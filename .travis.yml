@@ -18,3 +18,4 @@ deploy:
   skip_cleanup: true
   region: us-west-2
   local_dir: deploy
+  acl: public_read
