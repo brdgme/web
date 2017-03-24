@@ -4,6 +4,7 @@ import { Spinner } from './Spinner';
 
 export interface LoginProps {
   initialEmail?: string,
+  onLogin: (email: string, token: string) => void,
 }
 export interface LoginState {
   email: string,
@@ -18,8 +19,6 @@ enum Mode {
   SubmittingCode,
 }
 
-// 'HelloProps' describes the shape of props.
-// State is never set so we use the 'undefined' type.
 export class Login extends React.Component<LoginProps, LoginState> {
   constructor(props?: LoginProps, context?: any) {
     super(props, context);
@@ -50,9 +49,10 @@ export class Login extends React.Component<LoginProps, LoginState> {
     this.setState({
       mode: Mode.SubmittingCode,
     });
-    setTimeout(() => this.setState({
-      mode: Mode.EnteringEmail,
-    }), 1000);
+    setTimeout(() => this.props.onLogin(
+      this.state.email,
+      'abcd1234',
+    ), 1000);
   }
 
   onClickHasCode(e: React.FormEvent<HTMLAnchorElement>) {
@@ -77,7 +77,7 @@ export class Login extends React.Component<LoginProps, LoginState> {
       <div className="login">
         <h1>brdg.me</h1>
         <div className="subtitle">
-          Board games by email and web
+          Discreet ASCII board games, email / web
         </div>
         {this.state.mode === Mode.EnteringEmail && (
           <div>
@@ -103,6 +103,7 @@ export class Login extends React.Component<LoginProps, LoginState> {
           </div>
         ) || (
             <div>
+              Logging in as
               <a href="#" onClick={this.onClickChangeEmail}>{this.state.email}</a>
             </div>
           )}
