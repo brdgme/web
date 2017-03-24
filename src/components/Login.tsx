@@ -57,9 +57,12 @@ export class Login extends React.Component<LoginProps, LoginState> {
 
   onClickHasCode(e: React.FormEvent<HTMLAnchorElement>) {
     e.preventDefault();
-    this.setState({
-      mode: Mode.EnteringCode,
-    });
+    let form = (e.currentTarget.parentElement.parentElement) as HTMLFormElement;
+    if (form.reportValidity()) {
+      this.setState({
+        mode: Mode.EnteringCode,
+      });
+    }
   }
 
   onClickChangeEmail(e: React.FormEvent<HTMLAnchorElement>) {
@@ -80,21 +83,23 @@ export class Login extends React.Component<LoginProps, LoginState> {
           <div>
             <div>Enter your email address to start</div>
             <form onSubmit={this.onEmailSubmit}>
-              <input
-                type="email"
-                required
-                autoFocus
-                placeholder="Email address"
-                value={this.state.email}
-                onChange={e => this.setState({
-                  email: e.target.value,
-                })}
-              />
-              <input type="submit" value="Get code" />
+              <div>
+                <input
+                  type="email"
+                  required
+                  autoFocus
+                  placeholder="Email address"
+                  value={this.state.email}
+                  onChange={e => this.setState({
+                    email: e.target.value,
+                  })}
+                />
+                <input type="submit" value="Get code" />
+              </div>
+              <div className="hasCode">
+                <a href="#" onClick={this.onClickHasCode}>I already have a login code</a>
+              </div>
             </form>
-            <div className="hasCode">
-              <a href="#" onClick={this.onClickHasCode}>I already have a login code</a>
-            </div>
           </div>
         ) || (
             <div>
