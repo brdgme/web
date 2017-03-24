@@ -1,3 +1,5 @@
+const webpack = require('webpack');
+
 module.exports = {
   entry: "./src/index.tsx",
   output: {
@@ -12,6 +14,14 @@ module.exports = {
     // Add '.ts' and '.tsx' as resolvable extensions.
     extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js"]
   },
+
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env.API_SERVER': JSON.stringify(
+        process.env.API_SERVER || 'http://localhost'
+      ),
+    }),
+  ],
 
   module: {
     rules: [

@@ -1,6 +1,8 @@
 language: node_js
 node_js:
 - "7"
+env:
+- API_SERVER=https://api2.brdg.me
 before_script:
 - npm install -g webpack
 script:
