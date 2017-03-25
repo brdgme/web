@@ -37,12 +37,20 @@ class Brdgme extends React.Component<undefined, BrdgmeState> {
   }
 
   handleTokenChange(token?: string) {
-    localStorage.setItem(tokenLSOffset, token);
+    if (token === null) {
+      localStorage.removeItem(tokenLSOffset);
+    } else {
+      localStorage.setItem(tokenLSOffset, token);
+    }
     this.setState({ token });
   }
 
   handleEmailChange(email?: string) {
-    localStorage.setItem(emailLSOffset, email);
+    if (email === null) {
+      localStorage.removeItem(emailLSOffset);
+    } else {
+      localStorage.setItem(emailLSOffset, email);
+    }
     this.setState({ email });
   }
 
@@ -61,7 +69,10 @@ class Brdgme extends React.Component<undefined, BrdgmeState> {
             <div>
               <div>Logged in</div>
               <div>
-                <a href="#" onClick={() => this.handleTokenChange(null)}>Logout</a>
+                <a href="#" onClick={(e) => {
+                  e.preventDefault();
+                  this.handleTokenChange(null);
+                }}>Logout</a>
               </div>
             </div>
             ||
@@ -89,5 +100,5 @@ class Brdgme extends React.Component<undefined, BrdgmeState> {
 
 ReactDOM.render(
   <Brdgme />,
-  document.getElementById("brdgme")
+  document.body,
 );

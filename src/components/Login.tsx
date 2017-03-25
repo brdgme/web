@@ -77,7 +77,7 @@ export class Login extends React.Component<LoginProps, LoginState> {
       <div className="login">
         <h1>brdg.me</h1>
         <div className="subtitle">
-          Discreet ASCII board games, email / web
+          Lo-fi board games, email / web
         </div>
         {this.state.mode === Mode.EnteringEmail && (
           <div>
@@ -112,7 +112,7 @@ export class Login extends React.Component<LoginProps, LoginState> {
             <div>A login code has been sent to your email, please enter it here</div>
             <form onSubmit={this.onCodeSubmit}>
               <input
-                type="text"
+                type="tel"
                 pattern="[0-9]*"
                 required
                 autoFocus
