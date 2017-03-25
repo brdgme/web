@@ -3,9 +3,10 @@ node_js:
 - "7"
 env:
 - API_SERVER=https://api2.brdg.me
-before_script:
+before_install:
 - npm install -g webpack
-- pip install awscli
+- pip install --user awscli
+- export PATH=$PATH:$HOME/.local/bin
 script:
 - webpack -p
 deploy:
