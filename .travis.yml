@@ -5,6 +5,7 @@ env:
 - API_SERVER=https://api2.brdg.me
 before_script:
 - npm install -g webpack
+- pip install awscli
 script:
 - webpack -p
 deploy:
@@ -18,3 +19,6 @@ deploy:
   region: us-west-2
   local_dir: dist
   acl: public_read
+after_deploy:
+- aws configure set preview.cloudfront true
+- aws cloudfront create-invalidation --distribution-id E1NOCZKTXTLDIV --paths "/*"
