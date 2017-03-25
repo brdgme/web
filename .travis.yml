@@ -7,9 +7,6 @@ before_script:
 - npm install -g webpack
 script:
 - webpack -p
-before_deploy:
-- mkdir deploy
-- cp -rv index.html dist deploy
 deploy:
   provider: s3
   access_key_id:
@@ -19,5 +16,5 @@ deploy:
   bucket: www.brdg.me
   skip_cleanup: true
   region: us-west-2
-  local_dir: deploy
+  local_dir: dist
   acl: public_read

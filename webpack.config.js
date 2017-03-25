@@ -1,5 +1,6 @@
 const webpack = require('webpack');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const extractLess = new ExtractTextPlugin({
   filename: '[name].css'
@@ -27,6 +28,11 @@ module.exports = {
       ),
     }),
     extractLess,
+    new HtmlWebpackPlugin({
+      title: 'brdg.me',
+      hash: true,
+      template: 'src/index.ejs',
+    }),
   ],
 
   module: {
