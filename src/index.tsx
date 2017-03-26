@@ -1,18 +1,14 @@
 import * as React from "react";
-import {
-  BrowserRouter as Router,
-  Route,
-  Link,
-  Redirect,
-} from 'react-router-dom';
 import * as ReactDOM from "react-dom";
 import './style.less';
 
+import * as Router from './Router';
 import { Login } from "./components/Login";
 
 interface BrdgmeState {
   email?: string,
   token?: string,
+  path: string,
 }
 
 const emailLSOffset = 'email';
@@ -25,9 +21,15 @@ class Brdgme extends React.Component<undefined, BrdgmeState> {
     this.state = {
       email: localStorage.getItem(emailLSOffset),
       token: localStorage.getItem(tokenLSOffset),
+      path: window.location.pathname,
     };
 
     this.handleLogin = this.handleLogin.bind(this);
+  }
+
+  redirect(path: string) {
+    history.pushState(null, '', path);
+    this.setState({ path });
   }
 
   componentDidMount() {
@@ -57,44 +59,32 @@ class Brdgme extends React.Component<undefined, BrdgmeState> {
   handleLogin(email: string, token: string) {
     this.handleTokenChange(token);
     this.handleEmailChange(email);
+    this.redirect('/');
   }
 
   render() {
-    return (
-      <Router>
-        <div>
-          <Route exact path="/" render={() => (
-            this.state.token
-            &&
-            <div>
-              <div>Logged in</div>
-              <div>
-                <a href="#" onClick={(e) => {
-                  e.preventDefault();
-                  this.handleTokenChange(null);
-                }}>Logout</a>
-              </div>
-            </div>
-            ||
-            <Redirect to={{
-              pathname: '/login',
-            }} />
-          )} />
-          <Route path="/login" render={() => (
-            this.state.token
-            &&
-            <Redirect to={{
-              pathname: '/',
-            }} />
-            ||
-            <Login
-              initialEmail={this.state.email}
-              onLogin={this.handleLogin}
-            />
-          )} />
-        </div>
-      </Router>
-    )
+    if (this.state.token === null && this.state.path !== '/login') {
+      this.redirect('/login');
+    }
+    return Router.first(this.state.path, [
+      Router.prefix('/', (remaining) => Router.first(remaining, [
+        Router.match('login', () => <Login
+          initialEmail={this.state.email}
+          onLogin={this.handleLogin}
+        />),
+        Router.empty(() => <div>
+          <div>Logged in</div>
+          <div>
+            <a href="#" onClick={(e) => {
+              e.preventDefault();
+              this.handleTokenChange(null);
+            }}>Logout</a>
+          </div>
+        </div>),
+      ])),
+    ]) || <div>
+        Page not found.
+    </div>;
   }
 }
 
