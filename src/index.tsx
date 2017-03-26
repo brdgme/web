@@ -18,10 +18,17 @@ class Brdgme extends React.Component<undefined, BrdgmeState> {
   constructor() {
     super();
 
+    let token = localStorage.getItem(tokenLSOffset);
+    let path = window.location.pathname;
+    if (token === null && path !== '/login') {
+      // Can't use `redirect` here because we can't call `setState`
+      path = '/login';
+      history.pushState(null, '', path);
+    }
     this.state = {
       email: localStorage.getItem(emailLSOffset),
-      token: localStorage.getItem(tokenLSOffset),
-      path: window.location.pathname,
+      token,
+      path,
     };
 
     this.handleLogin = this.handleLogin.bind(this);
@@ -41,6 +48,7 @@ class Brdgme extends React.Component<undefined, BrdgmeState> {
   handleTokenChange(token?: string) {
     if (token === null) {
       localStorage.removeItem(tokenLSOffset);
+      this.redirect('/login');
     } else {
       localStorage.setItem(tokenLSOffset, token);
     }
@@ -63,9 +71,6 @@ class Brdgme extends React.Component<undefined, BrdgmeState> {
   }
 
   render() {
-    if (this.state.token === null && this.state.path !== '/login') {
-      this.redirect('/login');
-    }
     return Router.first(this.state.path, [
       Router.prefix('/', (remaining) => Router.first(remaining, [
         Router.match('login', () => <Login
