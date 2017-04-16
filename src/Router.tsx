@@ -43,6 +43,14 @@ export function empty<T>(
   return match('', success);
 }
 
+export function any<T>(
+  success: () => T | null,
+): Handler<T> {
+  return (input: string) => {
+    return success();
+  };
+}
+
 const intRegex = /^-?[0-9]+/;
 export function int<T>(
   success: (n: number, remaining: string) => T | null,

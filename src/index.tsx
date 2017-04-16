@@ -4,15 +4,18 @@ import './style.less';
 
 import * as Router from './Router';
 import { Login } from "./components/Login";
+import { Layout } from "./components/Layout";
 
 interface BrdgmeState {
   email?: string,
   token?: string,
+  userId?: string,
   path: string,
 }
 
 const emailLSOffset = 'email';
 const tokenLSOffset = 'token';
+const userIdLSOffset = 'userId';
 
 class Brdgme extends React.Component<undefined, BrdgmeState> {
   constructor() {
@@ -32,6 +35,7 @@ class Brdgme extends React.Component<undefined, BrdgmeState> {
     };
 
     this.handleLogin = this.handleLogin.bind(this);
+    this.handleLogout = this.handleLogout.bind(this);
   }
 
   redirect(path: string) {
@@ -64,32 +68,41 @@ class Brdgme extends React.Component<undefined, BrdgmeState> {
     this.setState({ email });
   }
 
-  handleLogin(email: string, token: string) {
+  handleUserIdChange(userId?: string) {
+    if (userId === null) {
+      localStorage.removeItem(userIdLSOffset);
+    } else {
+      localStorage.setItem(userIdLSOffset, userId);
+    }
+    this.setState({ userId });
+  }
+
+  handleLogin(email: string, token: string, userId: string) {
     this.handleTokenChange(token);
     this.handleEmailChange(email);
+    this.handleUserIdChange(userId);
     this.redirect('/');
+  }
+
+  handleLogout() {
+    this.handleTokenChange(null);
   }
 
   render() {
     return Router.first(this.state.path, [
-      Router.prefix('/', (remaining) => Router.first(remaining, [
-        Router.match('login', () => <Login
-          initialEmail={this.state.email}
-          onLogin={this.handleLogin}
-        />),
-        Router.empty(() => <div>
-          <div>Logged in</div>
-          <div>
-            <a href="#" onClick={(e) => {
-              e.preventDefault();
-              this.handleTokenChange(null);
-            }}>Logout</a>
-          </div>
-        </div>),
-      ])),
-    ]) || <div>
-        Page not found.
-    </div>;
+      Router.match('/login', () => <Login
+        initialEmail={this.state.email}
+        onLogin={this.handleLogin}
+      />),
+      Router.any(() => <Layout
+        email={this.state.email}
+        token={this.state.token}
+        userId={this.state.userId}
+        path={this.state.path}
+        onLogout={this.handleLogout}
+      />
+      )
+    ]);
   }
 }
 

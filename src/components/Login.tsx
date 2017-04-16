@@ -5,7 +5,7 @@ import { Spinner } from './Spinner';
 
 export interface LoginProps {
   initialEmail?: string,
-  onLogin: (email: string, token: string) => void,
+  onLogin: (email: string, token: string, userId: string) => void,
 }
 export interface LoginState {
   email: string,
@@ -78,7 +78,8 @@ export class Login extends React.Component<LoginProps, LoginState> {
         } else {
           this.props.onLogin(
             this.state.email,
-            res.body,
+            res.body.token,
+            res.body.userId,
           );
         }
       });
