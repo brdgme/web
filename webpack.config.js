@@ -24,7 +24,7 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       'process.env.API_SERVER': JSON.stringify(
-        process.env.API_SERVER || 'http://localhost:9000'
+        process.env.API_SERVER || 'http://localhost:8000'
       ),
     }),
     extractLess,
@@ -63,6 +63,7 @@ module.exports = {
   // dependencies, which allows browsers to cache those libraries between builds.
   externals: {
     "react": "React",
-    "react-dom": "ReactDOM"
+    "react-dom": "ReactDOM",
+    "superagent": "superagent",
   },
 };
