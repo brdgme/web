@@ -1,1 +1,1 @@
-declare var process: { env: any };
+declare var process: NodeJS.Process;

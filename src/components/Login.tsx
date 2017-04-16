@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as superagent from 'superagent';
 
 import { Spinner } from './Spinner';
 
@@ -39,9 +40,23 @@ export class Login extends React.Component<LoginProps, LoginState> {
     this.setState({
       mode: Mode.SubmittingEmail,
     });
-    setTimeout(() => this.setState({
-      mode: Mode.EnteringCode,
-    }), 1000);
+    superagent
+      .post(`${process.env.API_SERVER}/auth`)
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .send({ email: this.state.email })
+      .end((err, res) => {
+        if (err || !res.ok) {
+          alert('failed to request a login code');
+          this.setState({
+            mode: Mode.EnteringEmail,
+          });
+        } else {
+          this.setState({
+            mode: Mode.EnteringCode,
+          });
+        }
+      });
   }
 
   onCodeSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -49,10 +64,24 @@ export class Login extends React.Component<LoginProps, LoginState> {
     this.setState({
       mode: Mode.SubmittingCode,
     });
-    setTimeout(() => this.props.onLogin(
-      this.state.email,
-      'abcd1234',
-    ), 1000);
+    superagent
+      .post(`${process.env.API_SERVER}/auth/confirm`)
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .send({ email: this.state.email, confirmation: this.state.code })
+      .end((err, res) => {
+        if (err || !res.ok) {
+          alert('failed to confirm code, please check it is correct and try again');
+          this.setState({
+            mode: Mode.EnteringCode,
+          });
+        } else {
+          this.props.onLogin(
+            this.state.email,
+            res.body,
+          );
+        }
+      });
   }
 
   onClickHasCode(e: React.FormEvent<HTMLAnchorElement>) {
