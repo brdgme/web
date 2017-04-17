@@ -1,53 +1,88 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import * as superagent from 'superagent';
+
 import './style.less';
 
 import * as Router from './Router';
 import { Login } from "./components/Login";
 import { Home } from './components/Home';
-import { Session } from './Model';
+import { GameNew } from './components/game/New';
+import { GameIndex } from './components/game/Index';
+import { GameShow } from './components/game/Show';
+import { LayoutProps } from './components/Layout';
+import { GameExtended } from './Model';
 
 interface BrdgmeState {
   email?: string,
   token?: string,
   userId?: string,
   path: string,
+  activeGames?: GameExtended[],
 }
 
 const emailLSOffset = 'email';
 const tokenLSOffset = 'token';
 const userIdLSOffset = 'userId';
 
+function path(): string {
+  return location.hash.substr(1) || '/';
+}
+
 class Brdgme extends React.Component<undefined, BrdgmeState> {
   constructor() {
     super();
 
     let token = localStorage.getItem(tokenLSOffset);
-    let path = window.location.pathname;
-    if (token === null && path !== '/login') {
+    let p = path();
+    if (token === null && p !== '/login') {
       // Can't use `redirect` here because we can't call `setState`
-      path = '/login';
-      history.pushState(null, '', path);
+      p = '/login';
+      location.hash = p;
     }
     this.state = {
       email: localStorage.getItem(emailLSOffset),
       token,
-      path,
+      path: p,
     };
 
     this.handleLogin = this.handleLogin.bind(this);
     this.handleLogout = this.handleLogout.bind(this);
+    this.redirect = this.redirect.bind(this);
   }
 
   redirect(path: string) {
-    history.pushState(null, '', path);
-    this.setState({ path });
+    location.hash = path;
+  }
+
+  fetchActiveGames() {
+    superagent
+      .get(`${process.env.API_SERVER}/game/my_active`)
+      .auth(this.state.email, this.state.token)
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .end((err, res) => {
+        if (err || !res.ok) {
+          if (res.unauthorized) {
+            this.handleLogout();
+          } else {
+            console.log(err, res);
+          }
+          return;
+        }
+        this.setState({
+          activeGames: res.body.games,
+        });
+      });
   }
 
   componentDidMount() {
-    this.setState({
-      token: localStorage.getItem(tokenLSOffset),
-    });
+    window.onhashchange = (event) => {
+      this.setState({
+        path: path(),
+      });
+    };
+    this.fetchActiveGames();
   }
 
   handleTokenChange(token?: string) {
@@ -89,20 +124,41 @@ class Brdgme extends React.Component<undefined, BrdgmeState> {
     this.handleTokenChange(null);
   }
 
-  render() {
-    let session: Session = {
-      email: this.state.email,
-      token: this.state.token,
-      userId: this.state.userId,
-      logout: this.handleLogout,
+  layoutProps(): LayoutProps {
+    return {
+      activeGames: this.state.activeGames,
+      session: {
+        email: this.state.email,
+        token: this.state.token,
+        userId: this.state.userId,
+        logout: this.handleLogout,
+      },
+      redirect: this.redirect,
     };
+  }
+
+  render() {
     return Router.first(this.state.path, [
       Router.match('/login', () => <Login
         initialEmail={this.state.email}
         onLogin={this.handleLogin}
       />),
+      Router.prefix('/game', (remaining) =>
+        Router.first(remaining, [
+          Router.match('/new', () => <GameNew
+            layout={this.layoutProps()}
+          />),
+          Router.empty(() => <GameIndex
+            layout={this.layoutProps()}
+          />),
+          Router.any(() => <GameShow
+            id={remaining.substring(1)}
+            layout={this.layoutProps()}
+          />)
+        ])
+      ),
       Router.any(() => <Home
-        session={session}
+        layout={this.layoutProps()}
       />
       )
     ]);

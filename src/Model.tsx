@@ -56,6 +56,11 @@ export interface GameExtended {
   game_players: GamePlayerUser[],
 }
 
+export interface GameVersionType {
+  game_version: GameVersion,
+  game_type: GameType,
+}
+
 export interface Session {
   email: string,
   userId: string,
