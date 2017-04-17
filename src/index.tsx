@@ -4,7 +4,8 @@ import './style.less';
 
 import * as Router from './Router';
 import { Login } from "./components/Login";
-import { Layout } from "./components/Layout";
+import { Home } from './components/Home';
+import { Session } from './Model';
 
 interface BrdgmeState {
   email?: string,
@@ -89,17 +90,19 @@ class Brdgme extends React.Component<undefined, BrdgmeState> {
   }
 
   render() {
+    let session: Session = {
+      email: this.state.email,
+      token: this.state.token,
+      userId: this.state.userId,
+      logout: this.handleLogout,
+    };
     return Router.first(this.state.path, [
       Router.match('/login', () => <Login
         initialEmail={this.state.email}
         onLogin={this.handleLogin}
       />),
-      Router.any(() => <Layout
-        email={this.state.email}
-        token={this.state.token}
-        userId={this.state.userId}
-        path={this.state.path}
-        onLogout={this.handleLogout}
+      Router.any(() => <Home
+        session={session}
       />
       )
     ]);
