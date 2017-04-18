@@ -46,7 +46,17 @@ export class Layout extends React.Component<LayoutProps, LayoutState> {
           {this.props.activeGames && <div>
             <ul>
               {this.props.activeGames.map((ag) =>
-                <li>{ag.game_type.name} - {ag.game.id}</li>
+                <li>
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      this.props.redirect(`/game/${ag.game.id}`);
+                    }}
+                  >
+                    {ag.game_type.name}
+                  </a>
+                </li>
               )}
             </ul>
           </div> || <div>
