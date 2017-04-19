@@ -67,3 +67,28 @@ export interface Session {
   token: string,
   logout: () => void,
 }
+
+export interface GameLog {
+  id: string,
+  created_at: string,
+  updated_at: string,
+  logged_at: string,
+  game_id: string,
+  is_public: boolean,
+  body: string,
+}
+
+export interface GameLogHTML {
+  game_log: GameLog,
+  html: string,
+}
+
+export interface GameShowAPI {
+  game: Game,
+  game_type: GameType,
+  game_version: GameVersion,
+  game_players: GamePlayerUser[],
+  game_logs: GameLogHTML[],
+  game_html: string,
+  pub_state: string,
+}

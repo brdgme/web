@@ -1,0 +1,29 @@
+@import 'colors.less';
+
+.game-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.game-render {
+  flex: 1.6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid @dark-background
+}
+
+.game-logs {
+  flex: 1;
+  padding: 0.5em;
+
+  .log-time {
+    //margin-left: 1em;
+    margin-top: 0.3em;
+    margin-bottom: 0.3em;
+    text-align: center;
+    color: @light-text;
+  }
+}

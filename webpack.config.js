@@ -65,5 +65,6 @@ module.exports = {
     "react": "React",
     "react-dom": "ReactDOM",
     "superagent": "superagent",
+    "moment": "moment",
   },
 };

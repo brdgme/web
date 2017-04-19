@@ -49,6 +49,7 @@ class Brdgme extends React.Component<undefined, BrdgmeState> {
     this.handleLogin = this.handleLogin.bind(this);
     this.handleLogout = this.handleLogout.bind(this);
     this.redirect = this.redirect.bind(this);
+    this.fetchActiveGames = this.fetchActiveGames.bind(this);
   }
 
   redirect(path: string) {
@@ -83,6 +84,7 @@ class Brdgme extends React.Component<undefined, BrdgmeState> {
       });
     };
     this.fetchActiveGames();
+    setInterval(this.fetchActiveGames, 5000);
   }
 
   handleTokenChange(token?: string) {
