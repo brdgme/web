@@ -84,7 +84,6 @@ class Brdgme extends React.Component<undefined, BrdgmeState> {
       });
     };
     this.fetchActiveGames();
-    setInterval(this.fetchActiveGames, 5000);
   }
 
   handleTokenChange(token?: string) {
