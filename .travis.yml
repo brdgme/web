@@ -4,11 +4,11 @@ node_js:
 env:
 - API_SERVER=https://api2.brdg.me
 before_install:
-- npm install -g webpack
 - pip install --user awscli
 - export PATH=$PATH:$HOME/.local/bin
 script:
-- webpack -p
+- npm test
+- npm run build-prod
 deploy:
   provider: s3
   access_key_id:
