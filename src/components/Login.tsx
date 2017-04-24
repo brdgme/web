@@ -87,7 +87,7 @@ export class Login extends React.Component<LoginProps, LoginState> {
 
   onClickHasCode(e: React.FormEvent<HTMLAnchorElement>) {
     e.preventDefault();
-    let form = (e.currentTarget.parentElement.parentElement) as HTMLFormElement;
+    let form = (e.currentTarget.parentElement!.parentElement) as HTMLFormElement;
     if (form.reportValidity()) {
       this.setState({
         mode: Mode.EnteringCode,

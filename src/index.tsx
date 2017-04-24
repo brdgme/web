@@ -41,8 +41,8 @@ class Brdgme extends React.Component<undefined, BrdgmeState> {
       location.hash = p;
     }
     this.state = {
-      email: localStorage.getItem(emailLSOffset),
-      token,
+      email: localStorage.getItem(emailLSOffset) || undefined,
+      token: token || undefined,
       path: p,
     };
 
@@ -57,6 +57,9 @@ class Brdgme extends React.Component<undefined, BrdgmeState> {
   }
 
   fetchActiveGames() {
+    if (this.state.email === undefined || this.state.token === undefined) {
+      return;
+    }
     superagent
       .get(`${process.env.API_SERVER}/game/my_active`)
       .auth(this.state.email, this.state.token)
@@ -86,32 +89,32 @@ class Brdgme extends React.Component<undefined, BrdgmeState> {
     this.fetchActiveGames();
   }
 
-  handleTokenChange(token?: string) {
+  handleTokenChange(token: string | null) {
     if (token === null) {
       localStorage.removeItem(tokenLSOffset);
       this.redirect('/login');
     } else {
       localStorage.setItem(tokenLSOffset, token);
     }
-    this.setState({ token });
+    this.setState({ token: token || undefined });
   }
 
-  handleEmailChange(email?: string) {
+  handleEmailChange(email: string | null) {
     if (email === null) {
       localStorage.removeItem(emailLSOffset);
     } else {
       localStorage.setItem(emailLSOffset, email);
     }
-    this.setState({ email });
+    this.setState({ email: email || undefined });
   }
 
-  handleUserIdChange(userId?: string) {
+  handleUserIdChange(userId: string | null) {
     if (userId === null) {
       localStorage.removeItem(userIdLSOffset);
     } else {
       localStorage.setItem(userIdLSOffset, userId);
     }
-    this.setState({ userId });
+    this.setState({ userId: userId || undefined });
   }
 
   handleLogin(email: string, token: string, userId: string) {
@@ -129,9 +132,9 @@ class Brdgme extends React.Component<undefined, BrdgmeState> {
     return {
       activeGames: this.state.activeGames,
       session: {
-        email: this.state.email,
-        token: this.state.token,
-        userId: this.state.userId,
+        email: this.state.email!,
+        token: this.state.token!,
+        userId: this.state.userId!,
         logout: this.handleLogout,
       },
       redirect: this.redirect,
