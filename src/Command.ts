@@ -17,14 +17,13 @@ export interface CommandSpec {
   description?: string,
 }
 
-export interface CommandParseResult {
-  isOk: boolean,
-  errorMessage: string,
-  autocomplete: string[],
-  isComplete: boolean,
+export enum ParseResultKind {
+  Success,
+  Error,
 }
 
 export interface ParseSuccess<T> {
+  kind: ParseResultKind.Success,
   match: Match<T>,
   consumed: string,
   remaining: string,
@@ -41,11 +40,14 @@ export interface FullMatch<T> {
 }
 export interface PartialMatch<T> {
   kind: MatchKind.Partial,
-  potentialValues: [T],
+  potentialValues: T[],
 }
 export type Match<T> = FullMatch<T> | PartialMatch<T>;
 
-export type ParseError = string;
+export interface ParseError {
+  kind: ParseResultKind.Error,
+  message: string,
+}
 
 export type ParseResult<T> = ParseSuccess<T> | ParseError;
 
@@ -55,18 +57,28 @@ export function parseIntSpec(input: string, min: number, max: number): ParseResu
   if (matches) {
     const value = parseInt(matches[0]);
     if (min !== null && value < min) {
-      return `${value} is less than the minimum ${min}`;
+      return {
+        kind: ParseResultKind.Error,
+        message: `${value} is less than the minimum ${min}`,
+      };
     }
     if (max !== null && value > max) {
-      return `${value} is greater than the maximum ${max}`;
+      return {
+        kind: ParseResultKind.Error,
+        message: `${value} is greater than the maximum ${max}`,
+      };
     }
     return {
-      match: { value: parseInt(matches[0]) } as FullMatch<number>,
+      kind: ParseResultKind.Success,
+      match: { kind: MatchKind.Full, value: parseInt(matches[0]) },
       consumed: matches[0],
       remaining: input.substr(matches[0].length),
-    }
+    };
   }
-  return "int not found";
+  return {
+    kind: ParseResultKind.Error,
+    message: "int not found",
+  };
 }
 
 export function commonPrefix(s1: string, s2: string): string {
@@ -79,11 +91,67 @@ export function commonPrefix(s1: string, s2: string): string {
   return s1.substr(0, iterBound);
 }
 
+export function parseEnum(input: string, values: string[]): ParseResult<string> {
+  let partialMatches: string[] = [];
+  let consumed = '';
+  for (const v of values) {
+    const result = parseToken(input, v);
+    if (result.kind === ParseResultKind.Success) {
+      switch (result.match.kind) {
+        case MatchKind.Full:
+          return result;
+        case MatchKind.Partial:
+          let value = result.match.potentialValues[0];
+          let newCLen = result.consumed.length;
+          let cLen = consumed.length;
+          if (newCLen > cLen) {
+            partialMatches = [];
+            consumed = result.consumed;
+            cLen = newCLen;
+          }
+          if (newCLen === cLen) {
+            partialMatches.push(value);
+          }
+          break;
+      }
+    }
+  }
+
+  switch (partialMatches.length) {
+    case 0:
+      return {
+        kind: ParseResultKind.Error,
+        message: `input doesn't match any value in: ${values.join(', ')}`,
+      };
+    case 1:
+      return {
+        kind: ParseResultKind.Success,
+        match: {
+          kind: MatchKind.Full,
+          value: partialMatches[0],
+        },
+        consumed: consumed,
+        remaining: input.substr(consumed.length),
+      }
+    default:
+      return {
+        kind: ParseResultKind.Success,
+        match: {
+          kind: MatchKind.Partial,
+          potentialValues: partialMatches,
+        },
+        consumed: consumed,
+        remaining: input.substr(consumed.length),
+      }
+  }
+}
+
 export function parseToken(input: string, token: string): ParseResult<string> {
   const tLen = token.length;
   if (tLen === 0) {
     return {
-      match: { value: '' } as FullMatch<string>,
+      kind: ParseResultKind.Success,
+      match: { kind: MatchKind.Full, value: '' },
       consumed: '',
       remaining: input,
     };
@@ -93,19 +161,24 @@ export function parseToken(input: string, token: string): ParseResult<string> {
   const prefixLen = prefix.length;
   if (prefixLen === tLen) {
     return {
-      match: { value: token } as FullMatch<string>,
+      kind: ParseResultKind.Success,
+      match: { kind: MatchKind.Full, value: token },
       consumed: inputTrimmed,
       remaining: input.substr(tLen),
     };
   }
   if (prefixLen > 0) {
     return {
-      match: { potentialValues: [token] } as PartialMatch<string>,
+      kind: ParseResultKind.Success,
+      match: { kind: MatchKind.Partial, potentialValues: [token] },
       consumed: inputTrimmed.substr(0, prefixLen),
       remaining: input.substr(prefixLen),
-    }
+    };
   }
-  return `token '${token}' not found`;
+  return {
+    kind: ParseResultKind.Error,
+    message: `token '${token}' not found`,
+  };
 }
 
 const whiteSpaceRegex = /^\s*/;
@@ -113,14 +186,21 @@ export function parseWhitespace(input: string): ParseResult<string> {
   let matches = whiteSpaceRegex.exec(input);
   if (matches) {
     return {
-      match: { value: matches[0] } as FullMatch<string>,
+      kind: ParseResultKind.Success,
+      match: { kind: MatchKind.Full, value: matches[0] },
       consumed: matches[0],
       remaining: input.substr(matches[0].length),
     };
   }
-  return 'whitespace not found';
+  return {
+    kind: ParseResultKind.Error,
+    message: 'whitespace not found',
+  };
 }
 
-export function parse(input: string, spec: CommandSpec, specs: CommandSpecs): CommandParseResult {
-  return null;
+export function parse(input: string, spec: CommandSpec, specs: CommandSpecs): ParseResult<string> {
+  return {
+    kind: ParseResultKind.Error,
+    message: 'not implemented',
+  };
 }
