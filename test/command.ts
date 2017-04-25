@@ -170,3 +170,99 @@ describe('Command.parseEnum', () => {
     } as Command.ParseSuccess<string>, Command.parseEnum('Fargoo', ['fart', 'Fam', 'fae']));
   });
 });
+
+describe('Command.parse', () => {
+  it('should parse int', () => {
+    const spec: Command.CommandSpec = {
+        kind: {
+          Int: {}
+        },
+        min: 1,
+        max: 1,
+    };
+    const res = Command.parse(
+      '56',
+      spec,
+      {
+        entry: spec,
+        specs: {},
+      }
+    );
+    assert.deepEqual([[{
+      spec: spec,
+      result: {
+        kind: Command.ParseResultKind.Success,
+        match: {
+          kind: Command.MatchKind.Full,
+          value: 56,
+        },
+        consumed: '56',
+        remaining: '',
+      } as Command.ParseResult<number>,
+    }]], res);
+  });
+  it('should parse one of many', () => {
+    const intSpec: Command.CommandSpec = {
+        kind: {
+          Int: {}
+        },
+        min: 1,
+        max: 1,
+    };
+    const enumSpec: Command.CommandSpec = {
+        kind: {
+          Enum: [
+            '567',
+            '568',
+            '10000',
+          ],
+        },
+        min: 1,
+        max: 1,
+    };
+    const spec: Command.CommandSpec = {
+      kind: {
+        OneOf: [
+          intSpec,
+          enumSpec,
+        ],
+      },
+      min: 1,
+      max: 1,
+    };
+    const res = Command.parse(
+      '56',
+      spec,
+      {
+        entry: spec,
+        specs: {},
+      }
+    );
+    assert.deepEqual([[{
+      spec: intSpec,
+      result: {
+        kind: Command.ParseResultKind.Success,
+        match: {
+          kind: Command.MatchKind.Full,
+          value: 56,
+        },
+        consumed: '56',
+        remaining: '',
+      } as Command.ParseResult<number>,
+    }], [{
+      spec: enumSpec,
+      result: {
+        kind: Command.ParseResultKind.Success,
+        match: {
+          kind: Command.MatchKind.Partial,
+          potentialValues: [
+            '567',
+            '568',
+          ],
+        },
+        consumed: '56',
+        remaining: '',
+      } as Command.ParseResult<string>,
+    }]], res);
+  });
+});

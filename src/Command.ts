@@ -5,7 +5,7 @@ export interface CommandSpecs {
 
 export interface CommandSpec {
   kind: {
-    Int?: { min: number, max: number },
+    Int?: { min?: number, max?: number },
     Token?: string,
     Ref?: string,
     Enum?: string[],
@@ -52,17 +52,17 @@ export interface ParseError {
 export type ParseResult<T> = ParseSuccess<T> | ParseError;
 
 const intRegex = /\-?\d+/;
-export function parseIntSpec(input: string, min: number, max: number): ParseResult<number> {
+export function parseIntSpec(input: string, min?: number, max?: number): ParseResult<number> {
   const matches = intRegex.exec(input);
   if (matches) {
     const value = parseInt(matches[0]);
-    if (min !== null && value < min) {
+    if (min !== undefined && value < min) {
       return {
         kind: ParseResultKind.Error,
         message: `${value} is less than the minimum ${min}`,
       };
     }
-    if (max !== null && value > max) {
+    if (max !== undefined && value > max) {
       return {
         kind: ParseResultKind.Error,
         message: `${value} is greater than the maximum ${max}`,
@@ -198,9 +198,59 @@ export function parseWhitespace(input: string): ParseResult<string> {
   };
 }
 
-export function parse(input: string, spec: CommandSpec, specs: CommandSpecs): ParseResult<string> {
-  return {
-    kind: ParseResultKind.Error,
-    message: 'not implemented',
-  };
+interface CommandItem {
+  spec: CommandSpec,
+  result: ParseResult<string | number>,
+}
+
+export function parse(input: string, spec: CommandSpec, specs: CommandSpecs): CommandItem[][] {
+  if (spec.kind.Int !== undefined) {
+    return [[{
+      spec: spec,
+      result: parseIntSpec(input, spec.kind.Int.min, spec.kind.Int.max),
+    }]];
+  } else if (spec.kind.Token !== undefined) {
+    return [[{
+      spec: spec,
+      result: parseToken(input, spec.kind.Token),
+    }]];
+  } else if (spec.kind.Enum !== undefined) {
+    return [[{
+      spec: spec,
+      result: parseEnum(input, spec.kind.Enum),
+    }]];
+  } else if (spec.kind.Ref !== undefined) {
+    if (specs.specs[spec.kind.Ref] !== undefined) {
+      return parse(input, specs.specs[spec.kind.Ref], specs);
+    }
+    return [];
+  } else if (spec.kind.OneOf !== undefined) {
+    return [].concat.apply([], spec.kind.OneOf.map((s) => parse(input, s, specs)));
+  } else if (spec.kind.Chain !== undefined) {
+    if (spec.kind.Chain.length === 0) {
+      return [];
+    }
+    let parsedHead = parse(input, spec.kind.Chain[0], specs);
+    let tailSpec: CommandSpec = {
+      kind: {
+        Chain: spec.kind.Chain.slice(1),
+      },
+      min: 1,
+      max: 1,
+    };
+    return [].concat.apply([], parsedHead.map((ph) => {
+      if (ph.length === 0) {
+        return ph;
+      }
+      let headResult = ph[0].result;
+      if (headResult.kind === ParseResultKind.Error) {
+        return ph;
+      }
+      return parse(headResult.remaining, tailSpec, specs).map((tr) => {
+        return ph.concat()
+      })
+    }));
+  } else {
+    throw('spec kind not set');
+  }
 }
