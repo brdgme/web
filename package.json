@@ -14,9 +14,13 @@
   "author": "Michael Alexander <beefsack@gmail.com>",
   "license": "GPL-3.0",
   "dependencies": {
+    "@types/classnames": "0.0.32",
+    "@types/draft-js": "^0.10.1",
     "@types/react": "^15.0.16",
     "@types/react-dom": "^0.14.23",
     "@types/superagent": "^2.0.36",
+    "classnames": "^2.2.5",
+    "draft-js": "^0.10.0",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
     "superagent": "^3.5.2",

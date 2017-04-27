@@ -7,12 +7,40 @@
   flex-direction: row;
 }
 
-.game-render {
+.game-main {
   flex: 1.6;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-right: 1px solid @dark-background
+  border-right: 1px solid @dark-background;
+  flex-direction: column;
+
+  .game-render {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .game-command-input {
+    width: 63%;
+    padding: 0.63em;
+    border-top: 1px solid @dark-background;
+    font-size: 1.6em;
+
+    .command-error {
+      font-size: 0.62em;
+      color: @error;
+      text-align: center;
+    }
+
+    &.disabled {
+      background-color: @dark-background;
+    }
+  }
 }
 
 .game-logs {

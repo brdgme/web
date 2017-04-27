@@ -1,3 +1,5 @@
+import { CommandSpec } from './Command';
+
 export interface Game {
   id: string,
   created_at: string,
@@ -91,4 +93,5 @@ export interface GameShowAPI {
   game_logs: GameLogHTML[],
   game_html: string,
   pub_state: string,
+  command_spec?: CommandSpec,
 }

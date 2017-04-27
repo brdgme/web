@@ -66,5 +66,8 @@ module.exports = {
     "react-dom": "ReactDOM",
     "superagent": "superagent",
     "moment": "moment",
+    "draft-js": "Draft",
+    "immutable": "Immutable",
+    "classnames": "classNames",
   },
 };
