@@ -1,20 +1,12 @@
-export interface CommandSpecs {
-  entry: CommandSpec,
-  specs: { [id: string]: CommandSpec },
-}
-
 export interface CommandSpec {
-  kind: {
-    Int?: { min: number, max: number },
-    Token?: string,
-    Ref?: string,
-    Enum?: string[],
-    OneOf?: CommandSpec[],
-    Chain?: CommandSpec[],
-  },
-  min: number,
-  max?: number,
-  description?: string,
+  Int?: { min?: number, max?: number },
+  Token?: string,
+  Enum?: string[],
+  OneOf?: CommandSpec[],
+  Chain?: CommandSpec[],
+  Many?: { min?: number, max?: number, delim: string, spec: CommandSpec },
+  Opt?: CommandSpec,
+  Doc?: { name: string, desc?: string, spec: CommandSpec },
 }
 
 export enum ParseResultKind {
@@ -198,7 +190,7 @@ export function parseWhitespace(input: string): ParseResult<string> {
   };
 }
 
-export function parse(input: string, spec: CommandSpec, specs: CommandSpecs): ParseResult<string> {
+export function parse(input: string, spec: CommandSpec): ParseResult<string> {
   return {
     kind: ParseResultKind.Error,
     message: 'not implemented',
