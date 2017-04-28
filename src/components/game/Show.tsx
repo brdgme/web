@@ -103,7 +103,7 @@ export class GameShow extends React.Component<GameShowProps, GameShowState> {
     let renderedLogs: JSX.Element[] = this.state.game.game_logs.map((gl) => {
       let timeEl: JSX.Element = <div />;
       let logTime = moment.utc(gl.game_log.logged_at);
-      if (lastLog === undefined || logTime.subtract(5, 'minutes').isAfter(lastLog)) {
+      if (lastLog === undefined || logTime.clone().subtract(10, 'minutes').isAfter(lastLog)) {
         timeEl = (
           <div className="log-time">- {this.formatLogTime(logTime)} -</div>
         );

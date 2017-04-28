@@ -9,7 +9,9 @@
     "build-prod": "node_modules/.bin/webpack -p",
     "clean": "rm -rf dist test-build",
     "test": "node_modules/.bin/tsc --outDir test-build test/test.ts && node_modules/.bin/mocha test-build/test/test.js",
-    "watch": "node_modules/.bin/webpack -w"
+    "watch": "node_modules/.bin/webpack -w",
+    "server": "node server.js",
+    "dev": "npm run watch & npm run server"
   },
   "author": "Michael Alexander <beefsack@gmail.com>",
   "license": "GPL-3.0",
