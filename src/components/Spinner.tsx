@@ -1,6 +1,6 @@
 import * as React from "react";
 
-export class Spinner extends React.Component<undefined, undefined> {
+export class Spinner extends React.Component<{}, {}> {
   render() {
     return <div className="spinner">
       <div className="bounce1"></div>

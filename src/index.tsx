@@ -29,7 +29,7 @@ function path(): string {
   return location.hash.substr(1) || '/';
 }
 
-class Brdgme extends React.Component<undefined, BrdgmeState> {
+class Brdgme extends React.Component<{}, BrdgmeState> {
   constructor() {
     super();
 
