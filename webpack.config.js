@@ -26,6 +26,9 @@ module.exports = {
       'process.env.API_SERVER': JSON.stringify(
         process.env.API_SERVER || 'http://localhost:8000'
       ),
+      'process.env.WS_SERVER': JSON.stringify(
+        process.env.WS_SERVER || 'ws://localhost:8081'
+      ),
     }),
     extractLess,
     new HtmlWebpackPlugin({

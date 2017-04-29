@@ -79,7 +79,7 @@ export class Login extends React.Component<LoginProps, LoginState> {
           this.props.onLogin(
             this.state.email,
             res.body.token,
-            res.body.userId,
+            res.body.user_id,
           );
         }
       });

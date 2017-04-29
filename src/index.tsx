@@ -30,6 +30,8 @@ function path(): string {
 }
 
 class Brdgme extends React.Component<{}, BrdgmeState> {
+  wsUser?: WebSocket;
+
   constructor() {
     super();
 
@@ -42,6 +44,7 @@ class Brdgme extends React.Component<{}, BrdgmeState> {
     }
     this.state = {
       email: localStorage.getItem(emailLSOffset) || undefined,
+      userId: localStorage.getItem(userIdLSOffset) || undefined,
       token: token || undefined,
       path: p,
     };
@@ -50,6 +53,41 @@ class Brdgme extends React.Component<{}, BrdgmeState> {
     this.handleLogout = this.handleLogout.bind(this);
     this.redirect = this.redirect.bind(this);
     this.fetchActiveGames = this.fetchActiveGames.bind(this);
+    this.wsUserConnect = this.wsUserConnect.bind(this);
+    this.wsUserDisconnect = this.wsUserDisconnect.bind(this);
+  }
+
+  wsUserConnect(id: string) {
+    this.wsUser = new WebSocket(`${process.env.WS_SERVER}/user.${id}`);
+    this.wsUser.addEventListener('message', (event) => {
+      let data = JSON.parse(event.data);
+      // Data is an individual game, we either need to update the matching game
+      // in activeGames, or append it.
+      let activeGames = this.state.activeGames || [];
+      let index: number | undefined = undefined;
+      for (let i = 0, len = activeGames.length; i < len; i++) {
+        if (data.game.id === activeGames[i].game.id) {
+          index = i;
+          break;
+        }
+      }
+      if (index !== undefined) {
+        activeGames[index] = data;
+      } else {
+        activeGames.push(data);
+      }
+      this.setState({
+        activeGames: activeGames,
+      });
+    });
+  }
+
+  wsUserDisconnect() {
+    if (this.wsUser === undefined) {
+      return;
+    }
+    this.wsUser.close();
+    this.wsUser = undefined;
   }
 
   redirect(path: string) {
@@ -77,6 +115,9 @@ class Brdgme extends React.Component<{}, BrdgmeState> {
         this.setState({
           activeGames: res.body.games,
         });
+        if (this.state.userId !== undefined) {
+          this.wsUserConnect(this.state.userId);
+        }
       });
   }
 
@@ -109,10 +150,12 @@ class Brdgme extends React.Component<{}, BrdgmeState> {
   }
 
   handleUserIdChange(userId: string | null) {
+    this.wsUserDisconnect();
     if (userId === null) {
       localStorage.removeItem(userIdLSOffset);
     } else {
       localStorage.setItem(userIdLSOffset, userId);
+      this.wsUserConnect(userId);
     }
     this.setState({ userId: userId || undefined });
   }
