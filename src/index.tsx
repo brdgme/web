@@ -1,17 +1,21 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as superagent from 'superagent';
+import * as Redux from 'redux';
+import * as ReactRedux from 'react-redux';
+import ReduxThunk from 'redux-thunk';
 
 import './style.less';
 
-import * as Router from './Router';
-import { Login } from "./components/Login";
-import { Home } from './components/Home';
-import { GameNew } from './components/game/New';
-import { GameIndex } from './components/game/Index';
-import { GameShow } from './components/game/Show';
-import { LayoutProps } from './components/Layout';
-import { GameExtended } from './Model';
+import * as Router from './router';
+import { Container as Login } from "./components/login";
+import { Home } from './components/home';
+import { GameNew } from './components/game/new';
+import { GameIndex } from './components/game/index';
+import { GameShow } from './components/game/show';
+import { LayoutProps } from './components/layout';
+import { GameExtended } from './model';
+import { App, State } from './reducers';
 
 interface BrdgmeState {
   email?: string,
@@ -187,8 +191,8 @@ class Brdgme extends React.Component<{}, BrdgmeState> {
   render() {
     return Router.first(this.state.path, [
       Router.match('/login', () => <Login
-        initialEmail={this.state.email}
-        onLogin={this.handleLogin}
+      //initialEmail={this.state.email}
+      //onLogin={this.handleLogin}
       />),
       Router.prefix('/game', (remaining) =>
         Router.first(remaining, [
@@ -213,6 +217,12 @@ class Brdgme extends React.Component<{}, BrdgmeState> {
 }
 
 ReactDOM.render(
-  <Brdgme />,
+  <ReactRedux.Provider store={Redux.createStore(
+    App,
+    new State(),
+    Redux.applyMiddleware(ReduxThunk)
+  )}>
+    <Brdgme />
+  </ReactRedux.Provider >,
   document.body,
 );

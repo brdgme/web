@@ -72,5 +72,7 @@ module.exports = {
     "draft-js": "Draft",
     "immutable": "Immutable",
     "classnames": "classNames",
+    "redux": "Redux",
+    "react-redux": "ReactRedux",
   },
 };
