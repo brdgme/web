@@ -68,7 +68,7 @@ export class Login extends React.Component<LoginProps, LoginState> {
       .post(`${process.env.API_SERVER}/auth/confirm`)
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
-      .send({ email: this.state.email, confirmation: this.state.code })
+      .send({ email: this.state.email, code: this.state.code })
       .end((err, res) => {
         if (err || !res.ok) {
           alert('failed to confirm code, please check it is correct and try again');

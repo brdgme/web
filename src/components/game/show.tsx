@@ -6,7 +6,7 @@ import * as classNames from 'classnames';
 
 import { Layout, LayoutProps } from '../layout';
 import { Spinner } from '../spinner';
-import { GameShowAPI } from '../../model';
+import { GameExtended } from '../../model';
 
 const timeFormat = 'h:mm A';
 const dowFormat = 'ddd';
@@ -14,15 +14,15 @@ const recentDateFormat = 'MMM D';
 const oldDateFormat = 'YYYY-M-D';
 
 export interface GameShowProps {
-  id: string,
+  game?: GameExtended,
   layout: LayoutProps,
+  onCommand: (command: string) => void,
+  submittingCommand: boolean,
+  commandError?: string,
 }
 
 export interface GameShowState {
-  game?: GameShowAPI,
   commandInputState: Draft.EditorState,
-  submittingCommand: boolean,
-  commandError?: string,
 }
 
 export class GameShow extends React.Component<GameShowProps, GameShowState> {
@@ -31,7 +31,6 @@ export class GameShow extends React.Component<GameShowProps, GameShowState> {
 
     this.state = {
       commandInputState: Draft.EditorState.createEmpty(),
-      submittingCommand: false,
     };
 
     this.onCommandInputChange = this.onCommandInputChange.bind(this);
@@ -40,7 +39,6 @@ export class GameShow extends React.Component<GameShowProps, GameShowState> {
   }
 
   componentDidMount() {
-    this.fetch();
     this.focusCommandInput();
     document.addEventListener('keydown', this.focusCommandInput);
   }
@@ -51,36 +49,6 @@ export class GameShow extends React.Component<GameShowProps, GameShowState> {
 
   focusCommandInput() {
     (this.refs.editor as Draft.Editor).focus();
-  }
-
-  componentWillReceiveProps(nextProps: GameShowProps) {
-    if (this.props.id !== nextProps.id) {
-      this.setState({
-        game: undefined,
-      });
-      this.fetch();
-    }
-  }
-
-  fetch() {
-    superagent
-      .get(`${process.env.API_SERVER}/game/${this.props.id}`)
-      .auth(this.props.layout.session.email, this.props.layout.session.token)
-      .set('Content-Type', 'application/json')
-      .set('Accept', 'application/json')
-      .end((err, res) => {
-        if (err || !res.ok) {
-          if (res.unauthorized) {
-            this.props.layout.session.logout();
-          } else {
-            console.log(err, res);
-          }
-          return;
-        }
-        this.setState({
-          game: res.body,
-        });
-      });
   }
 
   formatLogTime(t: moment.Moment): string {
@@ -96,11 +64,11 @@ export class GameShow extends React.Component<GameShowProps, GameShowState> {
   }
 
   renderLogs(): JSX.Element {
-    if (this.state.game === undefined) {
+    if (this.props.game === undefined || this.props.game.game_logs === undefined) {
       return <div />;
     }
     let lastLog: moment.Moment;
-    let renderedLogs: JSX.Element[] = this.state.game.game_logs.map((gl) => {
+    let renderedLogs: JSX.Element[] = this.props.game.game_logs.map((gl) => {
       let timeEl: JSX.Element = <div />;
       let logTime = moment.utc(gl.game_log.logged_at);
       if (lastLog === undefined || logTime.clone().subtract(10, 'minutes').isAfter(lastLog)) {
@@ -123,52 +91,9 @@ export class GameShow extends React.Component<GameShowProps, GameShowState> {
     this.setState({ commandInputState });
   }
 
-  submitCommand(cmd: string) {
-    this.setState({
-      submittingCommand: true,
-    });
-    superagent
-      .post(`${process.env.API_SERVER}/game/${this.props.id}/command`)
-      .auth(this.props.layout.session.email, this.props.layout.session.token)
-      .set('Content-Type', 'application/json')
-      .set('Accept', 'application/json')
-      .send({
-        command: cmd,
-      })
-      .end((err, res) => {
-        if (res.unauthorized) {
-          this.props.layout.session.logout();
-          return;
-        } else if (res.badRequest) {
-          this.setState({
-            submittingCommand: false,
-            commandError: res.text,
-          });
-          console.log(this.state);
-          return;
-        } else if (err || !res.ok) {
-          this.setState({
-            submittingCommand: false,
-            commandError: 'Error sending command to brdg.me server, please try again',
-          });
-          return;
-        }
-        this.setState({
-          game: res.body,
-          submittingCommand: false,
-          commandError: undefined,
-          commandInputState: Draft.EditorState.push(
-            this.state.commandInputState,
-            Draft.ContentState.createFromText(''),
-            'delete-character',
-          ),
-        });
-      });
-  }
-
   onCommandInputKeyEvent(e: React.KeyboardEvent<{}>) {
     if (e.key === 'Enter') {
-      this.submitCommand(
+      this.props.onCommand(
         this.state.commandInputState.getCurrentContent().getPlainText());
       return 'move-selection-to-end-of-block';
     }
@@ -183,26 +108,26 @@ export class GameShow extends React.Component<GameShowProps, GameShowState> {
         <div className="game-container">
           <div className="game-main">
             <div className="game-render">
-              {this.state.game
+              {this.props.game && this.props.game.game_html
                 && <pre
-                  dangerouslySetInnerHTML={{ __html: this.state.game.game_html }}
+                  dangerouslySetInnerHTML={{ __html: this.props.game.game_html }}
                 />
                 || <Spinner />
               }
             </div>
             <div className={classNames({
               'game-command-input': true,
-              'disabled': this.state.submittingCommand,
+              'disabled': this.props.submittingCommand,
             })}>
-              {this.state.commandError && <div className="command-error">
-                {this.state.commandError}
+              {this.props.commandError && <div className="command-error">
+                {this.props.commandError}
               </div>}
               <Draft.Editor
                 editorState={this.state.commandInputState}
                 onChange={this.onCommandInputChange}
                 placeholder="Enter command..."
                 keyBindingFn={this.onCommandInputKeyEvent}
-                readOnly={this.state.submittingCommand}
+                readOnly={this.props.submittingCommand}
                 ref="editor"
               />
             </div>

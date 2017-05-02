@@ -56,6 +56,10 @@ export interface GameExtended {
   game_type: GameType,
   game_version: GameVersion,
   game_players: GamePlayerUser[],
+  game_logs?: GameLogHTML[],
+  pub_state?: string,
+  game_html?: string,
+  command_spec?: string,
 }
 
 export interface GameVersionType {
@@ -83,15 +87,4 @@ export interface GameLog {
 export interface GameLogHTML {
   game_log: GameLog,
   html: string,
-}
-
-export interface GameShowAPI {
-  game: Game,
-  game_type: GameType,
-  game_version: GameVersion,
-  game_players: GamePlayerUser[],
-  game_logs: GameLogHTML[],
-  game_html: string,
-  pub_state: string,
-  command_spec?: CommandSpec,
 }
