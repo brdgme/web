@@ -1,4 +1,4 @@
-import { CommandSpec } from './Command';
+import { CommandSpec } from './command';
 
 export interface Game {
   id: string,

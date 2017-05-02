@@ -1,7 +1,7 @@
 import * as React from "react";
 
-import { Spinner } from './Spinner';
-import { Session, GameExtended } from '../Model';
+import { Spinner } from './spinner';
+import { Session, GameExtended } from '../model';
 
 export interface LayoutProps {
   session: Session,

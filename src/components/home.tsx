@@ -1,8 +1,8 @@
 import * as React from "react";
 import * as superagent from 'superagent';
 
-import { Session } from '../Model';
-import { Layout, LayoutProps } from './Layout';
+import { Session } from '../model';
+import { Layout, LayoutProps } from './layout';
 
 export interface HomeProps {
   layout: LayoutProps,

@@ -4,9 +4,9 @@ import * as moment from 'moment';
 import * as Draft from 'draft-js';
 import * as classNames from 'classnames';
 
-import { Layout, LayoutProps } from '../Layout';
-import { Spinner } from '../Spinner';
-import { GameShowAPI } from '../../Model';
+import { Layout, LayoutProps } from '../layout';
+import { Spinner } from '../spinner';
+import { GameShowAPI } from '../../model';
 
 const timeFormat = 'h:mm A';
 const dowFormat = 'ddd';

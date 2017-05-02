@@ -1,8 +1,8 @@
 import * as React from "react";
 import * as superagent from 'superagent';
 
-import { Layout, LayoutProps } from '../Layout';
-import { GameVersionType } from '../../Model';
+import { Layout, LayoutProps } from '../layout';
+import { GameVersionType } from '../../model';
 
 export interface GameNewProps {
   layout: LayoutProps,

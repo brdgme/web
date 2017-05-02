@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as superagent from 'superagent';
 
-import { Spinner } from './Spinner';
+import { Spinner } from './spinner';
 
 export interface LoginProps {
   initialEmail?: string,

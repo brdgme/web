@@ -4,14 +4,14 @@ import * as superagent from 'superagent';
 
 import './style.less';
 
-import * as Router from './Router';
-import { Login } from "./components/Login";
-import { Home } from './components/Home';
-import { GameNew } from './components/game/New';
-import { GameIndex } from './components/game/Index';
-import { GameShow } from './components/game/Show';
-import { LayoutProps } from './components/Layout';
-import { GameExtended } from './Model';
+import * as Router from './router';
+import { Login } from "./components/login";
+import { Home } from './components/home';
+import { GameNew } from './components/game/new';
+import { GameIndex } from './components/game/index';
+import { GameShow } from './components/game/show';
+import { LayoutProps } from './components/layout';
+import { GameExtended } from './model';
 
 interface BrdgmeState {
   email?: string,
