@@ -11,7 +11,8 @@
     "test": "node_modules/.bin/tsc --outDir test-build test/test.ts && node_modules/.bin/mocha test-build/test/test.js",
     "watch": "node_modules/.bin/webpack -w",
     "server": "node server.js",
-    "dev": "npm run watch & npm run server"
+    "dev": "npm run watch & npm run server & npm run websocket",
+    "websocket": "cd node_modules/brdgme-websocket-server && npm start"
   },
   "author": "Michael Alexander <beefsack@gmail.com>",
   "license": "GPL-3.0",
@@ -45,6 +46,7 @@
     "source-map-loader": "^0.2.0",
     "style-loader": "^0.16.0",
     "typescript": "^2.3.1",
-    "webpack": "^2.3.1"
+    "webpack": "^2.3.1",
+    "brdgme-websocket-server": "https://github.com/brdgme/websocket-server.git"
   }
 }
