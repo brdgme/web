@@ -3,7 +3,8 @@ import * as ReactDOM from "react-dom";
 import * as superagent from 'superagent';
 import * as Redux from 'redux';
 import * as ReactRedux from 'react-redux';
-import ReduxThunk from 'redux-thunk';
+import createSagaMiddleware from 'redux-saga';
+import mySaga from './saga';
 
 import './style.less';
 
@@ -305,13 +306,21 @@ class Brdgme extends React.Component<{}, BrdgmeState> {
   }
 }
 
+interface MyWindow extends Window {
+  __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: Function,
+}
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || Redux.compose;
+declare var window: MyWindow;
+const sagaMiddleware = createSagaMiddleware();
 ReactDOM.render(
   <ReactRedux.Provider store={Redux.createStore(
     App,
     new State(),
-    Redux.applyMiddleware(ReduxThunk)
-  )}>
+    composeEnhancers(Redux.applyMiddleware(
+      sagaMiddleware,
+    )))}>
     <Brdgme />
   </ReactRedux.Provider >,
   document.body,
 );
+sagaMiddleware.run(mySaga);

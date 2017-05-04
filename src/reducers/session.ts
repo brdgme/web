@@ -1,5 +1,4 @@
 import { Action, Dispatch, combineReducers } from 'redux';
-import { ThunkAction } from 'redux-thunk';
 import * as superagent from 'superagent';
 import * as Immutable from 'immutable';
 

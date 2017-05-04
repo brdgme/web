@@ -1,5 +1,6 @@
 import { Action, Dispatch, combineReducers } from 'redux';
-import { ThunkAction } from 'redux-thunk';
+import { createAction, handleActions } from 'redux-actions';
+import * as Saga from 'redux-saga';
 import * as superagent from 'superagent';
 import * as Immutable from 'immutable';
 
@@ -22,89 +23,39 @@ export class State extends Immutable.Record({
   mode: Mode;
 }
 
-export const UPDATE_EMAIL = "LOGIN/UPDATE_EMAIL";
-export const UPDATE_CODE = "LOGIN/UPDATE_CODE";
-export const UPDATE_MODE = "LOGIN/UPDATE_MODE";
+export const UPDATE_EMAIL = "brdgme/login/UPDATE_EMAIL";
+export const UPDATE_CODE = "brdgme/login/UPDATE_CODE";
+export const UPDATE_MODE = "brdgme/login/UPDATE_MODE";
+export const SUBMIT_EMAIL = "brdgme/login/SUBMIT_EMAIL";
+export const SUBMIT_EMAIL_SUCCESS = "brdgme/login/SUBMIT_EMAIL_SUCCESS";
+export const SUBMIT_EMAIL_FAIL = "brdgme/login/SUBMIT_EMAIL_FAIL";
+export const SUBMIT_CODE = "brdgme/login/SUBMIT_CODE";
+export const SUBMIT_CODE_SUCCESS = "brdgme/login/SUBMIT_CODE_SUCCESS";
+export const SUBMIT_CODE_FAIL = "brdgme/login/SUBMIT_CODE_FAIL";
 
-interface UpdateEmail extends Action {
-  type: typeof UPDATE_EMAIL,
-  email: string,
-}
-export function updateEmail(email: string): UpdateEmail {
-  return { type: UPDATE_EMAIL, email };
-}
+export const updateEmail = createAction<string>(UPDATE_EMAIL);
+export const updateCode = createAction<string>(UPDATE_CODE);
+export const updateMode = createAction<Mode>(UPDATE_MODE);
+export const submitEmail = createAction<string>(SUBMIT_EMAIL);
+export const submitEmailSuccess = createAction(SUBMIT_EMAIL_SUCCESS);
+export const submitEmailFail = createAction(SUBMIT_EMAIL_FAIL);
+export const submitCode = createAction(
+  SUBMIT_CODE,
+  (email: string, code: string) => ({ email, code }),
+);
+export const submitCodeSuccess = createAction(
+  SUBMIT_CODE_SUCCESS,
+  (userId: string, token: string) => ({ userId, token }),
+);
+export const submitCodeFail = createAction(SUBMIT_CODE_FAIL);
 
-interface UpdateCode extends Action {
-  type: typeof UPDATE_CODE,
-  code: string,
-}
-export function updateCode(code: string): UpdateCode {
-  return { type: UPDATE_CODE, code };
-}
-
-interface UpdateMode extends Action {
-  type: typeof UPDATE_MODE,
-  mode: Mode,
-}
-export function updateMode(mode: Mode): UpdateMode {
-  return { type: UPDATE_MODE, mode };
-}
-
-interface SubmitEmail extends ThunkAction<void, State, {}> { }
-export function submitEmail(email: string): SubmitEmail {
-  return (dispatch) => {
-    dispatch(updateMode(Mode.SubmittingEmail));
-    superagent
-      .post(`${process.env.API_SERVER}/auth`)
-      .set('Content-Type', 'application/json')
-      .set('Accept', 'application/json')
-      .send({ email })
-      .end((err, res) => {
-        if (err || !res.ok) {
-          dispatch(updateMode(Mode.EnteringEmail));
-          alert('failed to request login code, please check your email and try again');
-        } else {
-          dispatch(updateMode(Mode.EnteringCode));
-        }
-      });
-  };
-}
-
-interface SubmitCode extends ThunkAction<void, State, {}> { }
-export function submitCode(email: string, code: string): SubmitCode {
-  return (dispatch, getState) => {
-    dispatch(updateMode(Mode.SubmittingCode));
-    let state = getState();
-    superagent
-      .post(`${process.env.API_SERVER}/auth/confirm`)
-      .set('Content-Type', 'application/json')
-      .set('Accept', 'application/json')
-      .send({ email, code })
-      .end((err, res) => {
-        if (err || !res.ok) {
-          dispatch(updateMode(Mode.EnteringCode));
-          alert('failed to confirm code, please check it is correct and try again');
-        } else {
-          dispatch(Session.updateAuth(new Session.AuthState({
-            email,
-            userId: res.body.user_id,
-            token: res.body.token,
-          })));
-        }
-      });
-  };
-}
-
-type LoginAction = UpdateEmail | UpdateCode | UpdateMode;
-export function reducer(state: State = new State(), action: LoginAction) {
-  switch (action.type) {
-    case UPDATE_EMAIL:
-      return state.set('email', action.email);
-    case UPDATE_CODE:
-      return state.set('code', action.code);
-    case UPDATE_MODE:
-      return state.set('mode', action.mode);
-    default:
-      return state;
-  }
-}
+export const reducer = handleActions({
+  [UPDATE_EMAIL]: (state, action) => state.set('email', action.payload),
+  [UPDATE_CODE]: (state, action) => state.set('code', action.payload),
+  [UPDATE_MODE]: (state, action) => state.set('mode', action.payload),
+  [SUBMIT_EMAIL]: (state, action) => state.set('mode', Mode.SubmittingEmail),
+  [SUBMIT_EMAIL_SUCCESS]: (state, action) => state.set('mode', Mode.EnteringCode),
+  [SUBMIT_EMAIL_FAIL]: (state, action) => state.set('mode', Mode.EnteringEmail),
+  [SUBMIT_CODE]: (state, action) => state.set('mode', Mode.SubmittingCode),
+  [SUBMIT_CODE_FAIL]: (state, action) => state.set('mode', Mode.EnteringCode),
+}, new State());
