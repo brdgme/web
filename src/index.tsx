@@ -23,6 +23,8 @@ interface BrdgmeState {
   userId?: string,
   path: string,
   activeGames?: GameExtended[],
+  submittingCommand: boolean,
+  commandError?: string,
 }
 
 const emailLSOffset = 'email';
@@ -51,6 +53,7 @@ class Brdgme extends React.Component<{}, BrdgmeState> {
       userId: localStorage.getItem(userIdLSOffset) || undefined,
       token: token || undefined,
       path: p,
+      submittingCommand: false,
     };
 
     this.handleLogin = this.handleLogin.bind(this);
@@ -59,30 +62,13 @@ class Brdgme extends React.Component<{}, BrdgmeState> {
     this.fetchActiveGames = this.fetchActiveGames.bind(this);
     this.wsUserConnect = this.wsUserConnect.bind(this);
     this.wsUserDisconnect = this.wsUserDisconnect.bind(this);
+    this.submitCommand = this.submitCommand.bind(this);
   }
 
   wsUserConnect(id: string) {
     this.wsUser = new WebSocket(`${process.env.WS_SERVER}/user.${id}`);
     this.wsUser.addEventListener('message', (event) => {
-      let data = JSON.parse(event.data);
-      // Data is an individual game, we either need to update the matching game
-      // in activeGames, or append it.
-      let activeGames = this.state.activeGames || [];
-      let index: number | undefined = undefined;
-      for (let i = 0, len = activeGames.length; i < len; i++) {
-        if (data.game.id === activeGames[i].game.id) {
-          index = i;
-          break;
-        }
-      }
-      if (index !== undefined) {
-        activeGames[index] = data;
-      } else {
-        activeGames.push(data);
-      }
-      this.setState({
-        activeGames: activeGames,
-      });
+      this.updateGameState(JSON.parse(event.data) as GameExtended);
     });
   }
 
@@ -92,6 +78,46 @@ class Brdgme extends React.Component<{}, BrdgmeState> {
     }
     this.wsUser.close();
     this.wsUser = undefined;
+  }
+
+  updateGameState(data: GameExtended) {
+    // Data is an individual game, we either need to update the matching game
+    // in activeGames, or append it.
+    let activeGames = this.state.activeGames || [];
+    let index: number | undefined = undefined;
+    for (let i = 0, len = activeGames.length; i < len; i++) {
+      if (data.game.id === activeGames[i].game.id) {
+        index = i;
+        break;
+      }
+    }
+    if (index !== undefined) {
+      activeGames[index] = data;
+    } else {
+      activeGames.push(data);
+    }
+    this.setState({
+      activeGames,
+    });
+  }
+
+  fetchGame(id: string) {
+    superagent
+      .get(`${process.env.API_SERVER}/game/${id}`)
+      .auth(this.state.email!, this.state.token!)
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .end((err, res) => {
+        if (err || !res.ok) {
+          if (res.unauthorized) {
+            this.handleLogout();
+          } else {
+            console.log(err, res);
+          }
+          return;
+        }
+        this.updateGameState(res.body as GameExtended);
+      });
   }
 
   redirect(path: string) {
@@ -188,6 +214,66 @@ class Brdgme extends React.Component<{}, BrdgmeState> {
     };
   }
 
+  findGame(id: string): GameExtended | undefined {
+    if (this.state.activeGames === undefined) {
+      return undefined;
+    }
+    for (let g of this.state.activeGames) {
+      if (id === g.game.id) {
+        if (g.game_html === undefined) {
+          // We fetch anyway, we need the render.
+          this.fetchGame(id);
+        }
+        return g;
+      }
+    }
+    this.fetchGame(id);
+    return undefined;
+  }
+
+  submitCommand(id: string, cmd: string) {
+    this.setState({
+      submittingCommand: true,
+    });
+    superagent
+      .post(`${process.env.API_SERVER}/game/${id}/command`)
+      .auth(this.state.email!, this.state.token!)
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .send({
+        command: cmd,
+      })
+      .end((err, res) => {
+        if (res.unauthorized) {
+          this.handleLogout();
+          return;
+        } else if (res.badRequest) {
+          this.setState({
+            submittingCommand: false,
+            commandError: res.text,
+          });
+          console.log(this.state);
+          return;
+        } else if (err || !res.ok) {
+          this.setState({
+            submittingCommand: false,
+            commandError: 'Error sending command to brdg.me server, please try again',
+          });
+          return;
+        }
+        this.setState({
+          submittingCommand: false,
+          commandError: undefined,
+          /*commandInputState: Draft.EditorState.push(
+            this.state.commandInputState,
+            Draft.ContentState.createFromText(''),
+            'delete-character',
+          ),*/
+        });
+        this.updateGameState(res.body);
+      });
+  }
+
   render() {
     return Router.first(this.state.path, [
       Router.match('/login', () => <Login
@@ -203,8 +289,11 @@ class Brdgme extends React.Component<{}, BrdgmeState> {
             layout={this.layoutProps()}
           />),
           Router.any(() => <GameShow
-            id={remaining.substring(1)}
+            game={this.findGame(remaining.substr(1))}
             layout={this.layoutProps()}
+            onCommand={(cmd) => this.submitCommand(remaining.substr(1), cmd)}
+            submittingCommand={this.state.submittingCommand}
+            commandError={this.state.commandError}
           />)
         ])
       ),

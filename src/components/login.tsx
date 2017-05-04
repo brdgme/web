@@ -1,69 +1,105 @@
-import * as React from 'react';
-import * as Redux from 'redux';
-import * as ReactRedux from 'react-redux';
+import * as React from "react";
 import * as superagent from 'superagent';
-import * as Thunk from 'redux-thunk';
 
 import { Spinner } from './spinner';
-import { State as AppState } from '../reducers';
-import * as Reducer from '../reducers/login';
 
-interface PropValues {
+export interface LoginProps {
+  initialEmail?: string,
+  onLogin: (email: string, token: string, userId: string) => void,
+}
+export interface LoginState {
   email: string,
   code: string,
-  mode: Reducer.Mode,
+  mode: Mode,
 }
 
-interface PropHandlers {
-  onSubmitEmail: (email: string) => void,
-  onSubmitCode: (email: string, code: string) => void,
-  onChangeMode: (mode: Reducer.Mode) => void,
-  onChangeEmail: (email: string) => void,
-  onChangeCode: (code: string) => void,
+enum Mode {
+  EnteringEmail,
+  SubmittingEmail,
+  EnteringCode,
+  SubmittingCode,
 }
 
-interface Props extends PropValues, PropHandlers { }
-
-export class Component extends React.PureComponent<Props, {}> {
-  constructor(props?: Props, context?: any) {
+export class Login extends React.Component<LoginProps, LoginState> {
+  constructor(props?: LoginProps, context?: any) {
     super(props, context);
-    this.handleSubmitEmail = this.handleSubmitEmail.bind(this);
-    this.handleSubmitCode = this.handleSubmitCode.bind(this);
-    this.handleClickHasCode = this.handleClickHasCode.bind(this);
-    this.handleClickChangeEmail = this.handleClickChangeEmail.bind(this);
-    this.handleChangeEmail = this.handleChangeEmail.bind(this);
-    this.handleChangeCode = this.handleChangeCode.bind(this);
+    this.onEmailSubmit = this.onEmailSubmit.bind(this);
+    this.onCodeSubmit = this.onCodeSubmit.bind(this);
+    this.onClickHasCode = this.onClickHasCode.bind(this);
+    this.onClickChangeEmail = this.onClickChangeEmail.bind(this);
+
+    this.state = {
+      email: props && props.initialEmail || '',
+      code: '',
+      mode: Mode.EnteringEmail,
+    };
   }
 
-  handleChangeEmail(e: React.ChangeEvent<HTMLInputElement>) {
-    this.props.onChangeEmail(e.target.value);
-  }
-
-  handleChangeCode(e: React.ChangeEvent<HTMLInputElement>) {
-    this.props.onChangeCode(e.target.value);
-  }
-
-  handleSubmitEmail(e: React.FormEvent<HTMLFormElement>) {
+  onEmailSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    this.props.onSubmitEmail(this.props.email);
+    this.setState({
+      mode: Mode.SubmittingEmail,
+    });
+    superagent
+      .post(`${process.env.API_SERVER}/auth`)
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .send({ email: this.state.email })
+      .end((err, res) => {
+        if (err || !res.ok) {
+          alert('failed to request a login code');
+          this.setState({
+            mode: Mode.EnteringEmail,
+          });
+        } else {
+          this.setState({
+            mode: Mode.EnteringCode,
+          });
+        }
+      });
   }
 
-  handleSubmitCode(e: React.FormEvent<HTMLFormElement>) {
+  onCodeSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    this.props.onSubmitCode(this.props.email, this.props.code);
+    this.setState({
+      mode: Mode.SubmittingCode,
+    });
+    superagent
+      .post(`${process.env.API_SERVER}/auth/confirm`)
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .send({ email: this.state.email, code: this.state.code })
+      .end((err, res) => {
+        if (err || !res.ok) {
+          alert('failed to confirm code, please check it is correct and try again');
+          this.setState({
+            mode: Mode.EnteringCode,
+          });
+        } else {
+          this.props.onLogin(
+            this.state.email,
+            res.body.token,
+            res.body.user_id,
+          );
+        }
+      });
   }
 
-  handleClickHasCode(e: React.MouseEvent<HTMLAnchorElement>) {
+  onClickHasCode(e: React.FormEvent<HTMLAnchorElement>) {
     e.preventDefault();
     let form = (e.currentTarget.parentElement!.parentElement) as HTMLFormElement;
     if (form.reportValidity()) {
-      this.props.onChangeMode(Reducer.Mode.EnteringCode);
+      this.setState({
+        mode: Mode.EnteringCode,
+      });
     }
   }
 
-  handleClickChangeEmail(e: React.MouseEvent<HTMLAnchorElement>) {
+  onClickChangeEmail(e: React.FormEvent<HTMLAnchorElement>) {
     e.preventDefault();
-    this.props.onChangeMode(Reducer.Mode.EnteringEmail);
+    this.setState({
+      mode: Mode.EnteringEmail,
+    });
   }
 
   render() {
@@ -73,87 +109,58 @@ export class Component extends React.PureComponent<Props, {}> {
         <div className="subtitle">
           Lo-fi board games, email / web
         </div>
-        {this.props.mode === Reducer.Mode.EnteringEmail && (
+        {this.state.mode === Mode.EnteringEmail && (
           <div>
             <div>Enter your email address to start</div>
-            <form onSubmit={this.handleSubmitEmail}>
+            <form onSubmit={this.onEmailSubmit}>
               <div>
                 <input
                   type="email"
                   required
                   autoFocus
                   placeholder="Email address"
-                  value={this.props.email}
-                  onChange={this.handleChangeEmail}
+                  value={this.state.email}
+                  onChange={e => this.setState({
+                    email: e.target.value,
+                  })}
                 />
                 <input type="submit" value="Get code" />
               </div>
               <div className="hasCode">
-                <a href="#" onClick={this.handleClickHasCode}>I already have a login code</a>
+                <a href="#" onClick={this.onClickHasCode}>I already have a login code</a>
               </div>
             </form>
           </div>
         ) || (
             <div>
               Logging in as
-              <a href="#" onClick={this.handleClickChangeEmail}>{this.props.email}</a>
+              <a href="#" onClick={this.onClickChangeEmail}>{this.state.email}</a>
             </div>
           )}
-        {this.props.mode === Reducer.Mode.EnteringCode && (
+        {this.state.mode === Mode.EnteringCode && (
           <div>
             <div>A login code has been sent to your email, please enter it here</div>
-            <form onSubmit={this.handleSubmitCode}>
+            <form onSubmit={this.onCodeSubmit}>
               <input
                 type="tel"
                 pattern="[0-9]*"
                 required
                 autoFocus
                 placeholder="Login code"
-                value={this.props.code}
-                onChange={this.handleChangeCode}
+                value={this.state.code}
+                onChange={e => this.setState({
+                  code: e.target.value,
+                })}
               />
               <input type="submit" value="Play!" />
             </form>
           </div>
         )}
-        {(this.props.mode === Reducer.Mode.SubmittingEmail ||
-          this.props.mode === Reducer.Mode.SubmittingCode) && (
+        {(this.state.mode === Mode.SubmittingEmail ||
+          this.state.mode === Mode.SubmittingCode) && (
             <Spinner />
           )}
       </div>
     );
   }
 }
-
-function mapStateToProps(state: AppState): PropValues {
-  return {
-    email: state.login.email,
-    code: state.login.code,
-    mode: state.login.mode,
-  };
-}
-
-function mapDispatchToProps(dispatch: Redux.Dispatch<AppState>): PropHandlers {
-  return {
-    onSubmitEmail: (email: string) => {
-      dispatch(Reducer.submitEmail(email));
-    },
-    onSubmitCode: (email: string, code: string) => {
-      dispatch(Reducer.submitCode(email, code));
-    },
-    onChangeMode: (mode: Reducer.Mode) => {
-      dispatch(Reducer.updateMode(mode));
-    },
-    onChangeEmail: (email: string) => {
-      dispatch(Reducer.updateEmail(email));
-    },
-    onChangeCode: (code: string) => {
-      dispatch(Reducer.updateCode(code));
-    },
-  };
-}
-
-export const Container = ReactRedux.connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(Component);
