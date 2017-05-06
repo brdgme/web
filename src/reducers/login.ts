@@ -1,10 +1,6 @@
-import { Action, Dispatch, combineReducers } from 'redux';
-import { createAction, handleActions } from 'redux-actions';
-import * as Saga from 'redux-saga';
-import * as superagent from 'superagent';
-import * as Immutable from 'immutable';
-
-import * as Session from './session';
+import * as Immutable from "immutable";
+import { Action, combineReducers, Dispatch } from "redux";
+import { createAction, handleActions } from "redux-actions";
 
 export enum Mode {
   EnteringEmail,
@@ -14,13 +10,13 @@ export enum Mode {
 }
 
 export class State extends Immutable.Record({
-  email: '',
-  code: '',
+  code: "",
+  email: "",
   mode: Mode.EnteringEmail,
 }) {
-  email: string;
-  code: string;
-  mode: Mode;
+  public code: string;
+  public email: string;
+  public mode: Mode;
 }
 
 export const UPDATE_EMAIL = "brdgme/login/UPDATE_EMAIL";
@@ -43,19 +39,16 @@ export const submitCode = createAction(
   SUBMIT_CODE,
   (email: string, code: string) => ({ email, code }),
 );
-export const submitCodeSuccess = createAction(
-  SUBMIT_CODE_SUCCESS,
-  (userId: string, token: string) => ({ userId, token }),
-);
+export const submitCodeSuccess = createAction<string>(SUBMIT_EMAIL_SUCCESS);
 export const submitCodeFail = createAction(SUBMIT_CODE_FAIL);
 
 export const reducer = handleActions({
-  [UPDATE_EMAIL]: (state, action) => state.set('email', action.payload),
-  [UPDATE_CODE]: (state, action) => state.set('code', action.payload),
-  [UPDATE_MODE]: (state, action) => state.set('mode', action.payload),
-  [SUBMIT_EMAIL]: (state, action) => state.set('mode', Mode.SubmittingEmail),
-  [SUBMIT_EMAIL_SUCCESS]: (state, action) => state.set('mode', Mode.EnteringCode),
-  [SUBMIT_EMAIL_FAIL]: (state, action) => state.set('mode', Mode.EnteringEmail),
-  [SUBMIT_CODE]: (state, action) => state.set('mode', Mode.SubmittingCode),
-  [SUBMIT_CODE_FAIL]: (state, action) => state.set('mode', Mode.EnteringCode),
+  [UPDATE_EMAIL]: (state, action) => state.set("email", action.payload),
+  [UPDATE_CODE]: (state, action) => state.set("code", action.payload),
+  [UPDATE_MODE]: (state, action) => state.set("mode", action.payload),
+  [SUBMIT_EMAIL]: (state, action) => state.set("mode", Mode.SubmittingEmail),
+  [SUBMIT_EMAIL_SUCCESS]: (state, action) => state.set("mode", Mode.EnteringCode),
+  [SUBMIT_EMAIL_FAIL]: (state, action) => state.set("mode", Mode.EnteringEmail),
+  [SUBMIT_CODE]: (state, action) => state.set("mode", Mode.SubmittingCode),
+  [SUBMIT_CODE_FAIL]: (state, action) => state.set("mode", Mode.EnteringCode),
 }, new State());

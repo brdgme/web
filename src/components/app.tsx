@@ -1,36 +1,46 @@
-import * as React from 'react';
+import * as React from "react";
+import * as ReactRedux from "react-redux";
+import * as Redux from "redux";
 
-import * as Model from '../model';
-import * as Router from '../router';
-import { Container as Login } from './login';
+import * as Model from "../model";
+import { State as AppState } from "../reducers";
+import * as Router from "../router";
+import { GameIndex } from "./game/index";
+import { GameNew } from "./game/new";
+import { GameShow } from "./game/show";
+import { Container as Home } from "./home";
+import { Container as Login } from "./login";
 
-interface Props {
-  path: string,
-  session?: Model.Session,
+interface IPropValues {
+  path: string;
 }
-export class Component extends React.PureComponent<Props, {}> {
-  render() {
+export class Component extends React.PureComponent<IPropValues, {}> {
+  public render() {
     return Router.first(this.props.path, [
-      Router.match('/login', () => <Login />),
-      /*Router.prefix('/game', (remaining) =>
+      Router.match("/login", () => <Login />),
+      Router.prefix("/game", (remaining) =>
         Router.first(remaining, [
-          Router.match('/new', () => <GameNew
-            layout={this.layoutProps()}
-          />),
-          Router.empty(() => <GameIndex
-            layout={this.layoutProps()}
-          />),
-          Router.any(() => <GameShow
-            id={remaining.substring(1)}
-            layout={this.layoutProps()}
-          />)
-        ])
+          Router.match("/new", () => <GameNew />),
+          Router.empty(() => <GameIndex />),
+          Router.any(() => <GameShow />),
+        ]),
       ),
-      Router.any(() => <Home
-        layout={this.layoutProps()}
-      )
-      />*/
-      Router.any(() => <div>404</div>),
-    ]);
+      Router.any(() => <Home />),
+    ]) || <div />;
   }
 }
+
+function mapStateToProps(state: AppState): IPropValues {
+  return {
+    path: state.session.path,
+  };
+}
+
+function mapDispatchToProps(dispatch: Redux.Dispatch<{}>): {} {
+  return {};
+}
+
+export const Container = ReactRedux.connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(Component);

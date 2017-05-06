@@ -1,32 +1,31 @@
+import * as classNames from "classnames";
+import * as Draft from "draft-js";
+import * as moment from "moment";
 import * as React from "react";
-import * as superagent from 'superagent';
-import * as moment from 'moment';
-import * as Draft from 'draft-js';
-import * as classNames from 'classnames';
+import * as superagent from "superagent";
 
-import { Layout, LayoutProps } from '../layout';
-import { Spinner } from '../spinner';
-import { GameExtended } from '../../model';
+import { IGameExtended } from "../../model";
+import { Container as Layout } from "../layout";
+import { Spinner } from "../spinner";
 
-const timeFormat = 'h:mm A';
-const dowFormat = 'ddd';
-const recentDateFormat = 'MMM D';
-const oldDateFormat = 'YYYY-M-D';
+const timeFormat = "h:mm A";
+const dowFormat = "ddd";
+const recentDateFormat = "MMM D";
+const oldDateFormat = "YYYY-M-D";
 
-export interface GameShowProps {
-  game?: GameExtended,
-  layout: LayoutProps,
-  onCommand: (command: string) => void,
-  submittingCommand: boolean,
-  commandError?: string,
+export interface IGameShowProps {
+  game?: IGameExtended;
+  onCommand?: (command: string) => void;
+  submittingCommand?: boolean;
+  commandError?: string;
 }
 
-export interface GameShowState {
-  commandInputState: Draft.EditorState,
+export interface IGameShowState {
+  commandInputState: Draft.EditorState;
 }
 
-export class GameShow extends React.Component<GameShowProps, GameShowState> {
-  constructor(props?: GameShowProps, context?: any) {
+export class GameShow extends React.Component<IGameShowProps, IGameShowState> {
+  constructor(props?: IGameShowProps, context?: any) {
     super(props, context);
 
     this.state = {
@@ -38,86 +37,22 @@ export class GameShow extends React.Component<GameShowProps, GameShowState> {
     this.focusCommandInput = this.focusCommandInput.bind(this);
   }
 
-  componentDidMount() {
-    this.focusCommandInput();
-    document.addEventListener('keydown', this.focusCommandInput);
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('keydown', this.focusCommandInput);
-  }
-
-  focusCommandInput() {
-    (this.refs.editor as Draft.Editor).focus();
-  }
-
-  formatLogTime(t: moment.Moment): string {
-    let prefix = '';
-    if (t.isBefore(moment().startOf('month').subtract(11, 'months'))) {
-      prefix = `${oldDateFormat}, `;
-    } else if (t.isBefore(moment().startOf('day').subtract(6, 'days'))) {
-      prefix = `${recentDateFormat}, `;
-    } else if (t.isBefore(moment().startOf('day'))) {
-      prefix = `${dowFormat}, `;
-    }
-    return t.local().format(`${prefix}${timeFormat}`);
-  }
-
-  renderLogs(): JSX.Element {
-    if (this.props.game === undefined || this.props.game.game_logs === undefined) {
-      return <div />;
-    }
-    let lastLog: moment.Moment;
-    let renderedLogs: JSX.Element[] = this.props.game.game_logs.map((gl) => {
-      let timeEl: JSX.Element = <div />;
-      let logTime = moment.utc(gl.game_log.logged_at);
-      if (lastLog === undefined || logTime.clone().subtract(10, 'minutes').isAfter(lastLog)) {
-        timeEl = (
-          <div className="log-time">- {this.formatLogTime(logTime)} -</div>
-        );
-      }
-      lastLog = logTime;
-      return (
-        <div>
-          {timeEl}
-          <div dangerouslySetInnerHTML={{ __html: gl.html }} />
-        </div>
-      )
-    });
-    return <div>{renderedLogs}</div>;
-  }
-
-  onCommandInputChange(commandInputState: Draft.EditorState) {
-    this.setState({ commandInputState });
-  }
-
-  onCommandInputKeyEvent(e: React.KeyboardEvent<{}>) {
-    if (e.key === 'Enter') {
-      this.props.onCommand(
-        this.state.commandInputState.getCurrentContent().getPlainText());
-      return 'move-selection-to-end-of-block';
-    }
-    return Draft.getDefaultKeyBinding(e);
-  }
-
-  render(): JSX.Element {
+  public render(): JSX.Element {
     return (
-      <Layout
-        {...this.props.layout }
-      >
+      <Layout>
         <div className="game-container">
           <div className="game-main">
             <div className="game-render">
-              {this.props.game && this.props.game.game_html
+              {this.props.game && this.props.game.html
                 && <pre
-                  dangerouslySetInnerHTML={{ __html: this.props.game.game_html }}
+                  dangerouslySetInnerHTML={{ __html: this.props.game.html }}
                 />
                 || <Spinner />
               }
             </div>
             <div className={classNames({
-              'game-command-input': true,
-              'disabled': this.props.submittingCommand,
+              "disabled": this.props.submittingCommand,
+              "game-command-input": true,
             })}>
               {this.props.commandError && <div className="command-error">
                 {this.props.commandError}
@@ -138,5 +73,67 @@ export class GameShow extends React.Component<GameShowProps, GameShowState> {
         </div>
       </Layout >
     );
+  }
+
+  private componentDidMount() {
+    this.focusCommandInput();
+    document.addEventListener("keydown", this.focusCommandInput);
+  }
+
+  private componentWillUnmount() {
+    document.removeEventListener("keydown", this.focusCommandInput);
+  }
+
+  private focusCommandInput() {
+    (this.refs.editor as Draft.Editor).focus();
+  }
+
+  private formatLogTime(t: moment.Moment): string {
+    let prefix = "";
+    if (t.isBefore(moment().startOf("month").subtract(11, "months"))) {
+      prefix = `${oldDateFormat}, `;
+    } else if (t.isBefore(moment().startOf("day").subtract(6, "days"))) {
+      prefix = `${recentDateFormat}, `;
+    } else if (t.isBefore(moment().startOf("day"))) {
+      prefix = `${dowFormat}, `;
+    }
+    return t.local().format(`${prefix}${timeFormat}`);
+  }
+
+  private renderLogs(): JSX.Element {
+    if (this.props.game === undefined || this.props.game.game_logs === undefined) {
+      return <div />;
+    }
+    let lastLog: moment.Moment;
+    const renderedLogs: JSX.Element[] = this.props.game.game_logs.map((gl) => {
+      let timeEl: JSX.Element = <div />;
+      const logTime = moment.utc(gl.game_log.logged_at);
+      if (lastLog === undefined || logTime.clone().subtract(10, "minutes").isAfter(lastLog)) {
+        timeEl = (
+          <div className="log-time">- {this.formatLogTime(logTime)} -</div>
+        );
+      }
+      lastLog = logTime;
+      return (
+        <div>
+          {timeEl}
+          <div dangerouslySetInnerHTML={{ __html: gl.html }} />
+        </div>
+      );
+    });
+    return <div>{renderedLogs}</div>;
+  }
+
+  private onCommandInputChange(commandInputState: Draft.EditorState) {
+    this.setState({ commandInputState });
+  }
+
+  private onCommandInputKeyEvent(e: React.KeyboardEvent<{}>) {
+    if (e.key === "Enter" && this.props.onCommand !== undefined) {
+      this.props.onCommand(
+        this.state.commandInputState.getCurrentContent().getPlainText());
+      return "move-selection-to-end-of-block";
+    }
+    return Draft.getDefaultKeyBinding(e);
   }
 }

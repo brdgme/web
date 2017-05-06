@@ -1,27 +1,27 @@
-import * as React from 'react';
-import * as Redux from 'redux';
-import * as ReactRedux from 'react-redux';
+import * as React from "react";
+import * as ReactRedux from "react-redux";
+import * as Redux from "redux";
 
-import { Spinner } from './spinner';
-import { State as AppState } from '../reducers';
-import * as LoginReducer from '../reducers/login';
+import { State as AppState } from "../reducers";
+import * as LoginReducer from "../reducers/login";
+import { Spinner } from "./spinner";
 
-export interface PropValues {
-  email: string,
-  code: string,
-  mode: LoginReducer.Mode,
+export interface IPropValues {
+  email: string;
+  code: string;
+  mode: LoginReducer.Mode;
 }
-export interface PropHandlers {
-  onChangeEmail: (email: string) => void,
-  onChangeCode: (code: string) => void,
-  onChangeMode: (mode: LoginReducer.Mode) => void,
-  onSubmitEmail: (email: string) => void,
-  onSubmitCode: (email: string, code: string) => void,
+export interface IPropHandlers {
+  onChangeEmail: (email: string) => void;
+  onChangeCode: (code: string) => void;
+  onChangeMode: (mode: LoginReducer.Mode) => void;
+  onSubmitEmail: (email: string) => void;
+  onSubmitCode: (email: string, code: string) => void;
 }
-export interface Props extends PropValues, PropHandlers { }
+export interface IProps extends IPropValues, IPropHandlers { }
 
-export class Component extends React.PureComponent<Props, {}> {
-  constructor(props?: Props, context?: any) {
+export class Component extends React.PureComponent<IProps, {}> {
+  constructor(props?: IProps, context?: any) {
     super(props, context);
 
     this.handleChangeCode = this.handleChangeCode.bind(this);
@@ -32,38 +32,7 @@ export class Component extends React.PureComponent<Props, {}> {
     this.handleSubmitEmail = this.handleSubmitEmail.bind(this);
   }
 
-  handleSubmitEmail(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    this.props.onSubmitEmail(this.props.email);
-  }
-
-  handleSubmitCode(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    this.props.onSubmitCode(this.props.email, this.props.code);
-  }
-
-  handleClickHaveCode(e: React.MouseEvent<HTMLAnchorElement>) {
-    e.preventDefault();
-    let form = (e.currentTarget.parentElement!.parentElement) as HTMLFormElement;
-    if (form.reportValidity()) {
-      this.props.onChangeMode(LoginReducer.Mode.EnteringCode);
-    }
-  }
-
-  handleClickChangeEmail(e: React.FormEvent<HTMLAnchorElement>) {
-    e.preventDefault();
-    this.props.onChangeMode(LoginReducer.Mode.EnteringEmail);
-  }
-
-  handleChangeCode(e: React.ChangeEvent<HTMLInputElement>) {
-    this.props.onChangeCode(e.target.value);
-  }
-
-  handleChangeEmail(e: React.ChangeEvent<HTMLInputElement>) {
-    this.props.onChangeEmail(e.target.value);
-  }
-
-  render() {
+  public render() {
     return (
       <div className="login">
         <h1>brdg.me</h1>
@@ -120,23 +89,54 @@ export class Component extends React.PureComponent<Props, {}> {
       </div>
     );
   }
+
+  private handleSubmitEmail(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    this.props.onSubmitEmail(this.props.email);
+  }
+
+  private handleSubmitCode(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    this.props.onSubmitCode(this.props.email, this.props.code);
+  }
+
+  private handleClickHaveCode(e: React.MouseEvent<HTMLAnchorElement>) {
+    e.preventDefault();
+    const form = (e.currentTarget.parentElement!.parentElement) as HTMLFormElement;
+    if (form.reportValidity()) {
+      this.props.onChangeMode(LoginReducer.Mode.EnteringCode);
+    }
+  }
+
+  private handleClickChangeEmail(e: React.FormEvent<HTMLAnchorElement>) {
+    e.preventDefault();
+    this.props.onChangeMode(LoginReducer.Mode.EnteringEmail);
+  }
+
+  private handleChangeCode(e: React.ChangeEvent<HTMLInputElement>) {
+    this.props.onChangeCode(e.target.value);
+  }
+
+  private handleChangeEmail(e: React.ChangeEvent<HTMLInputElement>) {
+    this.props.onChangeEmail(e.target.value);
+  }
 }
 
-function mapStateToProps(state: AppState): PropValues {
+function mapStateToProps(state: AppState): IPropValues {
   return {
-    email: state.login.email,
     code: state.login.code,
+    email: state.login.email,
     mode: state.login.mode,
   };
 }
 
-function mapDispatchToProps(dispatch: Redux.Dispatch<{}>): PropHandlers {
+function mapDispatchToProps(dispatch: Redux.Dispatch<{}>): IPropHandlers {
   return {
     onChangeCode: (code) => dispatch(LoginReducer.updateCode(code)),
     onChangeEmail: (email) => dispatch(LoginReducer.updateEmail(email)),
     onChangeMode: (mode) => dispatch(LoginReducer.updateMode(mode)),
-    onSubmitEmail: (email) => dispatch(LoginReducer.submitEmail(email)),
     onSubmitCode: (email, code) => dispatch(LoginReducer.submitCode(email, code)),
+    onSubmitEmail: (email) => dispatch(LoginReducer.submitEmail(email)),
   };
 }
 

@@ -1,51 +1,27 @@
-import { Action, Dispatch, combineReducers } from 'redux';
-import * as superagent from 'superagent';
-import * as Immutable from 'immutable';
+import * as Immutable from "immutable";
+import { Action, combineReducers, Dispatch } from "redux";
+import { createAction, handleActions } from "redux-actions";
 
-export class AuthState extends Immutable.Record({
-  email: '',
-  userId: '',
-  token: '',
-}) {
-  email: string;
-  userId: string;
-  token: string;
-}
+import * as Login from "./login";
 
 export class State extends Immutable.Record({
-  path: '',
-  auth: undefined,
+  token: undefined,
+  path: "",
 }) {
-  path: string;
-  auth?: AuthState;
+  public token?: string;
+  public path: string;
 }
 
-export const UPDATE_AUTH = "SESSION/UPDATE_AUTH";
-export const CLEAR_AUTH = "SESSION/CLEAR_AUTH";
+export const UPDATE_TOKEN = "brdgme/session/UPDATE_TOKEN";
+export const CLEAR_TOKEN = "brdgme/session/CLEAR_TOKEN";
+export const UPDATE_PATH = "brdgme/session/UPDATE_PATH";
 
-interface UpdateAuth extends Action {
-  type: typeof UPDATE_AUTH,
-  auth: AuthState,
-}
-export function updateAuth(auth: AuthState): UpdateAuth {
-  return { type: UPDATE_AUTH, auth };
-}
+export const updateToken = createAction<string>(UPDATE_TOKEN);
+export const clearToken = createAction(CLEAR_TOKEN);
+export const updatePath = createAction<string>(UPDATE_PATH);
 
-interface ClearAuth extends Action {
-  type: typeof CLEAR_AUTH,
-}
-export function clearAuth(): ClearAuth {
-  return { type: CLEAR_AUTH };
-}
-
-type SessionAction = UpdateAuth | ClearAuth;
-export function reducer(state: State = new State(), action: SessionAction): State {
-  switch (action.type) {
-    case UPDATE_AUTH:
-      return state.set('auth', action.auth) as State;
-    case CLEAR_AUTH:
-      return state.set('auth', undefined) as State;
-    default:
-      return state;
-  }
-}
+export const reducer = handleActions({
+  [UPDATE_TOKEN]: (state, action) => state.set("token", action.payload!),
+  [CLEAR_TOKEN]: (state, action) => state.remove("token"),
+  [UPDATE_PATH]: (state, action) => state.set("path", action.payload),
+}, new State());

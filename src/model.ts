@@ -1,90 +1,90 @@
-import { CommandSpec } from './command';
+import { ICommandSpec } from "./command";
 
-export interface Game {
-  id: string,
-  created_at: string,
-  updated_at: string,
-  game_version_id: string,
-  is_finished: boolean,
+export interface IGame {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  game_version_id: string;
+  is_finished: boolean;
 }
 
-export interface GameType {
-  id: string,
-  created_at: string,
-  updated_at: string,
-  name: string,
+export interface IGameType {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  name: string;
 }
 
-export interface GameVersion {
-  id: string,
-  created_at: string,
-  updated_at: string,
-  game_type_id: string,
-  name: string,
-  is_public: boolean,
-  is_deprecated: boolean,
+export interface IGameVersion {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  game_type_id: string;
+  name: string;
+  is_public: boolean;
+  is_deprecated: boolean;
 }
 
-export interface GamePlayer {
-  id: string,
-  created_at: string,
-  updated_at: string,
-  user_id: string,
-  game_id: string,
-  position: number,
-  color: string,
-  has_accepted: boolean,
-  is_turn: boolean,
-  is_read: boolean,
-  is_winner: boolean,
+export interface IGamePlayer {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+  game_id: string;
+  position: number;
+  color: string;
+  has_accepted: boolean;
+  is_turn: boolean;
+  is_read: boolean;
+  is_winner: boolean;
 }
 
-export interface User {
-  id: string,
-  created_at: string,
-  updated_at: string,
-  name: string,
+export interface IUser {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  name: string;
 }
 
-export interface GamePlayerUser {
-  game_player: GamePlayer,
-  user: User,
+export interface IGamePlayerUser {
+  game_player: IGamePlayer;
+  user: IUser;
 }
 
-export interface GameExtended {
-  game: Game,
-  game_type: GameType,
-  game_version: GameVersion,
-  game_players: GamePlayerUser[],
-  game_logs?: GameLogHTML[],
-  pub_state?: string,
-  game_html?: string,
-  command_spec?: string,
+export interface IGameExtended {
+  game: IGame;
+  game_type: IGameType;
+  game_version: IGameVersion;
+  game_players: IGamePlayerUser[];
+  game_logs?: IGameLogHTML[];
+  pub_state?: string;
+  html?: string;
+  command_spec?: string;
 }
 
-export interface GameVersionType {
-  game_version: GameVersion,
-  game_type: GameType,
+export interface IGameVersionType {
+  game_version: IGameVersion;
+  game_type: IGameType;
 }
 
-export interface Session {
-  email: string,
-  userId: string,
-  token: string,
-  logout: () => void,
+export interface ISession {
+  email: string;
+  userId: string;
+  token: string;
+  logout: () => void;
 }
 
-export interface GameLog {
-  id: string,
-  created_at: string,
-  updated_at: string,
-  logged_at: string,
-  game_id: string,
-  is_public: boolean,
-  body: string,
+export interface IGameLog {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  logged_at: string;
+  game_id: string;
+  is_public: boolean;
+  body: string;
 }
 
-export interface GameLogHTML {
-  game_log: GameLog,
-  html: string,
+export interface IGameLogHTML {
+  game_log: IGameLog;
+  html: string;
 }

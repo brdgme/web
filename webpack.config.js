@@ -65,14 +65,15 @@ module.exports = {
   // This is important because it allows us to avoid bundling all of our
   // dependencies, which allows browsers to cache those libraries between builds.
   externals: {
-    "react": "React",
-    "react-dom": "ReactDOM",
-    "superagent": "superagent",
-    "moment": "moment",
+    "classnames": "classNames",
     "draft-js": "Draft",
     "immutable": "Immutable",
-    "classnames": "classNames",
-    "redux": "Redux",
+    "moment": "moment",
+    "react": "React",
+    "react-dom": "ReactDOM",
     "react-redux": "ReactRedux",
+    "redux": "Redux",
+    "redux-saga": "ReduxSaga",
+    "superagent": "superagent",
   },
 };
