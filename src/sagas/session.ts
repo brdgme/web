@@ -21,10 +21,9 @@ function* loginSuccess(action: Action<string>): IterableIterator<Effect> {
 function* updatePath(action: Action<string>): IterableIterator<Effect> {
   yield put(App.clearPageState());
   window.location.hash = action.payload!;
-  return;
 }
 
 function* updateToken(action: Action<string>): IterableIterator<Effect> {
   localStorage.setItem(LS_AUTH_TOKEN_OFFSET, action.payload!);
-  return;
+  yield put(Session.updatePath("/"));
 }

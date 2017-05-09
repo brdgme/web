@@ -24,5 +24,7 @@ export const reducer = handleActions({
     .set("submittingCommand", false)
     .set("command", "")
     .remove("commandError"),
-  [Game.SUBMIT_COMMAND_FAIL]: (state, action) => state.set("submittingCommand", false),
+  [Game.SUBMIT_COMMAND_FAIL]: (state, action) => state
+    .set("commandError", action.payload)
+    .set("submittingCommand", false),
 }, new State());
