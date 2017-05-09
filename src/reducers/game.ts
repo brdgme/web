@@ -32,6 +32,9 @@ export const FETCH_GAME = "brdgme/game/FETCH_GAME";
 export const FETCH_GAME_SUCCESS = "brdgme/game/FETCH_GAME_SUCCESS";
 export const FETCH_GAME_FAIL = "brdgme/game/FETCH_GAME_FAIL";
 export const UPDATE_GAMES = "brdgme/game/UPDATE_GAMES";
+export const SUBMIT_COMMAND = "brdgme/game/SUBMIT_COMMAND";
+export const SUBMIT_COMMAND_SUCCESS = "brdgme/game/SUBMIT_COMMAND_SUCCESS";
+export const SUBMIT_COMMAND_FAIL = "brdgme/game/SUBMIT_COMMAND_FAIL";
 
 export const fetchActiveGames = createAction(FETCH_ACTIVE_GAMES);
 export const fetchActiveGamesSuccess = createAction<Model.IGameExtended[]>(FETCH_ACTIVE_GAMES_SUCCESS);
@@ -40,6 +43,13 @@ export const fetchGame = createAction<string>(FETCH_GAME);
 export const fetchGameSuccess = createAction<Model.IGameExtended>(FETCH_GAME_SUCCESS);
 export const fetchGameFail = createAction(FETCH_GAME_FAIL);
 export const updateGames = createAction<Immutable.List<Records.GameExtended>>(UPDATE_GAMES);
+export interface ISubmitCommand {
+  gameId: string;
+  command: string;
+}
+export const submitCommand = createAction<ISubmitCommand>(SUBMIT_COMMAND);
+export const submitCommandSuccess = createAction<Records.GameExtended>(SUBMIT_COMMAND_SUCCESS);
+export const submitCommandFail = createAction<string>(SUBMIT_COMMAND_FAIL);
 
 export const reducer = handleActions<State, any>({
   [FETCH_ACTIVE_GAMES_SUCCESS]: (state, action) => state.updateGames(
@@ -50,5 +60,8 @@ export const reducer = handleActions<State, any>({
   ),
   [UPDATE_GAMES]: (state, action) => state.updateGames(
     action.payload! as Immutable.List<Records.GameExtended>,
+  ),
+  [SUBMIT_COMMAND_SUCCESS]: (state, action) => state.updateGames(
+    Records.GameExtended.fromJSList([action.payload]),
   ),
 }, new State());

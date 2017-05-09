@@ -8,6 +8,7 @@ import * as superagent from "superagent";
 import * as Records from "../../records";
 import { State as AppState } from "../../reducers";
 import * as Game from "../../reducers/game";
+import * as GameShow from "../../reducers/pages/game-show";
 import { Container as Layout } from "../layout";
 import { Spinner } from "../spinner";
 
@@ -37,6 +38,7 @@ export class Component extends React.PureComponent<IProps, {}> {
 
     this.onCommandInputChange = this.onCommandInputChange.bind(this);
     this.focusCommandInput = this.focusCommandInput.bind(this);
+    this.onCommandSubmit = this.onCommandSubmit.bind(this);
   }
 
   public render(): JSX.Element {
@@ -59,13 +61,15 @@ export class Component extends React.PureComponent<IProps, {}> {
               {this.props.commandError && <div className="command-error">
                 {this.props.commandError}
               </div>}
-              <input
-                value={this.props.commandInput}
-                onChange={this.onCommandInputChange}
-                placeholder="Enter command..."
-                readOnly={this.props.submittingCommand}
-                ref="editor"
-              />
+              <form onSubmit={this.onCommandSubmit}>
+                <input
+                  value={this.props.commandInput}
+                  onChange={this.onCommandInputChange}
+                  placeholder="Enter command..."
+                  disabled={this.props.submittingCommand}
+                  ref="editor"
+                />
+              </form>
             </div>
           </div>
           <div className="game-logs">
@@ -90,6 +94,11 @@ export class Component extends React.PureComponent<IProps, {}> {
     if (props.game === undefined || props.game.html === undefined) {
       props.onFetch(props.gameId);
     }
+  }
+
+  private onCommandSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
+    e.preventDefault();
+    this.props.onCommand(this.props.gameId, this.props.commandInput);
   }
 
   private componentWillUnmount() {
@@ -149,16 +158,16 @@ function mapStateToProps(state: AppState, ownProps: IOwnProps): IPropValues {
   return {
     gameId: ownProps.gameId,
     game: state.game.games.get(ownProps.gameId),
-    commandInput: "",
-    submittingCommand: false,
-    commandError: undefined,
+    commandInput: state.pages.gameShow.command,
+    submittingCommand: state.pages.gameShow.submittingCommand,
+    commandError: state.pages.gameShow.commandError,
   };
 }
 
 function mapDispatchToProps(dispatch: Redux.Dispatch<{}>, ownProps: IOwnProps): IPropHandlers {
   return {
-    onCommand: (gameId, command) => { console.log(command); },
-    onCommandChange: (command) => { console.log(command); },
+    onCommand: (gameId, command) => dispatch(Game.submitCommand({ gameId, command })),
+    onCommandChange: (command) => dispatch(GameShow.updateCommand(command)),
     onFetch: (gameId) => dispatch(Game.fetchGame(gameId)),
   };
 }
