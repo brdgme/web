@@ -4,11 +4,13 @@
         "sourceMap": true,
         "noImplicitAny": true,
         "module": "commonjs",
-        "target": "ES6",
+        "target": "ES5",
         "jsx": "react",
-        "strictNullChecks": true
+        "strictNullChecks": true,
+        "noLib": true
     },
     "include": [
+        "./node_modules/typescript/lib/lib.es6.d.ts",
         "./src/**/*"
     ]
 }

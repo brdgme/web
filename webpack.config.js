@@ -66,7 +66,6 @@ module.exports = {
   // dependencies, which allows browsers to cache those libraries between builds.
   externals: {
     "classnames": "classNames",
-    "draft-js": "Draft",
     "immutable": "Immutable",
     "moment": "moment",
     "react": "React",
