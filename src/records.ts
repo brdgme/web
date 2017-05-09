@@ -186,7 +186,7 @@ export class GameExtended extends Immutable.Record({
   }
 
   public static fromJSList(js: any): Immutable.List<GameExtended> {
-    return Immutable.List(js.map(GameExtended.fromJS)) as Immutable.List<GameExtended>;
+    return Immutable.List<GameExtended>(js.map(GameExtended.fromJS));
   }
 
   public game: Game;

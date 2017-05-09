@@ -18,7 +18,6 @@
   "license": "GPL-3.0",
   "dependencies": {
     "@types/classnames": "0.0.32",
-    "@types/draft-js": "^0.10.1",
     "@types/react": "^15.0.16",
     "@types/react-dom": "^15.5.0",
     "@types/react-redux": "^4.4.40",
@@ -26,7 +25,6 @@
     "@types/redux-immutable": "^3.0.33",
     "@types/superagent": "^2.0.36",
     "classnames": "^2.2.5",
-    "draft-js": "^0.10.0",
     "immutable": "^3.8.1",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",

@@ -16,8 +16,8 @@ export class State extends Immutable.Record({
         if (g === undefined) {
           return;
         }
-        const existing = games.get(g.game.id) as Records.GameExtended | undefined;
-        if (existing === undefined || existing.game.updated_at < g.game.updated_at) {
+        const existing: Records.GameExtended | undefined = games.get(g.game.id);
+        if (existing === undefined || existing.game.updated_at <= g.game.updated_at) {
           games.set(g.game.id, g);
         }
       });

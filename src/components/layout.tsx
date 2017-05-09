@@ -104,7 +104,7 @@ function mapStateToProps(state: AppState): IPropValues {
     isLoggedIn: state.session.token !== undefined,
     activeGames: state.game.games.size > 0 && state.game.games.filter(
       (g: Records.GameExtended) => !g.game.is_finished,
-    ).toList() as Immutable.List<Records.GameExtended> || undefined,
+    ).toList() || undefined,
   };
 }
 

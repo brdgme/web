@@ -24,7 +24,10 @@ ReactDOM.render(
     new State().updateIn(
       ["session", "token"],
       () => localStorage.getItem(LS_AUTH_TOKEN_OFFSET) || undefined,
-    ) as State,
+    ).updateIn(
+      ["session", "path"],
+      () => location.hash.substr(1),
+    ),
     composeEnhancers(Redux.applyMiddleware(
       sagaMiddleware,
     )))}>

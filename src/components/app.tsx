@@ -7,7 +7,7 @@ import { State as AppState } from "../reducers";
 import * as Router from "../router";
 import { GameIndex } from "./game/index";
 import { GameNew } from "./game/new";
-import { GameShow } from "./game/show";
+import { Container as GameShow } from "./game/show";
 import { Container as Home } from "./home";
 import { Container as Login } from "./login";
 
@@ -22,7 +22,7 @@ export class Component extends React.PureComponent<IPropValues, {}> {
         Router.first(remaining, [
           Router.match("/new", () => <GameNew />),
           Router.empty(() => <GameIndex />),
-          Router.any(() => <GameShow />),
+          Router.any(() => <GameShow gameId={remaining.substr(1)} />),
         ]),
       ),
       Router.any(() => <Home />),

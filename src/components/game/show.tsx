@@ -1,10 +1,13 @@
 import * as classNames from "classnames";
-import * as Draft from "draft-js";
 import * as moment from "moment";
 import * as React from "react";
+import * as ReactRedux from "react-redux";
+import * as Redux from "redux";
 import * as superagent from "superagent";
 
-import { IGameExtended } from "../../model";
+import * as Records from "../../records";
+import { State as AppState } from "../../reducers";
+import * as Game from "../../reducers/game";
 import { Container as Layout } from "../layout";
 import { Spinner } from "../spinner";
 
@@ -13,27 +16,26 @@ const dowFormat = "ddd";
 const recentDateFormat = "MMM D";
 const oldDateFormat = "YYYY-M-D";
 
-export interface IGameShowProps {
-  game?: IGameExtended;
-  onCommand?: (command: string) => void;
+export interface IPropValues extends IOwnProps {
+  game?: Records.GameExtended;
+  commandInput: string;
   submittingCommand?: boolean;
   commandError?: string;
 }
 
-export interface IGameShowState {
-  commandInputState: Draft.EditorState;
+interface IPropHandlers {
+  onCommandChange: (command: string) => void;
+  onCommand: (gameId: string, command: string) => void;
+  onFetch: (gameId: string) => void;
 }
 
-export class GameShow extends React.Component<IGameShowProps, IGameShowState> {
-  constructor(props?: IGameShowProps, context?: any) {
+interface IProps extends IPropValues, IPropHandlers { }
+
+export class Component extends React.PureComponent<IProps, {}> {
+  constructor(props?: IProps, context?: any) {
     super(props, context);
 
-    this.state = {
-      commandInputState: Draft.EditorState.createEmpty(),
-    };
-
     this.onCommandInputChange = this.onCommandInputChange.bind(this);
-    this.onCommandInputKeyEvent = this.onCommandInputKeyEvent.bind(this);
     this.focusCommandInput = this.focusCommandInput.bind(this);
   }
 
@@ -57,11 +59,10 @@ export class GameShow extends React.Component<IGameShowProps, IGameShowState> {
               {this.props.commandError && <div className="command-error">
                 {this.props.commandError}
               </div>}
-              <Draft.Editor
-                editorState={this.state.commandInputState}
+              <input
+                value={this.props.commandInput}
                 onChange={this.onCommandInputChange}
                 placeholder="Enter command..."
-                keyBindingFn={this.onCommandInputKeyEvent}
                 readOnly={this.props.submittingCommand}
                 ref="editor"
               />
@@ -76,8 +77,19 @@ export class GameShow extends React.Component<IGameShowProps, IGameShowState> {
   }
 
   private componentDidMount() {
+    this.fetchGameIfRequired(this.props);
     this.focusCommandInput();
     document.addEventListener("keydown", this.focusCommandInput);
+  }
+
+  private componentWillReceiveProps(nextProps: IProps) {
+    this.fetchGameIfRequired(nextProps);
+  }
+
+  private fetchGameIfRequired(props: IProps) {
+    if (props.game === undefined || props.game.html === undefined) {
+      props.onFetch(props.gameId);
+    }
   }
 
   private componentWillUnmount() {
@@ -85,7 +97,7 @@ export class GameShow extends React.Component<IGameShowProps, IGameShowState> {
   }
 
   private focusCommandInput() {
-    (this.refs.editor as Draft.Editor).focus();
+    (this.refs.editor as HTMLInputElement).focus();
   }
 
   private formatLogTime(t: moment.Moment): string {
@@ -107,7 +119,7 @@ export class GameShow extends React.Component<IGameShowProps, IGameShowState> {
     let lastLog: moment.Moment;
     const renderedLogs: JSX.Element[] = this.props.game.game_logs.map((gl) => {
       let timeEl: JSX.Element = <div />;
-      const logTime = moment.utc(gl.game_log.logged_at);
+      const logTime = moment.utc(gl!.game_log.logged_at);
       if (lastLog === undefined || logTime.clone().subtract(10, "minutes").isAfter(lastLog)) {
         timeEl = (
           <div className="log-time">- {this.formatLogTime(logTime)} -</div>
@@ -117,23 +129,41 @@ export class GameShow extends React.Component<IGameShowProps, IGameShowState> {
       return (
         <div>
           {timeEl}
-          <div dangerouslySetInnerHTML={{ __html: gl.html }} />
+          <div dangerouslySetInnerHTML={{ __html: gl!.html }} />
         </div>
       );
-    });
+    }).toArray();
     return <div>{renderedLogs}</div>;
   }
 
-  private onCommandInputChange(commandInputState: Draft.EditorState) {
-    this.setState({ commandInputState });
-  }
-
-  private onCommandInputKeyEvent(e: React.KeyboardEvent<{}>) {
-    if (e.key === "Enter" && this.props.onCommand !== undefined) {
-      this.props.onCommand(
-        this.state.commandInputState.getCurrentContent().getPlainText());
-      return "move-selection-to-end-of-block";
-    }
-    return Draft.getDefaultKeyBinding(e);
+  private onCommandInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    this.props.onCommandChange(e.target.value);
   }
 }
+
+interface IOwnProps {
+  gameId: string;
+}
+
+function mapStateToProps(state: AppState, ownProps: IOwnProps): IPropValues {
+  return {
+    gameId: ownProps.gameId,
+    game: state.game.games.get(ownProps.gameId),
+    commandInput: "",
+    submittingCommand: false,
+    commandError: undefined,
+  };
+}
+
+function mapDispatchToProps(dispatch: Redux.Dispatch<{}>, ownProps: IOwnProps): IPropHandlers {
+  return {
+    onCommand: (gameId, command) => { console.log(command); },
+    onCommandChange: (command) => { console.log(command); },
+    onFetch: (gameId) => dispatch(Game.fetchGame(gameId)),
+  };
+}
+
+export const Container = ReactRedux.connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(Component);
