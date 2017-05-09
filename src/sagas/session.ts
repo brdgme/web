@@ -12,6 +12,7 @@ export function* sagas(): IterableIterator<Effect> {
   yield takeEvery(Login.SUBMIT_CODE_SUCCESS, loginSuccess);
   yield takeEvery(Session.UPDATE_PATH, updatePath);
   yield takeEvery(Session.UPDATE_TOKEN, updateToken);
+  yield takeEvery(Session.CLEAR_TOKEN, clearToken);
 }
 
 function* loginSuccess(action: Action<string>): IterableIterator<Effect> {
@@ -26,4 +27,8 @@ function* updatePath(action: Action<string>): IterableIterator<Effect> {
 function* updateToken(action: Action<string>): IterableIterator<Effect> {
   localStorage.setItem(LS_AUTH_TOKEN_OFFSET, action.payload!);
   yield put(Session.updatePath("/"));
+}
+
+function* clearToken(action: Action<{}>): IterableIterator<Effect> {
+  localStorage.removeItem(LS_AUTH_TOKEN_OFFSET);
 }
