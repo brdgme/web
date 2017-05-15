@@ -65,7 +65,7 @@ export const subscribeGame = (id: string): ISubscribeGame => ({
 export interface IUnsubscribeGame { type: "brdgme/websocket/UNSUBSCRIBE_GAME"; }
 export const unsubscribeGame = (): IUnsubscribeGame => ({ type: UNSUBSCRIBE_GAME });
 
-export type IAction
+export type Action
   = IConnected
   | IConnecting
   | IWaitingForReconnect
@@ -75,7 +75,7 @@ export type IAction
   | IUnsubscribeGame
   ;
 
-export function reducer(state = new State(), action: IAction): State {
+export function reducer(state = new State(), action: Action): State {
   switch (action.type) {
     case CONNECTING:
       return state.set("connectionState", ConnectionState.Connecting) as State;

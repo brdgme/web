@@ -1,6 +1,4 @@
 import * as Immutable from "immutable";
-import { Action, combineReducers, Dispatch } from "redux";
-import { createAction, handleActions } from "redux-actions";
 
 import * as Login from "./login";
 
@@ -16,12 +14,37 @@ export const UPDATE_TOKEN = "brdgme/session/UPDATE_TOKEN";
 export const CLEAR_TOKEN = "brdgme/session/CLEAR_TOKEN";
 export const UPDATE_PATH = "brdgme/session/UPDATE_PATH";
 
-export const updateToken = createAction<string>(UPDATE_TOKEN);
-export const clearToken = createAction(CLEAR_TOKEN);
-export const updatePath = createAction<string>(UPDATE_PATH);
+export interface IUpdateToken {
+  type: "brdgme/session/UPDATE_TOKEN";
+  payload: string;
+}
+export const updateToken = (token: string): IUpdateToken => ({
+  type: UPDATE_TOKEN,
+  payload: token,
+});
 
-export const reducer = handleActions({
-  [UPDATE_TOKEN]: (state, action) => state.set("token", action.payload!),
-  [CLEAR_TOKEN]: (state, action) => state.remove("token"),
-  [UPDATE_PATH]: (state, action) => state.set("path", action.payload),
-}, new State());
+export interface IClearToken { type: "brdgme/session/CLEAR_TOKEN"; }
+export const clearToken = (): IClearToken => ({ type: CLEAR_TOKEN });
+
+export interface IUpdatePath {
+  type: "brdgme/session/UPDATE_PATH";
+  payload: string;
+}
+export const updatePath = (path: string): IUpdatePath => ({
+  type: UPDATE_PATH,
+  payload: path,
+});
+
+type Action
+  = IUpdateToken
+  | IClearToken
+  | IUpdatePath
+  ;
+
+export function reducer(state = new State(), action: Action): State {
+  switch (action.type) {
+    case UPDATE_TOKEN: return state.set("token", action.payload) as State;
+    case CLEAR_TOKEN: return state.remove("token") as State;
+    case UPDATE_PATH: return state.set("path", action.payload) as State;
+  }
+}
