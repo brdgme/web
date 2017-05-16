@@ -1,6 +1,5 @@
 import * as Immutable from "immutable";
 import * as Redux from "redux";
-import { createAction, handleActions } from "redux-actions";
 import { combineReducers } from "redux-immutable";
 
 import * as Game from "./game";
@@ -10,7 +9,12 @@ import * as Session from "./session";
 
 export const CLEAR_PAGE_STATE = "brdgme/CLEAR_PAGE_STATE";
 
-export const clearPageState = createAction(CLEAR_PAGE_STATE);
+export interface IClearPageState {
+  type: typeof CLEAR_PAGE_STATE;
+}
+export const clearPageState = (): IClearPageState => ({
+  type: CLEAR_PAGE_STATE,
+});
 
 export class State extends Immutable.Record({
   game: new Game.State(),
@@ -31,7 +35,9 @@ const childrenReducer = combineReducers<State>({
   session: Session.reducer,
 });
 
-export function reducer(state: State = new State(), action: Redux.Action): State {
+export type Action = IClearPageState;
+
+export function reducer(state: State = new State(), action: Action): State {
   state = childrenReducer(state, action);
   switch (action.type) {
     case CLEAR_PAGE_STATE: return state.remove("pages") as State;

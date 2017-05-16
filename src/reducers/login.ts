@@ -1,6 +1,4 @@
 import * as Immutable from "immutable";
-import { Action, combineReducers, Dispatch } from "redux";
-import { createAction, handleActions } from "redux-actions";
 
 export enum Mode {
   EnteringEmail,
@@ -29,26 +27,106 @@ export const SUBMIT_CODE = "brdgme/login/SUBMIT_CODE";
 export const SUBMIT_CODE_SUCCESS = "brdgme/login/SUBMIT_CODE_SUCCESS";
 export const SUBMIT_CODE_FAIL = "brdgme/login/SUBMIT_CODE_FAIL";
 
-export const updateEmail = createAction<string>(UPDATE_EMAIL);
-export const updateCode = createAction<string>(UPDATE_CODE);
-export const updateMode = createAction<Mode>(UPDATE_MODE);
-export const submitEmail = createAction<string>(SUBMIT_EMAIL);
-export const submitEmailSuccess = createAction(SUBMIT_EMAIL_SUCCESS);
-export const submitEmailFail = createAction(SUBMIT_EMAIL_FAIL);
-export const submitCode = createAction(
-  SUBMIT_CODE,
-  (email: string, code: string) => ({ email, code }),
-);
-export const submitCodeSuccess = createAction<string>(SUBMIT_EMAIL_SUCCESS);
-export const submitCodeFail = createAction(SUBMIT_CODE_FAIL);
+export interface IUpdateEmail {
+  type: typeof UPDATE_EMAIL;
+  payload: string;
+}
+export const updateEmail = (email: string): IUpdateEmail => ({
+  type: UPDATE_EMAIL,
+  payload: email,
+});
 
-export const reducer = handleActions({
-  [UPDATE_EMAIL]: (state, action) => state.set("email", action.payload),
-  [UPDATE_CODE]: (state, action) => state.set("code", action.payload),
-  [UPDATE_MODE]: (state, action) => state.set("mode", action.payload),
-  [SUBMIT_EMAIL]: (state, action) => state.set("mode", Mode.SubmittingEmail),
-  [SUBMIT_EMAIL_SUCCESS]: (state, action) => state.set("mode", Mode.EnteringCode),
-  [SUBMIT_EMAIL_FAIL]: (state, action) => state.set("mode", Mode.EnteringEmail),
-  [SUBMIT_CODE]: (state, action) => state.set("mode", Mode.SubmittingCode),
-  [SUBMIT_CODE_FAIL]: (state, action) => state.set("mode", Mode.EnteringCode),
-}, new State());
+export interface IUpdateCode {
+  type: typeof UPDATE_CODE;
+  payload: string;
+}
+export const updateCode = (code: string): IUpdateCode => ({
+  type: UPDATE_CODE,
+  payload: code,
+});
+
+export interface IUpdateMode {
+  type: typeof UPDATE_MODE;
+  payload: Mode;
+}
+export const updateMode = (mode: Mode): IUpdateMode => ({
+  type: UPDATE_MODE,
+  payload: mode,
+});
+
+export interface ISubmitEmail {
+  type: typeof SUBMIT_EMAIL;
+  payload: string;
+}
+export const submitEmail = (email: string): ISubmitEmail => ({
+  type: SUBMIT_EMAIL,
+  payload: email,
+});
+
+export interface ISubmitEmailSuccess {
+  type: typeof SUBMIT_EMAIL_SUCCESS;
+}
+export const submitEmailSuccess = (): ISubmitEmailSuccess => ({
+  type: SUBMIT_EMAIL_SUCCESS,
+});
+
+export interface ISubmitEmailFail {
+  type: typeof SUBMIT_EMAIL_FAIL;
+}
+export const submitEmailFail = (): ISubmitEmailFail => ({
+  type: SUBMIT_EMAIL_FAIL,
+});
+
+export interface ISubmitCode {
+  type: typeof SUBMIT_CODE;
+  payload: {
+    email: string;
+    code: string;
+  };
+}
+export const submitCode = (email: string, code: string): ISubmitCode => ({
+  type: SUBMIT_CODE,
+  payload: { email, code },
+});
+
+export interface ISubmitCodeSuccess {
+  type: typeof SUBMIT_CODE_SUCCESS;
+  payload: string;
+}
+export const submitCodeSuccess = (token: string): ISubmitCodeSuccess => ({
+  type: SUBMIT_CODE_SUCCESS,
+  payload: token,
+});
+
+export interface ISubmitCodeFail {
+  type: typeof SUBMIT_CODE_FAIL;
+}
+export const submitCodeFail = (): ISubmitCodeFail => ({
+  type: SUBMIT_CODE_FAIL,
+});
+
+export type Action
+  = IUpdateEmail
+  | IUpdateCode
+  | IUpdateMode
+  | ISubmitEmail
+  | ISubmitEmailSuccess
+  | ISubmitEmailFail
+  | ISubmitCode
+  | ISubmitCodeSuccess
+  | ISubmitCodeFail
+  ;
+
+export function reducer(state = new State(), action: Action): State {
+  switch (action.type) {
+    case UPDATE_EMAIL: return state.set("email", action.payload) as State;
+    case UPDATE_CODE: return state.set("code", action.payload) as State;
+    case UPDATE_MODE: return state.set("mode", action.payload) as State;
+    case SUBMIT_EMAIL: return state.set("mode", Mode.SubmittingEmail) as State;
+    case SUBMIT_EMAIL_SUCCESS: return state.set("mode", Mode.EnteringCode) as State;
+    case SUBMIT_EMAIL_FAIL: return state.set("mode", Mode.EnteringEmail) as State;
+    case SUBMIT_CODE: return state.set("mode", Mode.SubmittingCode) as State;
+    case SUBMIT_CODE_FAIL: return state.set("mode", Mode.EnteringCode) as State;
+    default: return state;
+  }
+}

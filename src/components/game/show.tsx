@@ -166,7 +166,7 @@ function mapStateToProps(state: AppState, ownProps: IOwnProps): IPropValues {
 
 function mapDispatchToProps(dispatch: Redux.Dispatch<{}>, ownProps: IOwnProps): IPropHandlers {
   return {
-    onCommand: (gameId, command) => dispatch(Game.submitCommand({ gameId, command })),
+    onCommand: (gameId, command) => dispatch(Game.submitCommand(gameId, command)),
     onCommandChange: (command) => dispatch(GameShow.updateCommand(command)),
     onFetch: (gameId) => dispatch(Game.fetchGame(gameId)),
   };

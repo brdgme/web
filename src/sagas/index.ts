@@ -1,4 +1,3 @@
-import { Action } from "redux-actions";
 import { call, Effect, fork, put, takeEvery, takeLatest } from "redux-saga/effects";
 
 import { sagas as gameSagas } from "./game";

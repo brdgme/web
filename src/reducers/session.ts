@@ -15,7 +15,7 @@ export const CLEAR_TOKEN = "brdgme/session/CLEAR_TOKEN";
 export const UPDATE_PATH = "brdgme/session/UPDATE_PATH";
 
 export interface IUpdateToken {
-  type: "brdgme/session/UPDATE_TOKEN";
+  type: typeof UPDATE_TOKEN;
   payload: string;
 }
 export const updateToken = (token: string): IUpdateToken => ({
@@ -23,11 +23,11 @@ export const updateToken = (token: string): IUpdateToken => ({
   payload: token,
 });
 
-export interface IClearToken { type: "brdgme/session/CLEAR_TOKEN"; }
+export interface IClearToken { type: typeof CLEAR_TOKEN; }
 export const clearToken = (): IClearToken => ({ type: CLEAR_TOKEN });
 
 export interface IUpdatePath {
-  type: "brdgme/session/UPDATE_PATH";
+  type: typeof UPDATE_PATH;
   payload: string;
 }
 export const updatePath = (path: string): IUpdatePath => ({
@@ -46,5 +46,6 @@ export function reducer(state = new State(), action: Action): State {
     case UPDATE_TOKEN: return state.set("token", action.payload) as State;
     case CLEAR_TOKEN: return state.remove("token") as State;
     case UPDATE_PATH: return state.set("path", action.payload) as State;
+    default: return state;
   }
 }

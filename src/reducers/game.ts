@@ -1,6 +1,4 @@
 import * as Immutable from "immutable";
-import { Action, combineReducers, Dispatch } from "redux";
-import { createAction, handleActions } from "redux-actions";
 
 import * as Model from "../model";
 import * as Records from "../records";
@@ -36,32 +34,118 @@ export const SUBMIT_COMMAND = "brdgme/game/SUBMIT_COMMAND";
 export const SUBMIT_COMMAND_SUCCESS = "brdgme/game/SUBMIT_COMMAND_SUCCESS";
 export const SUBMIT_COMMAND_FAIL = "brdgme/game/SUBMIT_COMMAND_FAIL";
 
-export const fetchActiveGames = createAction(FETCH_ACTIVE_GAMES);
-export const fetchActiveGamesSuccess = createAction<Model.IGameExtended[]>(FETCH_ACTIVE_GAMES_SUCCESS);
-export const fetchActiveGamesFail = createAction(FETCH_ACTIVE_GAMES_FAIL);
-export const fetchGame = createAction<string>(FETCH_GAME);
-export const fetchGameSuccess = createAction<Model.IGameExtended>(FETCH_GAME_SUCCESS);
-export const fetchGameFail = createAction(FETCH_GAME_FAIL);
-export const updateGames = createAction<Immutable.List<Records.GameExtended>>(UPDATE_GAMES);
-export interface ISubmitCommand {
-  gameId: string;
-  command: string;
+export interface IFetchActiveGames {
+  type: typeof FETCH_ACTIVE_GAMES;
 }
-export const submitCommand = createAction<ISubmitCommand>(SUBMIT_COMMAND);
-export const submitCommandSuccess = createAction<Records.GameExtended>(SUBMIT_COMMAND_SUCCESS);
-export const submitCommandFail = createAction<string>(SUBMIT_COMMAND_FAIL);
+export const fetchActiveGames = (): IFetchActiveGames => ({
+  type: FETCH_ACTIVE_GAMES,
+});
 
-export const reducer = handleActions<State, any>({
-  [FETCH_ACTIVE_GAMES_SUCCESS]: (state, action) => state.updateGames(
-    Records.GameExtended.fromJSList(action.payload),
-  ),
-  [FETCH_GAME_SUCCESS]: (state, action) => state.updateGames(
-    Records.GameExtended.fromJSList([action.payload]),
-  ),
-  [UPDATE_GAMES]: (state, action) => state.updateGames(
-    action.payload! as Immutable.List<Records.GameExtended>,
-  ),
-  [SUBMIT_COMMAND_SUCCESS]: (state, action) => state.updateGames(
-    Records.GameExtended.fromJSList([action.payload]),
-  ),
-}, new State());
+export interface IFetchActiveGamesSuccess {
+  type: typeof FETCH_ACTIVE_GAMES_SUCCESS;
+  payload: Model.IGameExtended[];
+}
+export const fetchActiveGamesSuccess =
+  (games: Model.IGameExtended[]): IFetchActiveGamesSuccess => ({
+    type: FETCH_ACTIVE_GAMES_SUCCESS,
+    payload: games,
+  });
+
+export interface IFetchActiveGamesFail {
+  type: typeof FETCH_ACTIVE_GAMES_FAIL;
+}
+export const fetchActiveGamesFail = (): IFetchActiveGamesFail => ({
+  type: FETCH_ACTIVE_GAMES_FAIL,
+});
+
+export interface IFetchGame {
+  type: typeof FETCH_GAME;
+  payload: string;
+}
+export const fetchGame = (id: string): IFetchGame => ({
+  type: FETCH_GAME,
+  payload: id,
+});
+
+export interface IFetchGameSuccess {
+  type: typeof FETCH_GAME_SUCCESS;
+  payload: Model.IGameExtended;
+}
+export const fetchGameSuccess =
+  (game: Model.IGameExtended): IFetchGameSuccess => ({
+    type: FETCH_GAME_SUCCESS,
+    payload: game,
+  });
+
+export interface IFetchGameFail {
+  type: typeof FETCH_GAME_FAIL;
+}
+export const fetchGameFail = (): IFetchGameFail => ({ type: FETCH_GAME_FAIL });
+
+export interface IUpdateGames {
+  type: typeof UPDATE_GAMES;
+  payload: Immutable.List<Records.GameExtended>;
+}
+export const updateGames =
+  (games: Immutable.List<Records.GameExtended>): IUpdateGames => ({
+    type: UPDATE_GAMES,
+    payload: games,
+  });
+
+export interface ISubmitCommand {
+  type: typeof SUBMIT_COMMAND;
+  payload: {
+    gameId: string;
+    command: string;
+  };
+}
+export const submitCommand =
+  (gameId: string, command: string): ISubmitCommand => ({
+    type: SUBMIT_COMMAND,
+    payload: { gameId, command },
+  });
+
+export interface ISubmitCommandSuccess {
+  type: typeof SUBMIT_COMMAND_SUCCESS;
+  payload: Records.GameExtended;
+}
+export const submitCommandSuccess =
+  (game: Records.GameExtended): ISubmitCommandSuccess => ({
+    type: SUBMIT_COMMAND_SUCCESS,
+    payload: game,
+  });
+
+export interface ISubmitCommandFail {
+  type: typeof SUBMIT_COMMAND_FAIL;
+  payload: string;
+}
+export const submitCommandFail = (error: string): ISubmitCommandFail => ({
+  type: SUBMIT_COMMAND_FAIL,
+  payload: error,
+});
+
+export type Action
+  = IFetchActiveGames
+  | IFetchActiveGamesSuccess
+  | IFetchActiveGamesFail
+  | IFetchGame
+  | IFetchGameSuccess
+  | IFetchGameFail
+  | IUpdateGames
+  | ISubmitCommand
+  | ISubmitCommandSuccess
+  | ISubmitCommandFail
+  ;
+
+export function reducer(state = new State(), action: Action): State {
+  switch (action.type) {
+    case FETCH_ACTIVE_GAMES_SUCCESS: return state.updateGames(
+      Records.GameExtended.fromJSList(action.payload));
+    case FETCH_GAME_SUCCESS: return state.updateGames(
+      Records.GameExtended.fromJSList([action.payload]));
+    case UPDATE_GAMES: return state.updateGames(action.payload);
+    case SUBMIT_COMMAND_SUCCESS: return state.updateGames(
+      Records.GameExtended.fromJSList([action.payload]));
+    default: return state;
+  }
+}

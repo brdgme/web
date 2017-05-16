@@ -1,4 +1,3 @@
-import { Action } from "redux-actions";
 import { call, Effect, put, takeEvery, takeLatest } from "redux-saga/effects";
 
 import * as http from "../http";
@@ -15,20 +14,20 @@ export function* sagas(): IterableIterator<Effect> {
   yield takeEvery(Session.CLEAR_TOKEN, clearToken);
 }
 
-function* loginSuccess(action: Action<string>): IterableIterator<Effect> {
-  yield put(Session.updateToken(action.payload!));
+function* loginSuccess(action: Login.ISubmitCodeSuccess): IterableIterator<Effect> {
+  yield put(Session.updateToken(action.payload));
 }
 
-function* updatePath(action: Action<string>): IterableIterator<Effect> {
+function* updatePath(action: Session.IUpdatePath): IterableIterator<Effect> {
   yield put(App.clearPageState());
-  window.location.hash = action.payload!;
+  window.location.hash = action.payload;
 }
 
-function* updateToken(action: Action<string>): IterableIterator<Effect> {
-  localStorage.setItem(LS_AUTH_TOKEN_OFFSET, action.payload!);
+function* updateToken(action: Session.IUpdateToken): IterableIterator<Effect> {
+  localStorage.setItem(LS_AUTH_TOKEN_OFFSET, action.payload);
   yield put(Session.updatePath("/"));
 }
 
-function* clearToken(action: Action<{}>): IterableIterator<Effect> {
+function* clearToken(action: Session.IClearToken): IterableIterator<Effect> {
   localStorage.removeItem(LS_AUTH_TOKEN_OFFSET);
 }

@@ -1,5 +1,5 @@
-import { Action } from "redux-actions";
 import { call, Effect, put, select, takeEvery, takeLatest } from "redux-saga/effects";
+
 import * as http from "../http";
 import { State as AppState } from "../reducers";
 import * as Game from "../reducers/game";
@@ -10,7 +10,7 @@ export function* sagas(): IterableIterator<Effect> {
   yield takeEvery(Game.SUBMIT_COMMAND, submitCommand);
 }
 
-function* fetchActiveGames(action: Action<{}>): IterableIterator<Effect> {
+function* fetchActiveGames(action: Game.IFetchActiveGames): IterableIterator<Effect> {
   const token: string = yield select((state: AppState) => state.session.token);
   if (token === undefined) {
     return;
@@ -23,7 +23,7 @@ function* fetchActiveGames(action: Action<{}>): IterableIterator<Effect> {
   }
 }
 
-function* fetchGame(action: Action<string>): IterableIterator<Effect> {
+function* fetchGame(action: Game.IFetchGame): IterableIterator<Effect> {
   const token: string = yield select((state: AppState) => state.session.token);
   if (token === undefined) {
     return;
@@ -36,7 +36,7 @@ function* fetchGame(action: Action<string>): IterableIterator<Effect> {
   }
 }
 
-function* submitCommand(action: Action<Game.ISubmitCommand>): IterableIterator<Effect> {
+function* submitCommand(action: Game.ISubmitCommand): IterableIterator<Effect> {
   const token: string = yield select((state: AppState) => state.session.token);
   if (token === undefined) {
     return;
