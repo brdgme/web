@@ -10,7 +10,7 @@ export class State extends Immutable.Record({
   connected: false,
   secondsBeforeReconnect: undefined,
   subUser: undefined,
-  subGames: Immutable.List(),
+  subGame: undefined,
 }) {
   public connectionState: ConnectionState;
   public secondsBeforeReconnect?: number;
@@ -18,13 +18,13 @@ export class State extends Immutable.Record({
   public subGame?: string;
 }
 
-export const CONNECTED = "brdgme/websocket/CONNECTED";
-export const CONNECTING = "brdgme/websocket/CONNECTING";
-export const WAITING_FOR_RECONNECT = "brdgme/websocket/WAITING_FOR_RECONNECT";
-export const SUBSCRIBE_USER = "brdgme/websocket/SUBSCRIBE_USER";
-export const UNSUBSCRIBE_USER = "brdgme/websocket/UNSUBSCRIBE_USER";
-export const SUBSCRIBE_GAME = "brdgme/websocket/SUBSCRIBE_GAME";
-export const UNSUBSCRIBE_GAME = "brdgme/websocket/UNSUBSCRIBE_GAME";
+export const CONNECTED = "brdgme/ws/CONNECTED";
+export const CONNECTING = "brdgme/ws/CONNECTING";
+export const WAITING_FOR_RECONNECT = "brdgme/ws/WAITING_FOR_RECONNECT";
+export const SUBSCRIBE_USER = "brdgme/ws/SUBSCRIBE_USER";
+export const UNSUBSCRIBE_USER = "brdgme/ws/UNSUBSCRIBE_USER";
+export const SUBSCRIBE_GAME = "brdgme/ws/SUBSCRIBE_GAME";
+export const UNSUBSCRIBE_GAME = "brdgme/ws/UNSUBSCRIBE_GAME";
 
 export interface IConnected { type: typeof CONNECTED; }
 export const connected = (): IConnected => ({ type: CONNECTED });

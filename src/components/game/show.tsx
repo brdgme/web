@@ -9,6 +9,7 @@ import * as Records from "../../records";
 import { State as AppState } from "../../reducers";
 import * as Game from "../../reducers/game";
 import * as GameShow from "../../reducers/pages/game-show";
+import * as WS from "../../reducers/ws";
 import { Container as Layout } from "../layout";
 import { Spinner } from "../spinner";
 
@@ -28,6 +29,8 @@ interface IPropHandlers {
   onCommandChange: (command: string) => void;
   onCommand: (gameId: string, command: string) => void;
   onFetch: (gameId: string) => void;
+  onSubscribeUpdates: (gameId: string) => void;
+  onUnsubscribeUpdates: (gameId: string) => void;
 }
 
 interface IProps extends IPropValues, IPropHandlers { }
@@ -84,9 +87,13 @@ export class Component extends React.PureComponent<IProps, {}> {
     this.fetchGameIfRequired(this.props);
     this.focusCommandInput();
     document.addEventListener("keydown", this.focusCommandInput);
+    this.props.onSubscribeUpdates(this.props.gameId);
   }
 
   private componentWillReceiveProps(nextProps: IProps) {
+    if (this.props.gameId !== nextProps.gameId) {
+      this.props.onSubscribeUpdates(nextProps.gameId);
+    }
     this.fetchGameIfRequired(nextProps);
   }
 
@@ -103,6 +110,7 @@ export class Component extends React.PureComponent<IProps, {}> {
 
   private componentWillUnmount() {
     document.removeEventListener("keydown", this.focusCommandInput);
+    this.props.onUnsubscribeUpdates(this.props.gameId);
   }
 
   private focusCommandInput() {
@@ -169,6 +177,8 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<{}>, ownProps: IOwnProps): 
     onCommand: (gameId, command) => dispatch(Game.submitCommand(gameId, command)),
     onCommandChange: (command) => dispatch(GameShow.updateCommand(command)),
     onFetch: (gameId) => dispatch(Game.fetchGame(gameId)),
+    onSubscribeUpdates: (gameId) => dispatch(WS.subscribeGame(gameId)),
+    onUnsubscribeUpdates: () => dispatch(WS.unsubscribeGame()),
   };
 }
 

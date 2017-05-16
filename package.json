@@ -12,6 +12,7 @@
     "watch": "node_modules/.bin/webpack -w",
     "server": "node server.js",
     "dev": "npm run watch & npm run server & npm run websocket",
+    "dev-html": "npm run watch & npm run server",
     "websocket": "cd node_modules/brdgme-websocket-server && npm start"
   },
   "author": "Michael Alexander <beefsack@gmail.com>",

@@ -337,7 +337,7 @@ braces@^1.8.2:
 
 "brdgme-websocket-server@https://github.com/brdgme/websocket-server.git":
   version "0.1.0"
-  resolved "https://github.com/brdgme/websocket-server.git#8b5f8a456e728dc8754b47db81ef9a87ca3d5788"
+  resolved "https://github.com/brdgme/websocket-server.git#9488b7c8739a0cfec0a5f78399a6f692c38da0c5"
   dependencies:
     "@types/loglevel" "^1.4.29"
     "@types/redis" "^0.12.36"
@@ -2012,7 +2012,11 @@ ms@0.7.3:
   version "0.7.3"
   resolved "https://registry.yarnpkg.com/ms/-/ms-0.7.3.tgz#708155a5e44e33f5fd0fc53e81d0d40a91be1fff"
 
-nan@^2.3.0, nan@~2.5.0:
+nan@^2.3.0:
+  version "2.6.2"
+  resolved "https://registry.yarnpkg.com/nan/-/nan-2.6.2.tgz#e4ff34e6c95fdfb5aecc08de6596f43605a7db45"
+
+nan@~2.5.0:
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.5.1.tgz#d5b01691253326a97a2bbee9e61c55d8d60351e2"
 
@@ -3314,15 +3318,15 @@ ua-parser-js@^0.7.9:
   resolved "https://registry.yarnpkg.com/ua-parser-js/-/ua-parser-js-0.7.12.tgz#04c81a99bdd5dc52263ea29d24c6bf8d4818a4bb"
 
 uglify-js@3.0.x:
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.0.5.tgz#585f5540a991edce566be734d235b71eed7e7146"
+  version "3.0.6"
+  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.0.6.tgz#17a673f64a78d8807fbda1b4c9ffce114c6febfd"
   dependencies:
     commander "~2.9.0"
     source-map "~0.5.1"
 
 uglify-js@^2.8.5:
-  version "2.8.25"
-  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-2.8.25.tgz#11b776e7c3925802853e4c3dd6d0ffad8eb72336"
+  version "2.8.26"
+  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-2.8.26.tgz#3a1db8ae0a0aba7f92e1ddadadbd0293d549f90e"
   dependencies:
     source-map "~0.5.1"
     yargs "~3.10.0"

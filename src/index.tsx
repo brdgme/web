@@ -4,6 +4,7 @@ import * as ReactRedux from "react-redux";
 import * as Redux from "redux";
 import createSagaMiddleware from "redux-saga";
 
+import * as Session from "./reducers/session";
 import sagas from "./sagas";
 import { LS_AUTH_TOKEN_OFFSET } from "./sagas/session";
 
@@ -17,20 +18,30 @@ interface IMyWindow extends Window {
 }
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || Redux.compose;
 declare var window: IMyWindow;
+
+// Create store and initialise path and token.
 const sagaMiddleware = createSagaMiddleware();
+const store = Redux.createStore(
+  App,
+  new State().updateIn(
+    ["session", "token"],
+    () => localStorage.getItem(LS_AUTH_TOKEN_OFFSET) || undefined,
+  ).updateIn(
+    ["session", "path"],
+    () => location.hash.substr(1),
+  ),
+  composeEnhancers(Redux.applyMiddleware(
+    sagaMiddleware,
+  )),
+);
+store.dispatch(Session.updatePath(location.hash.substr(1)));
+const token = localStorage.getItem(LS_AUTH_TOKEN_OFFSET);
+if (token !== null) {
+  store.dispatch(Session.updateToken(token));
+}
+
 ReactDOM.render(
-  <ReactRedux.Provider store={Redux.createStore(
-    App,
-    new State().updateIn(
-      ["session", "token"],
-      () => localStorage.getItem(LS_AUTH_TOKEN_OFFSET) || undefined,
-    ).updateIn(
-      ["session", "path"],
-      () => location.hash.substr(1),
-    ),
-    composeEnhancers(Redux.applyMiddleware(
-      sagaMiddleware,
-    )))}>
+  <ReactRedux.Provider store={store}>
     <AppContainer />
   </ReactRedux.Provider >,
   document.body,

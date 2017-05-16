@@ -6,6 +6,7 @@ import * as Game from "./game";
 import * as Login from "./login";
 import * as Pages from "./pages";
 import * as Session from "./session";
+import * as WS from "./ws";
 
 export const CLEAR_PAGE_STATE = "brdgme/CLEAR_PAGE_STATE";
 
@@ -21,11 +22,13 @@ export class State extends Immutable.Record({
   login: new Login.State(),
   pages: new Pages.State(),
   session: new Session.State(),
+  ws: new WS.State(),
 }) {
   public game: Game.State;
   public login: Login.State;
   public pages: Pages.State;
   public session: Session.State;
+  public ws: WS.State;
 }
 
 const childrenReducer = combineReducers<State>({
@@ -33,6 +36,7 @@ const childrenReducer = combineReducers<State>({
   login: Login.reducer,
   pages: Pages.reducer,
   session: Session.reducer,
+  ws: WS.reducer,
 });
 
 export type Action = IClearPageState;
