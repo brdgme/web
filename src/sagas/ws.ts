@@ -1,5 +1,5 @@
 import { END, eventChannel } from "redux-saga";
-import { call, Effect, fork, put, select, take, takeEvery, takeLatest } from "redux-saga/effects";
+import { call, Effect, fork, put, select, take, takeEvery, takeLatest, actionChannel } from "redux-saga/effects";
 
 import * as http from "../http";
 import * as Records from "../records";
@@ -29,46 +29,42 @@ export function* clearToken(action: Session.IClearToken): IterableIterator<Effec
 }
 
 export function* wsSaga(): IterableIterator<Effect> {
+  const actions = yield actionChannel([
+    WS.SUBSCRIBE_GAME,
+    WS.UNSUBSCRIBE_GAME,
+    WS.SUBSCRIBE_USER,
+    WS.UNSUBSCRIBE_USER,
+  ]);
   while (true) {
-    console.log("looping here");
     try {
+      //yield put(WS.connecting());
       const socket: WebSocket = yield call(connect, process.env.WS_SERVER);
-      const state: AppState = yield select();
+      //yield put(WS.connected());
       const s = yield fork(socketSagas, socket);
-      if (state.ws.subUser !== undefined) {
-        sendAction(socket, WS.subscribeUser(state.ws.subUser));
-      }
-      if (state.ws.subGame !== undefined) {
-        sendAction(socket, WS.subscribeGame(state.ws.subGame));
-      }
-      console.log("starting loop");
       while (true) {
-        yield s;
+        sendAction(socket, yield take(actions));
       }
-    } catch (e) {
-      console.log(e);
+    } finally {
+      yield put(WS.waitingForReconnect(5));
+      yield call(sleep, 5 * 1000);
     }
-    // Wait before reconnecting.
-    yield call(sleep, 1000);
   }
 }
 
 export function* handleMessages(socket: WebSocket): IterableIterator<Effect> {
-  console.log("getting channel");
   const chan = yield call(messageChannel, socket);
-  console.log("got channel");
   while (true) {
-    console.log("waiting for message");
     const message: MessageEvent = yield take(chan);
-    console.log(message.data);
-    yield put(Game.updateGames(Records.GameExtended.fromJSList([message.data])));
+    yield put(Game.updateGames(Records.GameExtended.fromJSList([
+      JSON.parse(message.data),
+    ])));
   }
 }
 
 export function messageChannel(socket: WebSocket) {
   return eventChannel((emitter) => {
     const listener = (event: MessageEvent) => {
-      emitter(event.data);
+      emitter(event);
     };
     socket.addEventListener("message", listener);
     socket.addEventListener("close", () => emitter(END));
@@ -88,21 +84,8 @@ function connect(addr: string): Promise<WebSocket> {
 
 function* socketSagas(socket: WebSocket): IterableIterator<Effect> {
   yield fork(handleMessages, socket);
-  yield takeEvery([
-    WS.SUBSCRIBE_GAME,
-    WS.UNSUBSCRIBE_GAME,
-    WS.SUBSCRIBE_USER,
-    WS.UNSUBSCRIBE_USER,
-  ], handleWSAction(socket));
-}
-
-function handleWSAction(socket: WebSocket) {
-  return function*(action: WS.Action): IterableIterator<Effect> {
-    sendAction(socket, action);
-  };
 }
 
 function sendAction(socket: WebSocket, action: WS.Action) {
-  console.log(`sending ${JSON.stringify(action)}`);
   socket.send(JSON.stringify(action));
 }

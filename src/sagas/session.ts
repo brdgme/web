@@ -25,7 +25,6 @@ function* updatePath(action: Session.IUpdatePath): IterableIterator<Effect> {
 
 function* updateToken(action: Session.IUpdateToken): IterableIterator<Effect> {
   localStorage.setItem(LS_AUTH_TOKEN_OFFSET, action.payload);
-  yield put(Session.updatePath("/"));
 }
 
 function* clearToken(action: Session.IClearToken): IterableIterator<Effect> {

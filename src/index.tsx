@@ -23,22 +23,18 @@ declare var window: IMyWindow;
 const sagaMiddleware = createSagaMiddleware();
 const store = Redux.createStore(
   App,
-  new State().updateIn(
-    ["session", "token"],
-    () => localStorage.getItem(LS_AUTH_TOKEN_OFFSET) || undefined,
-  ).updateIn(
-    ["session", "path"],
-    () => location.hash.substr(1),
-  ),
+  new State(),
   composeEnhancers(Redux.applyMiddleware(
     sagaMiddleware,
   )),
 );
+sagaMiddleware.run(sagas);
 store.dispatch(Session.updatePath(location.hash.substr(1)));
 const token = localStorage.getItem(LS_AUTH_TOKEN_OFFSET);
 if (token !== null) {
   store.dispatch(Session.updateToken(token));
 }
+console.log(store.getState().toJS());
 
 ReactDOM.render(
   <ReactRedux.Provider store={store}>
@@ -46,4 +42,3 @@ ReactDOM.render(
   </ReactRedux.Provider >,
   document.body,
 );
-sagaMiddleware.run(sagas);
