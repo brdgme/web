@@ -177,6 +177,7 @@ export class GameExtended extends Immutable.Record({
       game: Game.fromJS(js.game),
       game_type: GameType.fromJS(js.game_type),
       game_version: GameVersion.fromJS(js.game_version),
+      game_player: js.game_player && GamePlayer.fromJS(js.game_player) || undefined,
       game_players: Immutable.List(js.game_players.map(GamePlayerUser.fromJS)),
       game_logs: js.game_logs && Immutable.List(js.game_logs.map(GameLogRendered.fromJS)),
       pub_state: js.pub_state,
@@ -192,6 +193,7 @@ export class GameExtended extends Immutable.Record({
   public game: Game;
   public game_type: GameType;
   public game_version: GameVersion;
+  public game_player?: GamePlayer;
   public game_players: Immutable.List<GamePlayerUser>;
   public game_logs?: Immutable.List<GameLogRendered>;
   public pub_state: string;

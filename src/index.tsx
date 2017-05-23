@@ -34,7 +34,6 @@ const token = localStorage.getItem(LS_AUTH_TOKEN_OFFSET);
 if (token !== null) {
   store.dispatch(Session.updateToken(token));
 }
-console.log(store.getState().toJS());
 
 ReactDOM.render(
   <ReactRedux.Provider store={store}>

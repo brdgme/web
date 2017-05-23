@@ -13,7 +13,7 @@
     "server": "node server.js",
     "dev": "npm run watch & npm run server & npm run websocket",
     "dev-html": "npm run watch & npm run server",
-    "websocket": "cd node_modules/brdgme-websocket-server && npm start"
+    "websocket": "cd node_modules/brdgme-websocket-server && npm run start-dev"
   },
   "author": "Michael Alexander <beefsack@gmail.com>",
   "license": "GPL-3.0",

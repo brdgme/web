@@ -14,10 +14,32 @@ export class State extends Immutable.Record({
         if (g === undefined) {
           return;
         }
-        const existing: Records.GameExtended | undefined = games.get(g.game.id);
-        if (existing === undefined || existing.game.updated_at <= g.game.updated_at) {
-          games.set(g.game.id, g);
+        let existing: Records.GameExtended | undefined = games.get(g.game.id);
+        if (existing !== undefined) {
+          if (existing !== undefined && existing.game.updated_at > g.game.updated_at) {
+            // Our internal one is already newer.
+            return;
+          }
+          if (existing.game_player && !g.game_player) {
+            // We have a private view of the game, don't override with public.
+            return;
+          }
+        } else {
+          existing = new Records.GameExtended();
         }
+        games.set(g.game.id, existing.withMutations((ex: Records.GameExtended) => {
+          const existingLogs = ex.game_logs || Immutable.List<Records.GameLogRendered>();
+          ex.merge(g).set("game_logs", existingLogs.withMutations((logs) => {
+            const logIds = logs.map((l: Records.GameLogRendered) => l.game_log.id).toSet();
+            if (g.game_logs !== undefined) {
+              g.game_logs.forEach((newLog: Records.GameLogRendered) => {
+                if (!logIds.contains(newLog.game_log.id)) {
+                  logs.push(newLog);
+                }
+              });
+            }
+          }));
+        }) as Records.GameExtended);
       });
     })) as this;
   }
