@@ -46,6 +46,35 @@
       text-align: center;
     }
   }
+
+  .game-logs-summary-container {
+    position: relative;
+    width: 63%;
+  }
+
+  .game-logs-summary {
+    background-color: rgba(255, 255, 255, 0.85);
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    border-top: 1px solid @dark-background;
+    border-left: 1px solid @dark-background;
+    border-right: 1px solid @dark-background;
+    border-top-left-radius: 0.63em;
+    border-top-right-radius: 0.63em;
+
+    .header {
+      padding: 0.3em;
+      padding-left: 0.63em;
+      background-color: fade(@dark-background, 60%);
+    }
+
+    .content {
+      max-height: 10em;
+      overflow-y: auto;
+      padding: 0.63em;
+    }
+  }
 }
 
 .game-logs {

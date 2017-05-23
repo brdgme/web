@@ -166,6 +166,7 @@ export class GameExtended extends Immutable.Record({
   game: undefined,
   game_type: undefined,
   game_version: undefined,
+  game_player: undefined,
   game_players: undefined,
   game_logs: undefined,
   pub_state: undefined,

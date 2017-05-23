@@ -1,4 +1,5 @@
 import * as classNames from "classnames";
+import * as Immutable from "immutable";
 import * as moment from "moment";
 import * as React from "react";
 import * as ReactRedux from "react-redux";
@@ -23,6 +24,7 @@ export interface IPropValues extends IOwnProps {
   commandInput: string;
   submittingCommand?: boolean;
   commandError?: string;
+  hideLogsAt?: string;
 }
 
 interface IPropHandlers {
@@ -31,6 +33,7 @@ interface IPropHandlers {
   onFetch: (gameId: string) => void;
   onSubscribeUpdates: (gameId: string) => void;
   onUnsubscribeUpdates: (gameId: string) => void;
+  onHideLogs: (at: string) => void;
 }
 
 interface IProps extends IPropValues, IPropHandlers { }
@@ -42,6 +45,7 @@ export class Component extends React.PureComponent<IProps, {}> {
     this.onCommandInputChange = this.onCommandInputChange.bind(this);
     this.focusCommandInput = this.focusCommandInput.bind(this);
     this.onCommandSubmit = this.onCommandSubmit.bind(this);
+    this.onHideLogs = this.onHideLogs.bind(this);
   }
 
   public render(): JSX.Element {
@@ -57,6 +61,32 @@ export class Component extends React.PureComponent<IProps, {}> {
                 || <Spinner />
               }
             </div>
+            {this.filteredLogs().size > 0 &&
+              <div className="game-logs-summary-container">
+                <div className="game-logs-summary">
+                  <div className="header">
+                    <span style={{
+                      display: "inline-block",
+                      float: "left",
+                    }}>Updates</span>
+                    <a
+                      style={{
+                        display: "inline-block",
+                        float: "right",
+                      }}
+                      href="#"
+                      onClick={this.onHideLogs}
+                    >hide</a>
+                    <div style={{
+                      clear: "both",
+                    }} />
+                  </div>
+                  <div className="content">
+                    {this.renderLogs()}
+                  </div>
+                </div>
+              </div>
+            }
             <div className={classNames({
               "disabled": this.props.submittingCommand,
               "game-command-input": true,
@@ -75,11 +105,8 @@ export class Component extends React.PureComponent<IProps, {}> {
               </form>
             </div>
           </div>
-          <div className="game-logs">
-            {this.renderLogs()}
-          </div>
         </div>
-      </Layout >
+      </Layout>
     );
   }
 
@@ -108,6 +135,16 @@ export class Component extends React.PureComponent<IProps, {}> {
     this.props.onCommand(this.props.gameId, this.props.commandInput);
   }
 
+  private onHideLogs(e: React.SyntheticEvent<HTMLAnchorElement>) {
+    e.preventDefault();
+    const logs = this.filteredLogs();
+    const max = logs.maxBy((l) => l && l.game_log.created_at);
+    if (max === undefined) {
+      return;
+    }
+    this.props.onHideLogs(max.game_log.created_at);
+  }
+
   private componentWillUnmount() {
     document.removeEventListener("keydown", this.focusCommandInput);
     this.props.onUnsubscribeUpdates(this.props.gameId);
@@ -129,12 +166,35 @@ export class Component extends React.PureComponent<IProps, {}> {
     return t.local().format(`${prefix}${timeFormat}`);
   }
 
+  private filteredLogs(): Immutable.List<Records.GameLogRendered> {
+    if (this.props.game === undefined || this.props.game.game_logs === undefined) {
+      return Immutable.List() as Immutable.List<Records.GameLogRendered>;
+    }
+    let logs = this.props.game.game_logs;
+    const hideLogsAt = this.props.hideLogsAt;
+    if (hideLogsAt !== undefined) {
+      logs = logs.filter(
+        (l: Records.GameLogRendered) =>
+          l.game_log.created_at > hideLogsAt,
+      ) as Immutable.List<Records.GameLogRendered>;
+    }
+    const game_player = this.props.game.game_player;
+    if (game_player !== undefined) {
+      logs = logs.filter(
+        (l: Records.GameLogRendered) =>
+          l.game_log.created_at >= game_player.last_turn_at,
+      ) as Immutable.List<Records.GameLogRendered>;
+    }
+    return logs;
+  }
+
   private renderLogs(): JSX.Element {
     if (this.props.game === undefined || this.props.game.game_logs === undefined) {
       return <div />;
     }
+    const logs = this.filteredLogs();
     let lastLog: moment.Moment;
-    const renderedLogs: JSX.Element[] = this.props.game.game_logs.map((gl) => {
+    const renderedLogs: JSX.Element[] = logs.map((gl) => {
       let timeEl: JSX.Element = <div />;
       const logTime = moment.utc(gl!.game_log.logged_at);
       if (lastLog === undefined || logTime.clone().subtract(10, "minutes").isAfter(lastLog)) {
@@ -169,6 +229,7 @@ function mapStateToProps(state: AppState, ownProps: IOwnProps): IPropValues {
     commandInput: state.pages.gameShow.command,
     submittingCommand: state.pages.gameShow.submittingCommand,
     commandError: state.pages.gameShow.commandError,
+    hideLogsAt: state.pages.gameShow.hideLogsAt,
   };
 }
 
@@ -179,6 +240,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<{}>, ownProps: IOwnProps): 
     onFetch: (gameId) => dispatch(Game.fetchGame(gameId)),
     onSubscribeUpdates: (gameId) => dispatch(WS.subscribeGame(gameId)),
     onUnsubscribeUpdates: () => dispatch(WS.unsubscribeGame()),
+    onHideLogs: (at) => dispatch(GameShow.hideLogs(at)),
   };
 }
 
