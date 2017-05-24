@@ -12,6 +12,7 @@ import * as Game from "../../reducers/game";
 import * as GameShow from "../../reducers/pages/game-show";
 import * as WS from "../../reducers/ws";
 import { Container as Layout } from "../layout";
+import Player from "../player";
 import { Spinner } from "../spinner";
 
 const timeFormat = "h:mm A";
@@ -87,6 +88,7 @@ export class Component extends React.PureComponent<IProps, {}> {
                 </div>
               </div>
             }
+            {this.renderWhoseTurn()}
             <div className={classNames({
               "disabled": this.props.submittingCommand,
               "game-command-input": true,
@@ -105,9 +107,76 @@ export class Component extends React.PureComponent<IProps, {}> {
               </form>
             </div>
           </div>
+          <div className="game-meta">
+            {this.props.game && <div>
+              <h2>{this.props.game.game_type && this.props.game.game_type.name}</h2>
+              <ul>
+                {this.props.game.game_players && this.props.game.game_players.map((gp) => <li>
+                  {gp && <Player
+                    name={gp.user.name}
+                    color={gp.game_player.color}
+                  />}
+                </li>)}
+              </ul>
+            </div>}
+          </div>
         </div>
       </Layout>
     );
+  }
+
+  private isMyTurn(): boolean {
+    return this.props.game
+      && this.props.game.game_player
+      && this.props.game.game_player.is_turn
+      || false;
+  }
+
+  private renderWhoseTurn(): JSX.Element[] {
+    if (this.props.game === undefined) {
+      return [];
+    }
+    const isMyTurn = this.isMyTurn();
+    const opponentWhoseTurn = this.opponentWhoseTurn();
+    const content: JSX.Element[] = [];
+    if (isMyTurn) {
+      content.push(<strong>Your turn!</strong>);
+    }
+    if (opponentWhoseTurn.size > 0) {
+      const opponents = opponentWhoseTurn.map((o) => <span> <Player
+        name={o!.user.name}
+        color={o!.game_player.color}
+      /></span>);
+      if (isMyTurn) {
+        content.push(<span> (also{opponents})</span>);
+      } else {
+        content.push(<span>Waiting on{opponents}</span>);
+      }
+    }
+    return [<div className={classNames({
+      "game-current-turn": true,
+      "my-turn": isMyTurn,
+    })}>
+      {content}
+    </div>];
+  }
+
+  private opponentWhoseTurn(): Immutable.List<Records.GamePlayerUser> {
+    return (this.props.game
+      && this.props.game.game_players.filter((gp) => {
+        if (gp === undefined) {
+          return false;
+        }
+        if (gp.game_player.is_turn === false) {
+          return false;
+        }
+        if (this.props.game!.game_player
+          && this.props.game!.game_player!.id === gp.game_player.id) {
+          return false;
+        }
+        return true;
+      })
+      || Immutable.List()) as Immutable.List<Records.GamePlayerUser>;
   }
 
   private componentDidMount() {

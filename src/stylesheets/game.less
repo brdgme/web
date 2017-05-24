@@ -1,4 +1,4 @@
-@import 'colors.less';
+@import 'vars.less';
 
 .game-container {
   width: 100%;
@@ -8,7 +8,7 @@
 }
 
 .game-main {
-  flex: 1.6;
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -27,7 +27,6 @@
 
   .game-command-input {
     width: 63%;
-    border-top: 1px solid @dark-background;
 
     input {
       border: 0;
@@ -74,6 +73,24 @@
       overflow-y: auto;
       padding: 0.63em;
     }
+  }
+}
+
+.game-meta {
+  background-color: @dark-background;
+  width: 15em;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+}
+
+.game-current-turn {
+  height: 1.3em;
+  width: 63%;
+  text-align: center;
+  background-color: @dark-background;
+
+  &.my-turn {
+    background-color: lighten(@brdgme-yellow, 30%);
   }
 }
 
