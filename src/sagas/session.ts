@@ -1,8 +1,9 @@
-import { call, Effect, put, takeEvery, takeLatest } from "redux-saga/effects";
+import { eventChannel } from "redux-saga";
+import { call, Effect, fork, put, take, takeEvery, takeLatest } from "redux-saga/effects";
 
 import * as http from "../http";
 import * as App from "../reducers";
-import * as Login from "../reducers/login";
+import * as Login from "../reducers/pages/login";
 import * as Session from "../reducers/session";
 
 export const LS_AUTH_TOKEN_OFFSET = "token";
@@ -12,10 +13,12 @@ export function* sagas(): IterableIterator<Effect> {
   yield takeEvery(Session.UPDATE_PATH, updatePath);
   yield takeEvery(Session.UPDATE_TOKEN, updateToken);
   yield takeEvery(Session.CLEAR_TOKEN, clearToken);
+  yield fork(hashchange);
 }
 
 function* loginSuccess(action: Login.ISubmitCodeSuccess): IterableIterator<Effect> {
   yield put(Session.updateToken(action.payload));
+  yield put(Session.updatePath("/"));
 }
 
 function* updatePath(action: Session.IUpdatePath): IterableIterator<Effect> {
@@ -29,4 +32,25 @@ function* updateToken(action: Session.IUpdateToken): IterableIterator<Effect> {
 
 function* clearToken(action: Session.IClearToken): IterableIterator<Effect> {
   localStorage.removeItem(LS_AUTH_TOKEN_OFFSET);
+  location.reload(true);
+}
+
+function* hashchange(): IterableIterator<Effect> {
+  const chan = yield call(hashchangeChannel);
+  while (true) {
+    const newPath = yield take(chan);
+    yield put(Session.updatePath(newPath));
+  }
+}
+
+export function hashchangeChannel() {
+  return eventChannel((emitter) => {
+    const listener = () => emitter(location.hash.substr(1) || "/");
+    window.addEventListener("hashchange", listener);
+    window.addEventListener("popstate", listener);
+    return () => {
+      window.removeEventListener("hashchange", listener);
+      window.removeEventListener("popstate", listener);
+    };
+  });
 }

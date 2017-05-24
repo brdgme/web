@@ -28,10 +28,10 @@ export async function fetchActiveGames(token: string): Promise<Model.IGameExtend
     .then((res) => res.body.games as Model.IGameExtended[]);
 }
 
-export async function fetchGame(id: string, token: string): Promise<Model.IGameExtended> {
+export async function fetchGame(id: string, token?: string): Promise<Model.IGameExtended> {
   return superagent
     .get(`${process.env.API_SERVER}/game/${id}`)
-    .auth(token, "")
+    .auth(token || "", "")
     .set("Content-Type", "application/json")
     .set("Accept", "application/json")
     .then((res) => res.body as Model.IGameExtended);

@@ -1,6 +1,6 @@
 import * as Immutable from "immutable";
 
-import * as Login from "./login";
+import * as Login from "./pages/login";
 
 export class State extends Immutable.Record({
   token: undefined,

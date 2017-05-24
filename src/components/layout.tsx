@@ -7,6 +7,7 @@ import * as Records from "../records";
 import { State as AppState } from "../reducers";
 import * as Game from "../reducers/game";
 import * as Session from "../reducers/session";
+import Player from "./player";
 import { Spinner } from "./spinner";
 
 export interface IPropValues {
@@ -31,56 +32,91 @@ export class Component extends React.PureComponent<IProps, {}> {
   }
 
   public render() {
+    let title = "brdg.me";
+    const myTurnGames = this.myTurnGames().size;
+    if (myTurnGames > 0) {
+      title += ` (${myTurnGames})`;
+    }
+    document.title = title;
+
     return (
       <div className="layout">
         <div className="menu">
-          <h1>brdg.me</h1>
-          <div className="subheading">
-            Lo-fi board games
-          </div>
-          {this.renderAuth()}
-          <div>
+          <h1>
             <a href="#" onClick={(e) => {
               e.preventDefault();
               this.props.onRedirect("/");
-            }}>Home</a>
+            }}>brdg.me</a>
+          </h1>
+          <div className="subheading">
+            <a href="#" onClick={(e) => {
+              e.preventDefault();
+              this.props.onRedirect("/");
+            }}>Lo-fi board games</a>
           </div>
+          {this.renderAuth()}
           <div>
             <a href="#" onClick={(e) => {
               e.preventDefault();
               this.props.onRedirect("/game/new");
             }}>New game</a>
           </div>
-          {this.props.activeGames && <div>
-            <ul>
-              {this.props.activeGames.map((ag) =>
-                <li>
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      this.props.onRedirect(`/game/${ag!.game.id}`);
-                    }}
-                  >
-                    {ag!.game_type.name}
-                  </a>
-                </li>,
-              )}
-            </ul>
-          </div> || <div>
-              <Spinner />
-            </div>
-          }
+          {this.renderMyTurnGames()}
         </div>
         <div className="content">{this.props.children}</div>
       </div>
     );
   }
 
+  private renderGame(game: Records.GameExtended): JSX.Element {
+    const myPlayerId = game.game_player && game.game_player.id;
+    return <div className="layout-game">
+      <a href="#" onClick={(e) => {
+        e.preventDefault();
+        this.props.onRedirect(`/game/${game.game.id}`);
+      }}>
+        <div className="layout-game-name">
+          {game.game_type.name}
+        </div>
+        <div className="layout-game-opponents">
+          with {game.game_players
+            .filter((gp) => gp && gp.game_player.id !== myPlayerId || false)
+            .map((gp) => <span> <Player
+              name={gp!.user.name}
+              color={gp!.game_player.color}
+            /></span>)}
+        </div>
+      </a>
+    </div>;
+  }
+
+  private renderMyTurnGames(): JSX.Element | undefined {
+    const myTurnGames = this.myTurnGames();
+    if (myTurnGames.size === 0) {
+      return undefined;
+    }
+    return <div>
+      <h2>Your turn</h2>
+      {myTurnGames.map((g) => g && this.renderGame(g))}
+    </div>;
+  }
+
+  private myTurnGames(): Immutable.List<Records.GameExtended> {
+    if (this.props.activeGames === undefined) {
+      return Immutable.List() as Immutable.List<Records.GameExtended>;
+    }
+    return this.props.activeGames
+      .filter((ag) =>
+        ag !== undefined
+        && ag.game_player !== undefined
+        && ag.game_player.is_turn)
+      .sortBy((ag) => ag!.game_player!.is_turn_at)
+      .toList();
+  }
+
   private renderAuth(): JSX.Element {
     if (this.props.isLoggedIn) {
       return <div>
-        <div>Logged in</div>
         <div>
           <a href="#" onClick={(e) => {
             e.preventDefault();

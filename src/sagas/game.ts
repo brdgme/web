@@ -25,9 +25,6 @@ function* fetchActiveGames(action: Game.IFetchActiveGames): IterableIterator<Eff
 
 function* fetchGame(action: Game.IFetchGame): IterableIterator<Effect> {
   const token: string = yield select((state: AppState) => state.session.token);
-  if (token === undefined) {
-    return;
-  }
   try {
     const game = yield call(http.fetchGame, action.payload, token);
     yield put(Game.fetchGameSuccess(game));

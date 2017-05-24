@@ -14,8 +14,8 @@ export class State extends Immutable.Record({
   public hideLogsAt?: string;
 }
 
-export const UPDATE_COMMAND = "brdgme/reducers/pages/game-show/UPDATE_COMMAND";
-export const HIDE_LOGS = "brdgme/reducers/pages/game-show/HIDE_LOGS";
+export const UPDATE_COMMAND = "brdgme/pages/game-show/UPDATE_COMMAND";
+export const HIDE_LOGS = "brdgme/pages/game-show/HIDE_LOGS";
 
 export interface IUpdateCommand {
   type: typeof UPDATE_COMMAND;

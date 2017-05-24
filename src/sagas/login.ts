@@ -1,7 +1,7 @@
 import { call, Effect, put, takeEvery, takeLatest } from "redux-saga/effects";
 
 import * as http from "../http";
-import * as Login from "../reducers/login";
+import * as Login from "../reducers/pages/login";
 import * as Session from "../reducers/session";
 
 export function* sagas(): IterableIterator<Effect> {
@@ -25,7 +25,7 @@ function* submitLoginCode(action: Login.ISubmitCode): IterableIterator<Effect> {
       action.payload!.email,
       action.payload!.code,
     );
-    yield put(Session.updateToken(token));
+    yield put(Login.submitCodeSuccess(token));
   } catch (e) {
     yield put(Login.submitCodeFail());
   }

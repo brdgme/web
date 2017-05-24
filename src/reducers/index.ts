@@ -3,7 +3,6 @@ import * as Redux from "redux";
 import { combineReducers } from "redux-immutable";
 
 import * as Game from "./game";
-import * as Login from "./login";
 import * as Pages from "./pages";
 import * as Session from "./session";
 import * as WS from "./ws";
@@ -19,13 +18,11 @@ export const clearPageState = (): IClearPageState => ({
 
 export class State extends Immutable.Record({
   game: new Game.State(),
-  login: new Login.State(),
   pages: new Pages.State(),
   session: new Session.State(),
   ws: new WS.State(),
 }) {
   public game: Game.State;
-  public login: Login.State;
   public pages: Pages.State;
   public session: Session.State;
   public ws: WS.State;
@@ -33,7 +30,6 @@ export class State extends Immutable.Record({
 
 const childrenReducer = combineReducers<State>({
   game: Game.reducer,
-  login: Login.reducer,
   pages: Pages.reducer,
   session: Session.reducer,
   ws: WS.reducer,

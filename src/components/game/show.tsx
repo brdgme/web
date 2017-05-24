@@ -89,10 +89,12 @@ export class Component extends React.PureComponent<IProps, {}> {
               </div>
             }
             {this.renderWhoseTurn()}
-            <div className={classNames({
-              "disabled": this.props.submittingCommand,
-              "game-command-input": true,
-            })}>
+            {this.props.game && this.props.game.game_player && <div
+              className={classNames({
+                "disabled": this.props.submittingCommand,
+                "game-command-input": true,
+              })}
+            >
               {this.props.commandError && <div className="command-error">
                 {this.props.commandError}
               </div>}
@@ -105,7 +107,7 @@ export class Component extends React.PureComponent<IProps, {}> {
                   ref="editor"
                 />
               </form>
-            </div>
+            </div>}
           </div>
           <div className="game-meta">
             {this.props.game && <div>
@@ -220,6 +222,9 @@ export class Component extends React.PureComponent<IProps, {}> {
   }
 
   private focusCommandInput() {
+    if (this.refs.editor === undefined) {
+      return;
+    }
     (this.refs.editor as HTMLInputElement).focus();
   }
 

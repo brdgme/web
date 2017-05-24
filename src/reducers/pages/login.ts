@@ -17,15 +17,15 @@ export class State extends Immutable.Record({
   public mode: Mode;
 }
 
-export const UPDATE_EMAIL = "brdgme/login/UPDATE_EMAIL";
-export const UPDATE_CODE = "brdgme/login/UPDATE_CODE";
-export const UPDATE_MODE = "brdgme/login/UPDATE_MODE";
-export const SUBMIT_EMAIL = "brdgme/login/SUBMIT_EMAIL";
-export const SUBMIT_EMAIL_SUCCESS = "brdgme/login/SUBMIT_EMAIL_SUCCESS";
-export const SUBMIT_EMAIL_FAIL = "brdgme/login/SUBMIT_EMAIL_FAIL";
-export const SUBMIT_CODE = "brdgme/login/SUBMIT_CODE";
-export const SUBMIT_CODE_SUCCESS = "brdgme/login/SUBMIT_CODE_SUCCESS";
-export const SUBMIT_CODE_FAIL = "brdgme/login/SUBMIT_CODE_FAIL";
+export const UPDATE_EMAIL = "brdgme/pages/login/UPDATE_EMAIL";
+export const UPDATE_CODE = "brdgme/pages/login/UPDATE_CODE";
+export const UPDATE_MODE = "brdgme/pages/login/UPDATE_MODE";
+export const SUBMIT_EMAIL = "brdgme/pages/login/SUBMIT_EMAIL";
+export const SUBMIT_EMAIL_SUCCESS = "brdgme/pages/login/SUBMIT_EMAIL_SUCCESS";
+export const SUBMIT_EMAIL_FAIL = "brdgme/pages/login/SUBMIT_EMAIL_FAIL";
+export const SUBMIT_CODE = "brdgme/pages/login/SUBMIT_CODE";
+export const SUBMIT_CODE_SUCCESS = "brdgme/pages/login/SUBMIT_CODE_SUCCESS";
+export const SUBMIT_CODE_FAIL = "brdgme/pages/login/SUBMIT_CODE_FAIL";
 
 export interface IUpdateEmail {
   type: typeof UPDATE_EMAIL;

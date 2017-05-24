@@ -3,7 +3,7 @@ import * as ReactRedux from "react-redux";
 import * as Redux from "redux";
 
 import { State as AppState } from "../reducers";
-import * as LoginReducer from "../reducers/login";
+import * as LoginReducer from "../reducers/pages/login";
 import { Spinner } from "./spinner";
 
 export interface IPropValues {
@@ -124,9 +124,9 @@ export class Component extends React.PureComponent<IProps, {}> {
 
 function mapStateToProps(state: AppState): IPropValues {
   return {
-    code: state.login.code,
-    email: state.login.email,
-    mode: state.login.mode,
+    code: state.pages.login.code,
+    email: state.pages.login.email,
+    mode: state.pages.login.mode,
   };
 }
 
