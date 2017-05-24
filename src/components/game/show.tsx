@@ -109,22 +109,52 @@ export class Component extends React.PureComponent<IProps, {}> {
               </form>
             </div>}
           </div>
-          <div className="game-meta">
-            {this.props.game && <div>
-              <h2>{this.props.game.game_type && this.props.game.game_type.name}</h2>
-              <ul>
-                {this.props.game.game_players && this.props.game.game_players.map((gp) => <li>
-                  {gp && <Player
-                    name={gp.user.name}
-                    color={gp.game_player.color}
-                  />}
-                </li>)}
-              </ul>
-            </div>}
-          </div>
+          {this.renderMeta()}
         </div>
       </Layout>
     );
+  }
+
+  private renderMeta(): JSX.Element {
+    return <div className="game-meta">
+      {this.props.game && <div>
+        <h2>{this.props.game.game_type && this.props.game.game_type.name}</h2>
+        {this.props.game.game_players && this.props.game.game_players.map(this.renderMetaPlayer)}
+        <h3>Actions</h3>
+        <div>
+          <a href="#" onClick={(e) => {
+            e.preventDefault();
+          }}>Concede</a>
+        </div>
+      </div>}
+    </div>;
+  }
+
+  private renderMetaPlayer(gp: Records.GamePlayerTypeUser): JSX.Element {
+    return <div>
+      <div>
+        <Player
+          name={gp.user.name}
+          color={gp.game_player.color}
+        />
+        &nbsp;
+        <abbr
+          title="ELO rating, new players start at 1200"
+          style={{
+            cursor: "help",
+          }}
+        >
+          ({gp.game_type_user.rating})
+        </abbr>
+      </div>
+      <div style={{
+        marginLeft: "1em",
+      }}>
+        {gp.game_player.points !== undefined && <div>
+          Points: {gp.game_player.points}
+        </div>}
+      </div>
+    </div>;
   }
 
   private isMyTurn(): boolean {
@@ -163,7 +193,7 @@ export class Component extends React.PureComponent<IProps, {}> {
     </div>];
   }
 
-  private opponentWhoseTurn(): Immutable.List<Records.GamePlayerUser> {
+  private opponentWhoseTurn(): Immutable.List<Records.GamePlayerTypeUser> {
     return (this.props.game
       && this.props.game.game_players.filter((gp) => {
         if (gp === undefined) {
@@ -178,7 +208,7 @@ export class Component extends React.PureComponent<IProps, {}> {
         }
         return true;
       })
-      || Immutable.List()) as Immutable.List<Records.GamePlayerUser>;
+      || Immutable.List()) as Immutable.List<Records.GamePlayerTypeUser>;
   }
 
   private componentDidMount() {
@@ -190,6 +220,7 @@ export class Component extends React.PureComponent<IProps, {}> {
 
   private componentWillReceiveProps(nextProps: IProps) {
     if (this.props.gameId !== nextProps.gameId) {
+      this.props.onUnsubscribeUpdates(this.props.gameId);
       this.props.onSubscribeUpdates(nextProps.gameId);
     }
     this.fetchGameIfRequired(nextProps);
