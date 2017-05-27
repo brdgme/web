@@ -6,6 +6,7 @@ import * as ReactRedux from "react-redux";
 import * as Redux from "redux";
 import * as superagent from "superagent";
 
+import * as Command from "../../command";
 import * as Records from "../../records";
 import { State as AppState } from "../../reducers";
 import * as Game from "../../reducers/game";

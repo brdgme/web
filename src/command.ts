@@ -1,12 +1,13 @@
 export interface ICommandSpec {
   Int?: { min?: number, max?: number };
   Token?: string;
-  Enum?: string[];
+  Enum?: { values: string[], exact: boolean };
   OneOf?: ICommandSpec[];
   Chain?: ICommandSpec[];
   Many?: { min?: number, max?: number, delim: string, spec: ICommandSpec };
   Opt?: ICommandSpec;
   Doc?: { name: string, desc?: string, spec: ICommandSpec };
+  Player?: {};
 }
 
 export enum ParseResultKind {
@@ -44,17 +45,17 @@ export interface IParseError {
 export type ParseResult<T> = IParseSuccess<T> | IParseError;
 
 const intRegex = /\-?\d+/;
-export function parseIntSpec(input: string, min: number, max: number): ParseResult<number> {
+export function parseIntSpec(input: string, min?: number, max?: number): ParseResult<number> {
   const matches = intRegex.exec(input);
   if (matches) {
     const value = parseInt(matches[0], 10);
-    if (min !== null && value < min) {
+    if (min !== undefined && value < min) {
       return {
         kind: ParseResultKind.Error,
         message: `${value} is less than the minimum ${min}`,
       };
     }
-    if (max !== null && value > max) {
+    if (max !== undefined && value > max) {
       return {
         kind: ParseResultKind.Error,
         message: `${value} is greater than the maximum ${max}`,
@@ -83,7 +84,7 @@ export function commonPrefix(s1: string, s2: string): string {
   return s1.substr(0, iterBound);
 }
 
-export function parseEnum(input: string, values: string[]): ParseResult<string> {
+export function parseEnum(input: string, values: string[], exact: boolean): ParseResult<string> {
   let partialMatches: string[] = [];
   let consumed = "";
   for (const v of values) {
@@ -190,9 +191,84 @@ export function parseWhitespace(input: string): ParseResult<string> {
   };
 }
 
-export function parse(input: string, spec: ICommandSpec): ParseResult<string> {
+export function parseOneOf(input: string, specs: ICommandSpec[]): ParseResult<string | number> {
+  for (const spec of specs) {
+    const res = parse(input, spec);
+    if (res.kind === ParseResultKind.Success) {
+      return res;
+    }
+  }
   return {
     kind: ParseResultKind.Error,
-    message: "not implemented",
+    message: "no match",
+  };
+}
+
+export function parseDoc(input: string, name: string, spec: ICommandSpec, desc?: string): ParseResult<string | number> {
+  return parse(input, spec);
+}
+
+export function parseChain(input: string, specs: ICommandSpec[]): ParseResult<Array<string | number>> {
+  let remaining = input;
+  let consumed = "";
+  const matches: Array<string | number> = [];
+  for (const spec of specs) {
+    const res = parse(remaining, spec);
+    if (res.kind === ParseResultKind.Error) {
+      return res;
+    }
+    if (res.match.kind === MatchKind.Partial) {
+      // Handle partial
+    }
+    remaining = res.remaining;
+    consumed += res.consumed;
+    /// matches.push(res.match);
+  }
+  return {
+    kind: ParseResultKind.Success,
+    match: {
+      kind: MatchKind.Full,
+      value: matches,
+    },
+    consumed,
+    remaining,
+  };
+}
+
+export function parse(input: string, spec: ICommandSpec): ParseResult<string | number> {
+  if (spec.Int !== undefined) {
+    return parseIntSpec(input, spec.Int.min, spec.Int.max);
+  } else if (spec.Token !== undefined) {
+    return parseToken(input, spec.Token);
+  } else if (spec.Enum !== undefined) {
+    return parseEnum(input, spec.Enum.values, spec.Enum.exact);
+  } else if (spec.OneOf !== undefined) {
+    return parseOneOf(input, spec.OneOf);
+  } else if (spec.Chain !== undefined) {
+    return {
+      kind: ParseResultKind.Error,
+      message: "Chain not implemented",
+    };
+  } else if (spec.Many !== undefined) {
+    return {
+      kind: ParseResultKind.Error,
+      message: "Many not implemented",
+    };
+  } else if (spec.Opt !== undefined) {
+    return {
+      kind: ParseResultKind.Error,
+      message: "Opt not implemented",
+    };
+  } else if (spec.Doc !== undefined) {
+    return parseDoc(input, spec.Doc.name, spec.Doc.spec, spec.Doc.desc);
+  } else if (spec.Player !== undefined) {
+    return {
+      kind: ParseResultKind.Error,
+      message: "Player not implemented",
+    };
+  }
+  return {
+    kind: ParseResultKind.Error,
+    message: "invalid command spec",
   };
 }
