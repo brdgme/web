@@ -54,6 +54,21 @@ export class GameVersion extends Immutable.Record({
   public is_deprecated: boolean;
 }
 
+export class GameVersionType extends Immutable.Record({
+  game_version: undefined,
+  game_type: undefined,
+}) {
+  public static fromJS(js: any): GameVersionType {
+    return new GameVersionType({
+      game_version: GameVersion.fromJS(js.game_version),
+      game_type: GameType.fromJS(js.game_type),
+    });
+  }
+
+  public game_version: GameVersion;
+  public game_type: GameType;
+}
+
 export class Game extends Immutable.Record({
   id: undefined,
   created_at: undefined,
