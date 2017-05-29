@@ -32,6 +32,7 @@ export interface IPropValues extends IOwnProps {
 interface IPropHandlers {
   onCommandChange: (command: string) => void;
   onCommand: (gameId: string, command: string) => void;
+  onUndo: (gameId: string) => void;
   onFetch: (gameId: string) => void;
   onSubscribeUpdates: (gameId: string) => void;
   onUnsubscribeUpdates: (gameId: string) => void;
@@ -118,7 +119,7 @@ export class Component extends React.PureComponent<IProps, {}> {
 
   private renderMeta(): JSX.Element {
     return <div className="game-meta">
-      {this.props.game && <div>
+      {this.props.game && this.props.game.game_player && <div>
         <h2>{this.props.game.game_type && this.props.game.game_type.name}</h2>
         {this.props.game.game_players && this.props.game.game_players.map(this.renderMetaPlayer)}
         <h3>Actions</h3>
@@ -127,6 +128,12 @@ export class Component extends React.PureComponent<IProps, {}> {
             e.preventDefault();
           }}>Concede</a>
         </div>
+        {this.props.game.game_player.can_undo && <div>
+          <a href="#" onClick={(e) => {
+            e.preventDefault();
+            this.props.onUndo(this.props.gameId);
+          }}>Undo</a>
+        </div>}
       </div>}
     </div>;
   }
@@ -343,6 +350,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<{}>, ownProps: IOwnProps): 
   return {
     onCommand: (gameId, command) => dispatch(Game.submitCommand(gameId, command)),
     onCommandChange: (command) => dispatch(GameShow.updateCommand(command)),
+    onUndo: (gameId) => dispatch(Game.submitUndo(gameId)),
     onFetch: (gameId) => dispatch(Game.fetchGame(gameId)),
     onSubscribeUpdates: (gameId) => dispatch(WS.subscribeGame(gameId)),
     onUnsubscribeUpdates: () => dispatch(WS.unsubscribeGame()),

@@ -55,6 +55,9 @@ export const UPDATE_GAMES = "brdgme/game/UPDATE_GAMES";
 export const SUBMIT_COMMAND = "brdgme/game/SUBMIT_COMMAND";
 export const SUBMIT_COMMAND_SUCCESS = "brdgme/game/SUBMIT_COMMAND_SUCCESS";
 export const SUBMIT_COMMAND_FAIL = "brdgme/game/SUBMIT_COMMAND_FAIL";
+export const SUBMIT_UNDO = "brdgme/game/SUBMIT_UNDO";
+export const SUBMIT_UNDO_SUCCESS = "brdgme/game/SUBMIT_UNDO_SUCCESS";
+export const SUBMIT_UNDO_FAIL = "brdgme/game/SUBMIT_UNDO_FAIL";
 
 export interface IFetchActiveGames {
   type: typeof FETCH_ACTIVE_GAMES;
@@ -146,6 +149,35 @@ export const submitCommandFail = (error: string): ISubmitCommandFail => ({
   payload: error,
 });
 
+export interface ISubmitUndo {
+  type: typeof SUBMIT_UNDO;
+  payload: string;
+}
+export const submitUndo =
+  (gameId: string): ISubmitUndo => ({
+    type: SUBMIT_UNDO,
+    payload: gameId,
+  });
+
+export interface ISubmitUndoSuccess {
+  type: typeof SUBMIT_UNDO_SUCCESS;
+  payload: Records.GameExtended;
+}
+export const submitUndoSuccess =
+  (game: Records.GameExtended): ISubmitUndoSuccess => ({
+    type: SUBMIT_UNDO_SUCCESS,
+    payload: game,
+  });
+
+export interface ISubmitUndoFail {
+  type: typeof SUBMIT_UNDO_FAIL;
+  payload: string;
+}
+export const submitUndoFail = (error: string): ISubmitUndoFail => ({
+  type: SUBMIT_UNDO_FAIL,
+  payload: error,
+});
+
 export type Action
   = IFetchActiveGames
   | IFetchActiveGamesSuccess
@@ -157,6 +189,9 @@ export type Action
   | ISubmitCommand
   | ISubmitCommandSuccess
   | ISubmitCommandFail
+  | ISubmitUndo
+  | ISubmitUndoSuccess
+  | ISubmitUndoFail
   ;
 
 export function reducer(state = new State(), action: Action): State {

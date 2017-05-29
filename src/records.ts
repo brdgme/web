@@ -110,6 +110,7 @@ export class GamePlayer extends Immutable.Record({
   is_winner: undefined,
   is_read: undefined,
   points: undefined,
+  can_undo: undefined,
 }) {
   public static fromJS(js: any): GamePlayer {
     return new GamePlayer(js);
@@ -130,6 +131,7 @@ export class GamePlayer extends Immutable.Record({
   public is_winner: boolean;
   public is_read: boolean;
   public points: number;
+  public can_undo: boolean;
 }
 
 export class GameLog extends Immutable.Record({

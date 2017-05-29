@@ -46,3 +46,13 @@ export async function submitGameCommand(id: string, command: string, token: stri
     .send({ command })
     .then((res) => res.body as Model.IGameExtended);
 }
+
+export async function submitUndo(id: string, token: string): Promise<Model.IGameExtended> {
+  return superagent
+    .post(`${process.env.API_SERVER}/game/${id}/undo`)
+    .auth(token, "")
+    .set("Content-Type", "application/json")
+    .set("Accept", "application/json")
+    .send()
+    .then((res) => res.body as Model.IGameExtended);
+}
