@@ -1,5 +1,7 @@
 import * as Immutable from "immutable";
 
+import { ICommandSpec } from "./command";
+
 export class User extends Immutable.Record({
   id: undefined,
   created_at: undefined,
@@ -243,5 +245,5 @@ export class GameExtended extends Immutable.Record({
   public game_logs?: Immutable.List<GameLogRendered>;
   public pub_state: string;
   public html?: string;
-  public command_spec?: string;
+  public command_spec?: ICommandSpec;
 }

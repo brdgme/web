@@ -105,7 +105,7 @@ export class Component extends React.PureComponent<IProps, {}> {
                   value={this.props.commandInput}
                   onChange={this.onCommandInputChange}
                   placeholder="Enter command..."
-                  disabled={this.props.submittingCommand}
+                  disabled={this.commandInputDisabled()}
                   ref="editor"
                 />
               </form>
@@ -135,6 +135,23 @@ export class Component extends React.PureComponent<IProps, {}> {
   public componentWillUnmount() {
     document.removeEventListener("keydown", this.focusCommandInput);
     this.props.onUnsubscribeUpdates(this.props.gameId);
+  }
+
+  private commandInputDisabled(): boolean {
+    if (this.props.submittingCommand) {
+      return true;
+    }
+    if (this.props.game === undefined) {
+      return true;
+    }
+    if (this.props.game.game.is_finished) {
+      return true;
+    }
+    if (this.props.game.game_player === undefined
+      || !this.props.game.game_player.is_turn) {
+      return true;
+    }
+    return false;
   }
 
   private renderMeta(): JSX.Element {
@@ -327,6 +344,10 @@ export class Component extends React.PureComponent<IProps, {}> {
   }
 
   private onCommandInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (this.props.game !== undefined && this.props.game.command_spec !== undefined) {
+      const parseResult = Command.parse(e.target.value, 0, this.props.game.command_spec);
+      console.log(Command.suggestions(parseResult, e.target.value.length));
+    }
     this.props.onCommandChange(e.target.value);
   }
 }
