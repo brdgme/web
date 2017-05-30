@@ -117,6 +117,26 @@ export class Component extends React.PureComponent<IProps, {}> {
     );
   }
 
+  public componentDidMount() {
+    this.fetchGameIfRequired(this.props);
+    this.focusCommandInput();
+    document.addEventListener("keydown", this.focusCommandInput);
+    this.props.onSubscribeUpdates(this.props.gameId);
+  }
+
+  public componentWillReceiveProps(nextProps: IProps) {
+    if (this.props.gameId !== nextProps.gameId) {
+      this.props.onUnsubscribeUpdates(this.props.gameId);
+      this.props.onSubscribeUpdates(nextProps.gameId);
+    }
+    this.fetchGameIfRequired(nextProps);
+  }
+
+  public componentWillUnmount() {
+    document.removeEventListener("keydown", this.focusCommandInput);
+    this.props.onUnsubscribeUpdates(this.props.gameId);
+  }
+
   private renderMeta(): JSX.Element {
     return <div className="game-meta">
       {this.props.game && this.props.game.game_player && <div>
@@ -219,21 +239,6 @@ export class Component extends React.PureComponent<IProps, {}> {
       || Immutable.List()) as Immutable.List<Records.GamePlayerTypeUser>;
   }
 
-  private componentDidMount() {
-    this.fetchGameIfRequired(this.props);
-    this.focusCommandInput();
-    document.addEventListener("keydown", this.focusCommandInput);
-    this.props.onSubscribeUpdates(this.props.gameId);
-  }
-
-  private componentWillReceiveProps(nextProps: IProps) {
-    if (this.props.gameId !== nextProps.gameId) {
-      this.props.onUnsubscribeUpdates(this.props.gameId);
-      this.props.onSubscribeUpdates(nextProps.gameId);
-    }
-    this.fetchGameIfRequired(nextProps);
-  }
-
   private fetchGameIfRequired(props: IProps) {
     if (props.game === undefined || props.game.html === undefined) {
       props.onFetch(props.gameId);
@@ -253,11 +258,6 @@ export class Component extends React.PureComponent<IProps, {}> {
       return;
     }
     this.props.onHideLogs(max.game_log.created_at);
-  }
-
-  private componentWillUnmount() {
-    document.removeEventListener("keydown", this.focusCommandInput);
-    this.props.onUnsubscribeUpdates(this.props.gameId);
   }
 
   private focusCommandInput() {

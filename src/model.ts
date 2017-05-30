@@ -44,6 +44,7 @@ export interface IUser {
   created_at: string;
   updated_at: string;
   name: string;
+  pref_colors: string[];
 }
 
 export interface IGamePlayerUser {

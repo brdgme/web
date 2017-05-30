@@ -45,9 +45,6 @@ export class State extends Immutable.Record({
   }
 }
 
-export const FETCH_ACTIVE_GAMES = "brdgme/game/FETCH_ACTIVE_GAMES";
-export const FETCH_ACTIVE_GAMES_SUCCESS = "brdgme/game/FETCH_ACTIVE_GAMES_SUCCESS";
-export const FETCH_ACTIVE_GAMES_FAIL = "brdgme/game/FETCH_ACTIVE_GAMES_FAIL";
 export const FETCH_GAME = "brdgme/game/FETCH_GAME";
 export const FETCH_GAME_SUCCESS = "brdgme/game/FETCH_GAME_SUCCESS";
 export const FETCH_GAME_FAIL = "brdgme/game/FETCH_GAME_FAIL";
@@ -58,30 +55,6 @@ export const SUBMIT_COMMAND_FAIL = "brdgme/game/SUBMIT_COMMAND_FAIL";
 export const SUBMIT_UNDO = "brdgme/game/SUBMIT_UNDO";
 export const SUBMIT_UNDO_SUCCESS = "brdgme/game/SUBMIT_UNDO_SUCCESS";
 export const SUBMIT_UNDO_FAIL = "brdgme/game/SUBMIT_UNDO_FAIL";
-
-export interface IFetchActiveGames {
-  type: typeof FETCH_ACTIVE_GAMES;
-}
-export const fetchActiveGames = (): IFetchActiveGames => ({
-  type: FETCH_ACTIVE_GAMES,
-});
-
-export interface IFetchActiveGamesSuccess {
-  type: typeof FETCH_ACTIVE_GAMES_SUCCESS;
-  payload: Model.IGameExtended[];
-}
-export const fetchActiveGamesSuccess =
-  (games: Model.IGameExtended[]): IFetchActiveGamesSuccess => ({
-    type: FETCH_ACTIVE_GAMES_SUCCESS,
-    payload: games,
-  });
-
-export interface IFetchActiveGamesFail {
-  type: typeof FETCH_ACTIVE_GAMES_FAIL;
-}
-export const fetchActiveGamesFail = (): IFetchActiveGamesFail => ({
-  type: FETCH_ACTIVE_GAMES_FAIL,
-});
 
 export interface IFetchGame {
   type: typeof FETCH_GAME;
@@ -179,10 +152,7 @@ export const submitUndoFail = (error: string): ISubmitUndoFail => ({
 });
 
 export type Action
-  = IFetchActiveGames
-  | IFetchActiveGamesSuccess
-  | IFetchActiveGamesFail
-  | IFetchGame
+  = IFetchGame
   | IFetchGameSuccess
   | IFetchGameFail
   | IUpdateGames
@@ -196,8 +166,6 @@ export type Action
 
 export function reducer(state = new State(), action: Action): State {
   switch (action.type) {
-    case FETCH_ACTIVE_GAMES_SUCCESS: return state.updateGames(
-      Records.GameExtended.fromJSList(action.payload));
     case FETCH_GAME_SUCCESS: return state.updateGames(
       Records.GameExtended.fromJSList([action.payload]));
     case UPDATE_GAMES: return state.updateGames(action.payload);

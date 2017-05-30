@@ -18,19 +18,11 @@ export interface IPropValues {
 interface IPropHandlers {
   onLogout: () => void;
   onRedirect: (path: string) => void;
-  onFetchActiveGames: () => void;
 }
 
 interface IProps extends IPropValues, IPropHandlers { }
 
 export class Component extends React.PureComponent<IProps, {}> {
-  public componentDidMount() {
-    if (this.props.activeGames === undefined) {
-      // In case sagas aren't running on app start.
-      setTimeout(() => this.props.onFetchActiveGames());
-    }
-  }
-
   public render() {
     let title = "brdg.me";
     const myTurnGames = this.myTurnGames().size;
@@ -148,7 +140,6 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<{}>): IPropHandlers {
   return {
     onLogout: () => dispatch(Session.clearToken()),
     onRedirect: (path) => dispatch(Session.updatePath(path)),
-    onFetchActiveGames: () => dispatch(Game.fetchActiveGames()),
   };
 }
 

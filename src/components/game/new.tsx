@@ -1,189 +1,161 @@
+import * as Immutable from "immutable";
 import * as React from "react";
+import * as ReactRedux from "react-redux";
+import * as Redux from "redux";
 import * as superagent from "superagent";
 
-import { IGameVersionType } from "../../model";
+import * as Records from "../../records";
+import { State as AppState } from "../../reducers";
+import * as GameNew from "../../reducers/pages/game-new";
 import { Container as Layout } from "../layout";
 
-export interface IGameNewState {
-  gameVersions?: IGameVersionType[];
+export interface IPropValues {
+  gameVersionTypes: Immutable.List<Records.GameVersionType>;
   gameVersionId?: string;
-  opponentIds: string[];
-  opponentEmails: string[];
+  userIds: Immutable.List<string>;
+  emails: Immutable.List<string>;
+  isSubmitting: boolean;
 }
 
-export class GameNew extends React.Component<{}, IGameNewState> {
-  constructor(props?: {}, context?: any) {
-    super(props, context);
+export interface IPropHandlers {
+  onUpdateGameVersionId: (gameVersionId: string) => void;
+  onAddUserId: () => void;
+  onUpdateUserId: (index: number, userId: string) => void;
+  onRemoveUserId: (index: number) => void;
+  onAddEmail: () => void;
+  onUpdateEmail: (index: number, email: string) => void;
+  onRemoveEmail: (index: number) => void;
+  onSubmit: (gameVersionId: string, userIds: Immutable.List<string>, emails: Immutable.List<string>) => void;
+}
 
-    this.state = {
-      opponentEmails: [],
-      opponentIds: [],
-    };
+export interface IProps extends IPropValues, IPropHandlers { }
+
+export class Component extends React.PureComponent<IProps, {}> {
+  constructor(props?: IProps, context?: any) {
+    super(props, context);
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleGameVersionSelectChange = this.handleGameVersionSelectChange.bind(this);
-    this.handleAddOpponentIdClick = this.handleAddOpponentIdClick.bind(this);
-    this.handleAddOpponentEmailClick = this.handleAddOpponentEmailClick.bind(this);
+    this.handleAddUserIdClick = this.handleAddUserIdClick.bind(this);
+    this.handleAddEmailClick = this.handleAddEmailClick.bind(this);
   }
 
   public render() {
     return (
       <Layout>
         <h1>New game</h1>
-        {this.state.gameVersions && <form onSubmit={this.handleSubmit}>
+        <form onSubmit={this.handleSubmit}>
           <h2>Game</h2>
           <div>
             <select
-              value={this.state.gameVersionId}
+              value={this.props.gameVersionId}
               onChange={this.handleGameVersionSelectChange}
             >
-              {this.state.gameVersions.map((gv) => <option
-                value={gv.game_version.id}
+              <option>Choose game</option>
+              {this.props.gameVersionTypes.map((gv) => <option
+                value={gv!.game_version.id}
               >
-                {gv.game_type.name}
+                {gv!.game_type.name}
               </option>)}
             </select>
           </div>
           <h2>Opponent IDs</h2>
-          {this.state.opponentIds.map((oId, key) => <div>
+          {this.props.userIds.map((uId, key) => <div>
             <input
-              value={oId}
-              onChange={(e) => this.handleOpponentIdChange(e, key)}
+              value={uId}
+              onChange={(e) => this.handleUserIdChange(e, key!)}
             />
-            <a href="#" onClick={(e) => this.handleRemoveOpponentId(e, key)}>X</a>
+            <a href="#" onClick={(e) => this.handleRemoveUserId(e, key!)}>X</a>
           </div>)}
           <div>
-            <a href="#" onClick={this.handleAddOpponentIdClick}>Add</a>
+            <a href="#" onClick={this.handleAddUserIdClick}>Add</a>
           </div>
           <h2>Opponent emails</h2>
-          {this.state.opponentEmails.map((oEmail, key) => <div>
+          {this.props.emails.map((email, key) => <div>
             <input
-              value={oEmail}
-              onChange={(e) => this.handleOpponentEmailChange(e, key)}
+              value={email}
+              onChange={(e) => this.handleEmailChange(e, key!)}
             />
-            <a href="#" onClick={(e) => this.handleRemoveOpponentEmail(e, key)}>X</a>
+            <a href="#" onClick={(e) => this.handleRemoveEmail(e, key!)}>X</a>
           </div>)}
           <div>
-            <a href="#" onClick={this.handleAddOpponentEmailClick}>Add</a>
+            <a href="#" onClick={this.handleAddEmailClick}>Add</a>
           </div>
           <div>
             <input type="submit" value="Create game" />
           </div>
-        </form>}
+        </form>
       </Layout>
     );
   }
 
-  private componentDidMount() {
-    this.fetchVersions();
-  }
-
-  private fetchVersions() {
-    /*
-    superagent
-      .get(`${process.env.API_SERVER}/game/version_public`)
-      .auth(this.props.layout.session.email, this.props.layout.session.token)
-      .set("Content-Type", "application/json")
-      .set("Accept", "application/json")
-      .end((err, res) => {
-        if (err || !res.ok) {
-          if (res.unauthorized) {
-            this.props.layout.session.logout();
-          } else {
-            throw new Error("error getting public versions");
-          }
-          return;
-        }
-        this.setState({
-          gameVersionId: res.body.versions.length > 0 && res.body.versions[0].game_version.id,
-          gameVersions: res.body.versions,
-        });
-      });
-      */
-  }
-
   private handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    /*
-    superagent
-      .post(`${process.env.API_SERVER}/game`)
-      .auth(this.props.layout.session.email, this.props.layout.session.token)
-      .set("Content-Type", "application/json")
-      .set("Accept", "application/json")
-      .send({
-        game_version_id: this.state.gameVersionId,
-        opponent_emails: this.state.opponentEmails,
-        opponent_ids: this.state.opponentIds,
-      })
-      .end((err, res) => {
-        if (err || !res.ok) {
-          if (res.unauthorized) {
-            this.props.layout.session.logout();
-          } else {
-            throw new Error("error creating game");
-          }
-          return;
-        }
-        this.props.layout.redirect(`/game/${res.body.id}`);
-      });
-      */
+    if (this.props.gameVersionId === undefined) {
+      return;
+    }
+    this.props.onSubmit(this.props.gameVersionId, this.props.userIds, this.props.emails);
   }
 
   private handleGameVersionSelectChange(e: React.FormEvent<HTMLSelectElement>) {
-    this.setState({
-      gameVersionId: e.currentTarget.value,
-    });
+    this.props.onUpdateGameVersionId(e.currentTarget.value);
   }
 
-  private handleAddOpponentIdClick(e: React.SyntheticEvent<HTMLAnchorElement>) {
+  private handleAddUserIdClick(e: React.SyntheticEvent<HTMLAnchorElement>) {
     e.preventDefault();
-    const opponentIds = this.state.opponentIds;
-    opponentIds.push("");
-    this.setState({
-      opponentIds,
-    });
+    this.props.onAddUserId();
   }
 
-  private handleRemoveOpponentId(e: React.SyntheticEvent<HTMLAnchorElement>, key: number) {
+  private handleRemoveUserId(e: React.SyntheticEvent<HTMLAnchorElement>, key: number) {
     e.preventDefault();
-    const opponentIds = this.state.opponentIds;
-    opponentIds.splice(key, 1);
-    this.setState({
-      opponentIds,
-    });
+    this.props.onRemoveUserId(key);
   }
 
-  private handleOpponentIdChange(e: React.SyntheticEvent<HTMLInputElement>, key: number) {
-    const opponentIds = this.state.opponentIds;
-    opponentIds[key] = e.currentTarget.value;
-    this.setState({
-      opponentIds,
-    });
+  private handleUserIdChange(e: React.SyntheticEvent<HTMLInputElement>, key: number) {
+    this.props.onUpdateUserId(key, e.currentTarget.value);
   }
 
-  private handleAddOpponentEmailClick(e: React.SyntheticEvent<HTMLAnchorElement>) {
+  private handleAddEmailClick(e: React.SyntheticEvent<HTMLAnchorElement>) {
     e.preventDefault();
-    const opponentEmails = this.state.opponentEmails;
-    opponentEmails.push("");
-    this.setState({
-      opponentEmails,
-    });
+    this.props.onAddEmail();
   }
 
-  private handleRemoveOpponentEmail(e: React.SyntheticEvent<HTMLAnchorElement>, key: number) {
+  private handleRemoveEmail(e: React.SyntheticEvent<HTMLAnchorElement>, key: number) {
     e.preventDefault();
-    const opponentEmails = this.state.opponentEmails;
-    opponentEmails.splice(key, 1);
-    this.setState({
-      opponentEmails,
-    });
+    this.props.onRemoveEmail(key);
   }
 
-  private handleOpponentEmailChange(e: React.SyntheticEvent<HTMLInputElement>, key: number) {
-    const opponentEmails = this.state.opponentEmails;
-    opponentEmails[key] = e.currentTarget.value;
-    this.setState({
-      opponentEmails,
-    });
+  private handleEmailChange(e: React.SyntheticEvent<HTMLInputElement>, key: number) {
+    e.preventDefault();
+    this.props.onUpdateEmail(key, e.currentTarget.value);
   }
 }
+
+function mapStateToProps(state: AppState, ownProps: {}): IPropValues {
+  return {
+    gameVersionTypes: state.session.gameVersionTypes || Immutable.List<Records.GameVersionType>(),
+    gameVersionId: state.pages.gameNew.game_version_id,
+    userIds: state.pages.gameNew.user_ids,
+    emails: state.pages.gameNew.emails,
+    isSubmitting: state.pages.gameNew.mode === GameNew.Mode.Submitting,
+  };
+}
+
+function mapDispatchToProps(dispatch: Redux.Dispatch<GameNew.Action>, ownProps: {}): IPropHandlers {
+  return {
+    onUpdateGameVersionId: (gameVersionId: string) => dispatch(GameNew.updateGameVersionId(gameVersionId)),
+    onAddUserId: () => dispatch(GameNew.addUserId()),
+    onUpdateUserId: (index: number, userId: string) => dispatch(GameNew.updateUserId(index, userId)),
+    onRemoveUserId: (index: number) => dispatch(GameNew.removeUserId(index)),
+    onAddEmail: () => dispatch(GameNew.addEmail()),
+    onUpdateEmail: (index: number, email: string) => dispatch(GameNew.updateEmail(index, email)),
+    onRemoveEmail: (index: number) => dispatch(GameNew.removeEmail(index)),
+    onSubmit: (gameVersionId: string, userIds: Immutable.List<string>, emails: Immutable.List<string>) =>
+      dispatch(GameNew.submit(gameVersionId, userIds, emails)),
+  };
+}
+
+export const Container = ReactRedux.connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(Component);

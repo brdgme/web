@@ -6,7 +6,7 @@ import * as Model from "../model";
 import { State as AppState } from "../reducers";
 import * as Router from "../router";
 import { GameIndex } from "./game/index";
-import { GameNew } from "./game/new";
+import { Container as GameNew } from "./game/new";
 import { Container as GameShow } from "./game/show";
 import { Container as Home } from "./home";
 import { Container as Login } from "./login";

@@ -5,6 +5,7 @@ export class User extends Immutable.Record({
   created_at: undefined,
   updated_at: undefined,
   name: undefined,
+  pref_colors: Immutable.List(),
 }) {
   public static fromJS(js: any): User {
     return new User(js);
@@ -14,6 +15,7 @@ export class User extends Immutable.Record({
   public created_at: string;
   public updated_at: string;
   public name: string;
+  public pref_colors: Immutable.List<string>;
 }
 
 export class GameType extends Immutable.Record({

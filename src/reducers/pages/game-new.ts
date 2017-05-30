@@ -142,7 +142,7 @@ export const submitFail = (error: string): ISubmitFail => ({
   payload: error,
 });
 
-type Action
+export type Action
   = IUpdateMode
   | IFetchGameVersionTypes
   | IUpdateGameVersionId

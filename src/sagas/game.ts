@@ -1,27 +1,18 @@
+import * as Immutable from "immutable";
 import { call, Effect, put, select, takeEvery, takeLatest } from "redux-saga/effects";
 
 import * as http from "../http";
+import * as Records from "../records";
 import { State as AppState } from "../reducers";
 import * as Game from "../reducers/game";
+import * as GameNew from "../reducers/pages/game-new";
+import * as Session from "../reducers/session";
 
 export function* sagas(): IterableIterator<Effect> {
-  yield takeEvery(Game.FETCH_ACTIVE_GAMES, fetchActiveGames);
   yield takeEvery(Game.FETCH_GAME, fetchGame);
   yield takeEvery(Game.SUBMIT_COMMAND, submitCommand);
   yield takeEvery(Game.SUBMIT_UNDO, submitUndo);
-}
-
-function* fetchActiveGames(action: Game.IFetchActiveGames): IterableIterator<Effect> {
-  const token: string = yield select((state: AppState) => state.session.token);
-  if (token === undefined) {
-    return;
-  }
-  try {
-    const activeGames = yield call(http.fetchActiveGames, token);
-    yield put(Game.fetchActiveGamesSuccess(activeGames));
-  } catch (e) {
-    yield put(Game.fetchActiveGamesFail());
-  }
+  yield takeEvery(GameNew.SUBMIT, submitNewGame);
 }
 
 function* fetchGame(action: Game.IFetchGame): IterableIterator<Effect> {
@@ -66,5 +57,27 @@ function* submitUndo(action: Game.ISubmitUndo): IterableIterator<Effect> {
     yield put(Game.submitUndoSuccess(game));
   } catch (e) {
     yield put(Game.submitUndoFail(e.response && e.response.text || e.message));
+  }
+}
+
+function* submitNewGame(action: GameNew.ISubmit): IterableIterator<Effect> {
+  const token: string = yield select((state: AppState) => state.session.token);
+  if (token === undefined) {
+    return;
+  }
+  try {
+    const game = Records.GameExtended.fromJS(yield call(
+      http.submitNewGame,
+      action.payload.game_version_id,
+      action.payload.emails,
+      action.payload.user_ids,
+      token,
+    ));
+    yield put(Game.updateGames(Immutable.List([game])));
+    const gameRecord =
+      yield put(Session.updatePath(`/game/${game.game.id}`));
+    yield put(GameNew.submitSuccess(game));
+  } catch (e) {
+    yield put(GameNew.submitFail(e.response && e.response.text || e.message));
   }
 }
