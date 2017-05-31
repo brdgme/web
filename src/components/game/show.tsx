@@ -1,4 +1,3 @@
-/*
 import * as classNames from "classnames";
 import * as Immutable from "immutable";
 import * as moment from "moment";
@@ -384,4 +383,3 @@ export const Container = ReactRedux.connect(
   mapStateToProps,
   mapDispatchToProps,
 )(Component);
-*/
