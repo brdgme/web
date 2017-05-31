@@ -7,8 +7,12 @@ export interface ICommandSpec {
   Many?: { min?: number, max?: number, delim: string, spec: ICommandSpec };
   Opt?: ICommandSpec;
   Doc?: { name: string, desc?: string, spec: ICommandSpec };
-  Player?: {};
 }
+
+const COMMAND_SPEC_PLAYER = "Player";
+const COMMAND_SPEC_SPACE = "Space";
+
+type CommandSpec = ICommandSpec | typeof COMMAND_SPEC_PLAYER | typeof COMMAND_SPEC_SPACE;
 
 export interface IParseResult {
   kind: typeof MATCH_FULL | typeof MATCH_PARTIAL | typeof MATCH_ERROR;
@@ -100,7 +104,9 @@ export function parseEnum(input: string, offset: number, values: string[], exact
         message: `input doesn't match any value in: ${values.join(", ")}`,
       };
     case 1:
-      return matches[0];
+      return Object.assign({}, matches[0], {
+        kind: (matches[0].kind === MATCH_FULL || !exact) && MATCH_FULL || MATCH_PARTIAL,
+      });
     default:
       for (const m of matches) {
         if (m.kind === MATCH_FULL) {
@@ -150,9 +156,15 @@ export function parseToken(input: string, offset: number, token: string): IParse
   };
 }
 
-const whiteSpaceRegex = /^\s*/;
-export function parseWhitespace(input: string, offset: number): IParseResult {
-  const matches = whiteSpaceRegex.exec(input.substr(offset));
+const spaceRegex = /^\s*/;
+export function parseSpace(input: string, offset: number): IParseResult {
+  if (offset >= input.length) {
+    return {
+      kind: MATCH_PARTIAL,
+      offset,
+    };
+  }
+  const matches = spaceRegex.exec(input.substr(offset));
   if (matches) {
     return {
       kind: MATCH_FULL,
@@ -164,11 +176,11 @@ export function parseWhitespace(input: string, offset: number): IParseResult {
   return {
     kind: MATCH_ERROR,
     offset,
-    message: "whitespace not found",
+    message: "expected a space",
   };
 }
 
-export function parseOneOf(input: string, offset: number, specs: ICommandSpec[]): IParseResult {
+export function parseOneOf(input: string, offset: number, specs: CommandSpec[]): IParseResult {
   let success = 0;
   const results: IParseResult[] = specs.map((s) => {
     const res = parse(input, offset, s);
@@ -184,7 +196,7 @@ export function parseOneOf(input: string, offset: number, specs: ICommandSpec[])
   };
 }
 
-export function parseDoc(input: string, offset: number, name: string, spec: ICommandSpec, desc?: string): IParseResult {
+export function parseDoc(input: string, offset: number, name: string, spec: CommandSpec, desc?: string): IParseResult {
   return {
     kind: MATCH_FULL,
     offset,
@@ -250,65 +262,53 @@ export function pushResult(result: IParseResult, to: IParseResult): IParseResult
 }
 
 export function suggestions(result: IParseResult, at: number): string[] {
-  let s = [];
-  if (result.kind !== MATCH_ERROR && (result.next === undefined || result.next.length === 0)) {
+  const s = [];
+  let nextValues: string[] = [];
+  if (result.next !== undefined) {
+    for (const n of result.next) {
+      nextValues = nextValues.concat(suggestions(n, at));
+    }
+  }
+  if (result.kind !== MATCH_ERROR && nextValues.length === 0) {
     const offset = result.offset || 0;
     const length = result.length || 0;
     if (result.value !== undefined && offset <= at && offset + length >= at) {
       s.push(result.value);
     }
   }
-  if (result.next !== undefined) {
-    for (const n of result.next) {
-      s = s.concat(suggestions(n, at));
-    }
-  }
-  return s;
+  return s.concat(nextValues);
 }
 
 export function parseChain(
   input: string,
   offset: number,
-  specs: ICommandSpec[],
-  leadingWhitespace?: boolean,
+  specs: CommandSpec[],
 ): IParseResult {
-  if (specs.length === 0) {
-    return {
-      kind: MATCH_FULL,
-      offset,
-    };
-  }
-  let whitespaceLen = 0;
-  if (leadingWhitespace === true) {
-    const whitespace = parseWhitespace(input, offset);
-    whitespaceLen = whitespace.length || 0;
-  }
-  const head = specs[0];
-  const tail = specs.slice(1);
-  const result = parse(input, offset + whitespaceLen, head);
+  const headSpec = specs[0];
+  const tailSpecs = specs.slice(1);
+  const result = parse(input, offset, headSpec);
   const flatResult = flattenResult(result);
-  if (leadingWhitespace && whitespaceLen === 0 && (flatResult.combined.length || 0) !== 0) {
-    // We parsed the next segment, but we didn't parse any whitespace inbetween!
-    // This is an error.
-    return {
-      kind: MATCH_ERROR,
-      offset,
-      message: "should follow a space",
-    };
-  }
-  if (flatResult.combined.kind !== MATCH_FULL || tail.length === 0) {
+  if (flatResult.combined.kind !== MATCH_FULL || tailSpecs.length === 0) {
     // No full match on this link of the chain or end of the chain, exit here.
     return result;
   }
-  const headLen = flatResult.combined.length || 0;
+  const tailResult = parseChain(input, offset + (flatResult.combined.length || 0), tailSpecs);
   return pushResult(
-    parseChain(input, offset + whitespaceLen + headLen, tail, headLen > 0),
+    tailResult,
     flatResult.flat,
   );
 }
 
-export function parse(input: string, offset: number, spec: ICommandSpec): IParseResult {
-  if (spec.Int !== undefined) {
+export function parse(input: string, offset: number, spec: CommandSpec): IParseResult {
+  if (spec === COMMAND_SPEC_PLAYER) {
+    return {
+      kind: MATCH_ERROR,
+      offset,
+      message: "Player not implemented",
+    };
+  } else if (spec === COMMAND_SPEC_SPACE) {
+    return parseSpace(input, offset);
+  } else if (spec.Int !== undefined) {
     return parseIntSpec(input, offset, spec.Int.min, spec.Int.max);
   } else if (spec.Token !== undefined) {
     return parseToken(input, offset, spec.Token);
@@ -332,12 +332,6 @@ export function parse(input: string, offset: number, spec: ICommandSpec): IParse
     };
   } else if (spec.Doc !== undefined) {
     return parseDoc(input, offset, spec.Doc.name, spec.Doc.spec, spec.Doc.desc);
-  } else if (spec.Player !== undefined) {
-    return {
-      kind: MATCH_ERROR,
-      offset,
-      message: "Player not implemented",
-    };
   }
   return {
     kind: MATCH_ERROR,

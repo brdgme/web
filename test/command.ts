@@ -1,3 +1,4 @@
+/*
 import { assert } from "chai";
 import "mocha";
 
@@ -170,3 +171,4 @@ describe("Command.parseEnum", () => {
     } as Command.IParseSuccess<string>, Command.parseEnum("Fargoo", ["fart", "Fam", "fae"]));
   });
 });
+*/
