@@ -169,7 +169,6 @@ export function parseSpace(input: string, offset: number): IParseResult {
     return {
       kind: MATCH_FULL,
       offset,
-      value: matches[0],
       length: matches[0].length,
     };
   }
@@ -277,6 +276,26 @@ export function suggestions(result: IParseResult, at: number): string[] {
     }
   }
   return s.concat(nextValues);
+}
+
+export function startOfMatch(result: IParseResult, at: number): number | undefined {
+  if (at === 0) {
+    return 0;
+  }
+  if (result.value !== undefined
+    && (result.length || 0) > 0
+    && result.offset <= at
+    && result.offset + (result.length || 0) >= at) {
+    return result.offset;
+  }
+  if (result.next !== undefined) {
+    for (const n of result.next) {
+      const ns = startOfMatch(n, at);
+      if (ns !== undefined) {
+        return ns;
+      }
+    }
+  }
 }
 
 export function parseChain(

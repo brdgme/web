@@ -23,7 +23,8 @@ const oldDateFormat = "YYYY-M-D";
 
 export interface IPropValues extends IOwnProps {
   game?: Records.GameExtended;
-  commandInput: string;
+  command: string;
+  commandPos: number;
   submittingCommand?: boolean;
   commandError?: string;
   hideLogsAt?: string;
@@ -31,6 +32,7 @@ export interface IPropValues extends IOwnProps {
 
 interface IPropHandlers {
   onCommandChange: (command: string) => void;
+  onCommandPosChange: (commandPos: number) => void;
   onCommand: (gameId: string, command: string) => void;
   onUndo: (gameId: string) => void;
   onFetch: (gameId: string) => void;
@@ -46,12 +48,23 @@ export class Component extends React.PureComponent<IProps, {}> {
     super(props, context);
 
     this.onCommandInputChange = this.onCommandInputChange.bind(this);
+    this.onCommandPositionChange = this.onCommandPositionChange.bind(this);
     this.focusCommandInput = this.focusCommandInput.bind(this);
     this.onCommandSubmit = this.onCommandSubmit.bind(this);
     this.onHideLogs = this.onHideLogs.bind(this);
   }
 
   public render(): JSX.Element {
+    if (this.props.game !== undefined && this.props.game.command_spec !== undefined) {
+      const fullCommand = Command.parse(this.props.command, 0, this.props.game.command_spec);
+      console.log(Command.suggestions(fullCommand, this.props.commandPos));
+      const start = Command.startOfMatch(fullCommand, this.props.commandPos);
+      if (start !== undefined) {
+        const upToStart = Command.parse(
+          this.props.command.substr(0, start), 0, this.props.game.command_spec);
+        console.log(Command.suggestions(upToStart, start));
+      }
+    }
     return (
       <Layout>
         <div className="game-container">
@@ -102,9 +115,12 @@ export class Component extends React.PureComponent<IProps, {}> {
               </div>}
               <form onSubmit={this.onCommandSubmit}>
                 <input
-                  value={this.props.commandInput}
+                  value={this.props.command}
                   onChange={this.onCommandInputChange}
-                  placeholder="Enter command..."
+                  onClick={this.onCommandPositionChange}
+                  onKeyUp={this.onCommandPositionChange}
+                  onFocus={this.onCommandPositionChange}
+                  placeholder={!this.commandInputDisabled() && "Enter command..." || undefined}
                   disabled={this.commandInputDisabled()}
                   ref="editor"
                 />
@@ -264,7 +280,7 @@ export class Component extends React.PureComponent<IProps, {}> {
 
   private onCommandSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
-    this.props.onCommand(this.props.gameId, this.props.commandInput);
+    this.props.onCommand(this.props.gameId, this.props.command);
   }
 
   private onHideLogs(e: React.SyntheticEvent<HTMLAnchorElement>) {
@@ -344,11 +360,12 @@ export class Component extends React.PureComponent<IProps, {}> {
   }
 
   private onCommandInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (this.props.game !== undefined && this.props.game.command_spec !== undefined) {
-      const parseResult = Command.parse(e.target.value, 0, this.props.game.command_spec);
-      console.log(Command.suggestions(parseResult, e.target.value.length));
-    }
-    this.props.onCommandChange(e.target.value);
+    this.props.onCommandChange(e.currentTarget.value);
+    this.props.onCommandPosChange(e.currentTarget.selectionStart);
+  }
+
+  private onCommandPositionChange(e: React.FormEvent<HTMLInputElement>) {
+    this.props.onCommandPosChange(e.currentTarget.selectionStart);
   }
 }
 
@@ -360,7 +377,8 @@ function mapStateToProps(state: AppState, ownProps: IOwnProps): IPropValues {
   return {
     gameId: ownProps.gameId,
     game: state.game.games.get(ownProps.gameId),
-    commandInput: state.pages.gameShow.command,
+    command: state.pages.gameShow.command,
+    commandPos: state.pages.gameShow.commandPos,
     submittingCommand: state.pages.gameShow.submittingCommand,
     commandError: state.pages.gameShow.commandError,
     hideLogsAt: state.pages.gameShow.hideLogsAt,
@@ -371,6 +389,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<{}>, ownProps: IOwnProps): 
   return {
     onCommand: (gameId, command) => dispatch(Game.submitCommand(gameId, command)),
     onCommandChange: (command) => dispatch(GameShow.updateCommand(command)),
+    onCommandPosChange: (commandPos) => dispatch(GameShow.updateCommandPos(commandPos)),
     onUndo: (gameId) => dispatch(Game.submitUndo(gameId)),
     onFetch: (gameId) => dispatch(Game.fetchGame(gameId)),
     onSubscribeUpdates: (gameId) => dispatch(WS.subscribeGame(gameId)),
