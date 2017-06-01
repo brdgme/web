@@ -156,7 +156,7 @@ export function parseToken(input: string, offset: number, token: string): IParse
   };
 }
 
-const spaceRegex = /^\s*/;
+const spaceRegex = /^\s+/;
 export function parseSpace(input: string, offset: number): IParseResult {
   if (offset >= input.length) {
     return {
@@ -296,6 +296,22 @@ export function startOfMatch(result: IParseResult, at: number): number | undefin
       }
     }
   }
+}
+
+export function lastMatch(result: IParseResult): IParseResult {
+  let last = result;
+  let lastPos = result.offset + (result.length || 0);
+  if (result.next !== undefined) {
+    for (const n of result.next) {
+      const nl = lastMatch(n);
+      const nlPos = nl.offset + (nl.length || 0);
+      if (nlPos > lastPos) {
+        last = nl;
+        lastPos = nlPos;
+      }
+    }
+  }
+  return last;
 }
 
 export function parseChain(

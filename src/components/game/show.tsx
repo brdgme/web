@@ -58,7 +58,15 @@ export class Component extends React.PureComponent<IProps, {}> {
     if (this.props.game !== undefined && this.props.game.command_spec !== undefined) {
       const fullCommand = Command.parse(this.props.command, 0, this.props.game.command_spec);
       console.log(Command.suggestions(fullCommand, this.props.commandPos));
-      const start = Command.startOfMatch(fullCommand, this.props.commandPos);
+      let start = Command.startOfMatch(fullCommand, this.props.commandPos);
+      if (start === undefined) {
+        // Use the end of the last match, or the start of the current word if
+        // the last match ends at the end of the last word.
+        const lastMatch = Command.lastMatch(fullCommand);
+        if (!this.props.command.substr(lastMatch.offset, this.props.commandPos - lastMatch.offset).match(/\s/)) {
+          start = lastMatch.offset;
+        }
+      }
       if (start !== undefined) {
         const upToStart = Command.parse(
           this.props.command.substr(0, start), 0, this.props.game.command_spec);
