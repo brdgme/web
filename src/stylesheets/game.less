@@ -77,11 +77,38 @@
 }
 
 .game-meta {
+  display: flex;
+  flex-direction: column;
   background-color: @dark-background;
-  width: 15em;
+  width: 22em;
   padding-left: 0.5em;
   padding-right: 0.5em;
   overflow-y: auto;
+
+  .game-meta-main {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .game-meta-logs {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    max-height: 50%;
+
+    .game-meta-logs-content {
+      flex: 1;
+      background-color: white;
+      padding: 0.6em;
+      font-size: 0.8em;
+      margin-bottom: 0.6em;
+      overflow-y: auto;
+
+      .game-log-entry {
+        margin-top: 0.2em;
+      }
+    }
+  }
 }
 
 .game-current-turn {

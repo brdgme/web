@@ -27,18 +27,19 @@ export interface IPropValues extends IOwnProps {
   commandPos: number;
   submittingCommand?: boolean;
   commandError?: string;
-  hideLogsAt?: string;
 }
 
 interface IPropHandlers {
-  onCommandChange: (command: string) => void;
-  onCommandPosChange: (commandPos: number) => void;
+  onCommandChange: (
+    command: string,
+    commandPos: number,
+    commandSpec?: Immutable.Map<any, any>,
+  ) => void;
   onCommand: (gameId: string, command: string) => void;
   onUndo: (gameId: string) => void;
   onFetch: (gameId: string) => void;
   onSubscribeUpdates: (gameId: string) => void;
   onUnsubscribeUpdates: (gameId: string) => void;
-  onHideLogs: (at: string) => void;
 }
 
 interface IProps extends IPropValues, IPropHandlers { }
@@ -51,28 +52,9 @@ export class Component extends React.PureComponent<IProps, {}> {
     this.onCommandPositionChange = this.onCommandPositionChange.bind(this);
     this.focusCommandInput = this.focusCommandInput.bind(this);
     this.onCommandSubmit = this.onCommandSubmit.bind(this);
-    this.onHideLogs = this.onHideLogs.bind(this);
   }
 
   public render(): JSX.Element {
-    if (this.props.game !== undefined && this.props.game.command_spec !== undefined) {
-      const fullCommand = Command.parse(this.props.command, 0, this.props.game.command_spec);
-      console.log(Command.suggestions(fullCommand, this.props.commandPos));
-      let start = Command.startOfMatch(fullCommand, this.props.commandPos);
-      if (start === undefined) {
-        // Use the end of the last match, or the start of the current word if
-        // the last match ends at the end of the last word.
-        const lastMatch = Command.lastMatch(fullCommand);
-        if (!this.props.command.substr(lastMatch.offset, this.props.commandPos - lastMatch.offset).match(/\s/)) {
-          start = lastMatch.offset;
-        }
-      }
-      if (start !== undefined) {
-        const upToStart = Command.parse(
-          this.props.command.substr(0, start), 0, this.props.game.command_spec);
-        console.log(Command.suggestions(upToStart, start));
-      }
-    }
     return (
       <Layout>
         <div className="game-container">
@@ -85,32 +67,6 @@ export class Component extends React.PureComponent<IProps, {}> {
                 || <Spinner />
               }
             </div>
-            {this.filteredLogs().size > 0 &&
-              <div className="game-logs-summary-container">
-                <div className="game-logs-summary">
-                  <div className="header">
-                    <span style={{
-                      display: "inline-block",
-                      float: "left",
-                    }}>Updates</span>
-                    <a
-                      style={{
-                        display: "inline-block",
-                        float: "right",
-                      }}
-                      href="#"
-                      onClick={this.onHideLogs}
-                    >hide</a>
-                    <div style={{
-                      clear: "both",
-                    }} />
-                  </div>
-                  <div className="content">
-                    {this.renderLogs()}
-                  </div>
-                </div>
-              </div>
-            }
             {this.renderWhoseTurn()}
             {this.props.game && this.props.game.game_player && <div
               className={classNames({
@@ -144,6 +100,7 @@ export class Component extends React.PureComponent<IProps, {}> {
   public componentDidMount() {
     this.fetchGameIfRequired(this.props);
     this.focusCommandInput();
+    this.scrollToLastLog();
     document.addEventListener("keydown", this.focusCommandInput);
     this.props.onSubscribeUpdates(this.props.gameId);
   }
@@ -154,6 +111,21 @@ export class Component extends React.PureComponent<IProps, {}> {
       this.props.onSubscribeUpdates(nextProps.gameId);
     }
     this.fetchGameIfRequired(nextProps);
+  }
+
+  public componentDidUpdate(prevProps: IProps, prevState: undefined) {
+    const prevLogLen = prevProps.game
+      && prevProps.game.game_logs
+      && prevProps.game.game_logs.size
+      || 0;
+    const nextLogLen = this.props.game
+      && this.props.game.game_logs
+      && this.props.game.game_logs.size
+      || 0;
+    if (nextLogLen > prevLogLen) {
+      // New logs, scroll to bottom.
+      this.scrollToLastLog();
+    }
   }
 
   public componentWillUnmount() {
@@ -178,24 +150,42 @@ export class Component extends React.PureComponent<IProps, {}> {
     return false;
   }
 
+  private scrollToLastLog() {
+    if (this.refs.gameLogs !== undefined) {
+      const gameLogs = this.refs.gameLogs as Element;
+      const lastLog = gameLogs.querySelector(".game-log-entry:last-child");
+      if (lastLog !== null) {
+        lastLog.scrollIntoView(false);
+      }
+    }
+  }
+
   private renderMeta(): JSX.Element {
     return <div className="game-meta">
-      {this.props.game && this.props.game.game_player && <div>
-        <h2>{this.props.game.game_type && this.props.game.game_type.name}</h2>
-        {this.props.game.game_players && this.props.game.game_players.map(this.renderMetaPlayer)}
-        <h3>Actions</h3>
-        <div>
-          <a href="#" onClick={(e) => {
-            e.preventDefault();
-          }}>Concede</a>
-        </div>
-        {this.props.game.game_player.can_undo && <div>
-          <a href="#" onClick={(e) => {
-            e.preventDefault();
-            this.props.onUndo(this.props.gameId);
-          }}>Undo</a>
+      <div className="game-meta-main">
+        {this.props.game && this.props.game.game_player && <div>
+          <h2>{this.props.game.game_type && this.props.game.game_type.name}</h2>
+          {this.props.game.game_players && this.props.game.game_players.map(this.renderMetaPlayer)}
+          <h3>Actions</h3>
+          <div>
+            <a href="#" onClick={(e) => {
+              e.preventDefault();
+            }}>Concede</a>
+          </div>
+          {this.props.game.game_player.can_undo && <div>
+            <a href="#" onClick={(e) => {
+              e.preventDefault();
+              this.props.onUndo(this.props.gameId);
+            }}>Undo</a>
+          </div>}
         </div>}
-      </div>}
+      </div>
+      <div className="game-meta-logs">
+        <h2>Logs</h2>
+        <div className="game-meta-logs-content" ref="gameLogs">
+          {this.renderLogs()}
+        </div>
+      </div>
     </div>;
   }
 
@@ -291,16 +281,6 @@ export class Component extends React.PureComponent<IProps, {}> {
     this.props.onCommand(this.props.gameId, this.props.command);
   }
 
-  private onHideLogs(e: React.SyntheticEvent<HTMLAnchorElement>) {
-    e.preventDefault();
-    const logs = this.filteredLogs();
-    const max = logs.maxBy((l) => l && l.game_log.created_at);
-    if (max === undefined) {
-      return;
-    }
-    this.props.onHideLogs(max.game_log.created_at);
-  }
-
   private focusCommandInput() {
     if (this.refs.editor === undefined) {
       return;
@@ -320,33 +300,11 @@ export class Component extends React.PureComponent<IProps, {}> {
     return t.local().format(`${prefix}${timeFormat}`);
   }
 
-  private filteredLogs(): Immutable.List<Records.GameLogRendered> {
-    if (this.props.game === undefined || this.props.game.game_logs === undefined) {
-      return Immutable.List() as Immutable.List<Records.GameLogRendered>;
-    }
-    let logs = this.props.game.game_logs;
-    const hideLogsAt = this.props.hideLogsAt;
-    if (hideLogsAt !== undefined) {
-      logs = logs.filter(
-        (l: Records.GameLogRendered) =>
-          l.game_log.created_at > hideLogsAt,
-      ) as Immutable.List<Records.GameLogRendered>;
-    }
-    const game_player = this.props.game.game_player;
-    if (game_player !== undefined) {
-      logs = logs.filter(
-        (l: Records.GameLogRendered) =>
-          l.game_log.created_at >= game_player.last_turn_at,
-      ) as Immutable.List<Records.GameLogRendered>;
-    }
-    return logs;
-  }
-
   private renderLogs(): JSX.Element {
     if (this.props.game === undefined || this.props.game.game_logs === undefined) {
       return <div />;
     }
-    const logs = this.filteredLogs();
+    const logs = this.props.game.game_logs;
     let lastLog: moment.Moment;
     const renderedLogs: JSX.Element[] = logs.map((gl) => {
       let timeEl: JSX.Element = <div />;
@@ -358,7 +316,7 @@ export class Component extends React.PureComponent<IProps, {}> {
       }
       lastLog = logTime;
       return (
-        <div>
+        <div className="game-log-entry">
           {timeEl}
           <div dangerouslySetInnerHTML={{ __html: gl!.html }} />
         </div>
@@ -367,14 +325,38 @@ export class Component extends React.PureComponent<IProps, {}> {
     return <div>{renderedLogs}</div>;
   }
 
+  private commandSpec(): Immutable.Map<any, any> | undefined {
+    return this.props.game
+      && this.props.game.command_spec
+      || undefined;
+  }
+
   private onCommandInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    this.props.onCommandChange(e.currentTarget.value);
-    this.props.onCommandPosChange(e.currentTarget.selectionStart);
+    this.onCommandChange(
+      e.currentTarget.value,
+      e.currentTarget.selectionStart,
+    );
   }
 
   private onCommandPositionChange(e: React.FormEvent<HTMLInputElement>) {
-    this.props.onCommandPosChange(e.currentTarget.selectionStart);
+    this.onCommandChange(
+      this.props.command,
+      e.currentTarget.selectionStart,
+    );
   }
+
+  private onCommandChange(command: string, commandPos: number) {
+    if (command !== this.props.command
+      || commandPos !== this.props.commandPos) {
+      this.props.onCommandChange(command, commandPos, this.commandSpec());
+    }
+  }
+}
+
+interface ICommandChange {
+  command: string;
+  commandPos: number;
+  commandSpec: Immutable.Map<any, any>;
 }
 
 interface IOwnProps {
@@ -389,20 +371,18 @@ function mapStateToProps(state: AppState, ownProps: IOwnProps): IPropValues {
     commandPos: state.pages.gameShow.commandPos,
     submittingCommand: state.pages.gameShow.submittingCommand,
     commandError: state.pages.gameShow.commandError,
-    hideLogsAt: state.pages.gameShow.hideLogsAt,
   };
 }
 
 function mapDispatchToProps(dispatch: Redux.Dispatch<{}>, ownProps: IOwnProps): IPropHandlers {
   return {
     onCommand: (gameId, command) => dispatch(Game.submitCommand(gameId, command)),
-    onCommandChange: (command) => dispatch(GameShow.updateCommand(command)),
-    onCommandPosChange: (commandPos) => dispatch(GameShow.updateCommandPos(commandPos)),
+    onCommandChange: (command, commandPos, commandSpec) =>
+      dispatch(GameShow.updateCommand(command, commandPos, commandSpec)),
     onUndo: (gameId) => dispatch(Game.submitUndo(gameId)),
     onFetch: (gameId) => dispatch(Game.fetchGame(gameId)),
     onSubscribeUpdates: (gameId) => dispatch(WS.subscribeGame(gameId)),
     onUnsubscribeUpdates: () => dispatch(WS.unsubscribeGame()),
-    onHideLogs: (at) => dispatch(GameShow.hideLogs(at)),
   };
 }
 

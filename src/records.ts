@@ -229,7 +229,7 @@ export class GameExtended extends Immutable.Record({
       game_logs: js.game_logs && Immutable.List(js.game_logs.map(GameLogRendered.fromJS)),
       pub_state: js.pub_state,
       html: js.html,
-      command_spec: js.command_spec,
+      command_spec: Immutable.fromJS(js.command_spec),
     });
   }
 
@@ -245,5 +245,5 @@ export class GameExtended extends Immutable.Record({
   public game_logs?: Immutable.List<GameLogRendered>;
   public pub_state: string;
   public html?: string;
-  public command_spec?: ICommandSpec;
+  public command_spec?: Immutable.Map<any, any>;
 }

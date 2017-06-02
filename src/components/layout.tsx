@@ -11,7 +11,7 @@ import Player from "./player";
 import { Spinner } from "./spinner";
 
 export interface IPropValues {
-  isLoggedIn: boolean;
+  user?: Records.User;
   activeGames?: Immutable.List<Records.GameExtended>;
 }
 
@@ -94,20 +94,26 @@ export class Component extends React.PureComponent<IProps, {}> {
   }
 
   private myTurnGames(): Immutable.List<Records.GameExtended> {
-    if (this.props.activeGames === undefined) {
+    if (this.props.activeGames === undefined || this.props.user === undefined) {
       return Immutable.List() as Immutable.List<Records.GameExtended>;
     }
     return this.props.activeGames
-      .filter((ag) =>
-        ag !== undefined
-        && ag.game_player !== undefined
-        && ag.game_player.is_turn)
-      .sortBy((ag) => ag!.game_player!.is_turn_at)
+      .toList().map((ag) => Immutable.Map({
+        game: ag!,
+        game_player: ag!.game_players.find((gp) =>
+          gp !== undefined
+          && gp.user.id === this.props.user!.id
+          && gp.game_player.is_turn,
+        ),
+      }))
+      .filter((g) => g!.get("game_player") !== undefined)
+      .sortBy((g) => g!.getIn(["game_player", "is_turn_at"]))
+      .map((g) => g!.get("game") as Records.GameExtended)
       .toList();
   }
 
   private renderAuth(): JSX.Element {
-    if (this.props.isLoggedIn) {
+    if (this.props.user !== undefined) {
       return <div>
         <div>
           <a href="#" onClick={(e) => {
@@ -129,7 +135,7 @@ export class Component extends React.PureComponent<IProps, {}> {
 
 function mapStateToProps(state: AppState): IPropValues {
   return {
-    isLoggedIn: state.session.token !== undefined,
+    user: state.session.user,
     activeGames: state.game.games.size > 0 && state.game.games.filter(
       (g: Records.GameExtended) => !g.game.is_finished,
     ).toList() || undefined,
