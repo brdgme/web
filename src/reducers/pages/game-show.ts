@@ -9,11 +9,15 @@ export class State extends Immutable.Record({
   submittingCommand: false,
   commandError: undefined,
   hideLogsAt: undefined,
+  suggestions: Immutable.List(),
+  allSuggestions: Immutable.List(),
 }) {
   public command: string;
   public commandPos: number;
   public submittingCommand: boolean;
   public commandError?: string;
+  public suggestions: Immutable.List<any>;
+  public allSuggestions: Immutable.List<any>;
 }
 
 export const UPDATE_COMMAND = "brdgme/pages/game-show/UPDATE_COMMAND";

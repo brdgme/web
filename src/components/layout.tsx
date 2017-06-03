@@ -98,17 +98,8 @@ export class Component extends React.PureComponent<IProps, {}> {
       return Immutable.List() as Immutable.List<Records.GameExtended>;
     }
     return this.props.activeGames
-      .toList().map((ag) => Immutable.Map({
-        game: ag!,
-        game_player: ag!.game_players.find((gp) =>
-          gp !== undefined
-          && gp.user.id === this.props.user!.id
-          && gp.game_player.is_turn,
-        ),
-      }))
-      .filter((g) => g!.get("game_player") !== undefined)
-      .sortBy((g) => g!.getIn(["game_player", "is_turn_at"]))
-      .map((g) => g!.get("game") as Records.GameExtended)
+      .filter((ag) => ag!.game_player && ag!.game_player!.is_turn || false)
+      .sortBy((ag) => ag!.game_player!.is_turn_at)
       .toList();
   }
 

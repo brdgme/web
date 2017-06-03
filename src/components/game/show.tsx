@@ -68,6 +68,7 @@ export class Component extends React.PureComponent<IProps, {}> {
               }
             </div>
             {this.renderWhoseTurn()}
+            {this.renderSuggestionBox()}
             {this.props.game && this.props.game.game_player && <div
               className={classNames({
                 "disabled": this.props.submittingCommand,
@@ -131,6 +132,65 @@ export class Component extends React.PureComponent<IProps, {}> {
   public componentWillUnmount() {
     document.removeEventListener("keydown", this.focusCommandInput);
     this.props.onUnsubscribeUpdates(this.props.gameId);
+  }
+
+  private commandSuggestions(): Command.Suggestion[] {
+    if (this.props.game === undefined || !this.props.game.command_spec) {
+      return [];
+    }
+    const commandSpec = this.props.game.command_spec.toJS();
+    const fullCommand = Command.parse(this.props.command, 0, commandSpec);
+    const suggestions = Command.suggestions(fullCommand, this.props.commandPos);
+    let allSuggestions: Command.Suggestion[] = [];
+    let start = Command.startOfMatch(fullCommand, this.props.commandPos);
+    if (start === undefined) {
+      // Use the end of the last match, or the start of the current word if
+      // the last match ends at the end of the last word.
+      const lastMatch = Command.lastMatch(fullCommand);
+      if (!this.props.command.substr(lastMatch.offset, this.props.commandPos - lastMatch.offset).match(/\s/)) {
+        start = lastMatch.offset;
+      }
+    }
+    if (start !== undefined) {
+      const upToStart = Command.parse(
+        this.props.command.substr(0, start), 0, commandSpec);
+      allSuggestions = Command.suggestions(upToStart, start);
+    }
+    return suggestions;
+  }
+
+  private renderSuggestionBox(): JSX.Element | undefined {
+    const suggestions = this.commandSuggestions();
+    if (suggestions.length === 0) {
+      return undefined;
+    }
+    return <div className="suggestions-container">
+      <div className="suggestions-content">
+        {this.renderSuggestions(suggestions)}
+      </div>
+    </div>;
+  }
+
+  private renderSuggestionDoc(s: Command.ISuggestionDoc): JSX.Element {
+    return <div className="suggestion-doc">
+      {s.desc && <div className="suggestion-doc-header">
+        {s.desc && <span className="suggestion-doc-desc">{s.desc}</span>}
+      </div>}
+      <div className="suggestion-doc-values">
+        {this.renderSuggestions(s.values)}
+      </div>
+    </div>;
+  }
+
+  private renderSuggestions(suggestions: Command.Suggestion[]): JSX.Element {
+    return <div>
+      {suggestions.map((s) => {
+        if (typeof s === "string") {
+          return <div>{s}</div>;
+        }
+        return this.renderSuggestionDoc(s);
+      })}
+    </div>;
   }
 
   private commandInputDisabled(): boolean {

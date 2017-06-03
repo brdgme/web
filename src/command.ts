@@ -260,9 +260,16 @@ export function pushResult(result: IParseResult, to: IParseResult): IParseResult
   });
 }
 
-export function suggestions(result: IParseResult, at: number): string[] {
-  const s = [];
-  let nextValues: string[] = [];
+export interface ISuggestionDoc {
+  name?: string;
+  desc?: string;
+  values: Suggestion[];
+}
+export type SuggestionValue = string;
+export type Suggestion = ISuggestionDoc | SuggestionValue;
+export function suggestions(result: IParseResult, at: number): Suggestion[] {
+  let s: Suggestion[] = [];
+  let nextValues: Suggestion[] = [];
   if (result.next !== undefined) {
     for (const n of result.next) {
       nextValues = nextValues.concat(suggestions(n, at));
@@ -275,7 +282,15 @@ export function suggestions(result: IParseResult, at: number): string[] {
       s.push(result.value);
     }
   }
-  return s.concat(nextValues);
+  s = s.concat(nextValues);
+  if (s.length > 0 && (result.name !== undefined || result.desc !== undefined)) {
+    return [{
+      name: result.name,
+      desc: result.desc,
+      values: s,
+    }];
+  }
+  return s;
 }
 
 export function startOfMatch(result: IParseResult, at: number): number | undefined {
