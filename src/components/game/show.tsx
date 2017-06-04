@@ -185,10 +185,23 @@ export class Component extends React.PureComponent<IProps, {}> {
   private renderSuggestions(suggestions: Command.Suggestion[]): JSX.Element {
     return <div>
       {suggestions.map((s) => {
-        if (typeof s === "string") {
-          return <div>{s}</div>;
+        switch (s.kind) {
+          case Command.SUGGESTION_VALUE:
+            return <div
+              onClick={() => {
+                this.onCommandChange(
+                  this.props.command.substr(0, s.offset)
+                  + s.value
+                  + " "
+                  + this.props.command.substr(s.offset + (s.length || 0)),
+                  s.offset + s.value.length + 1,
+                );
+                this.focusCommandInput();
+              }}
+            >{s.value}</div>;
+          case Command.SUGGESTION_DOC:
+            return this.renderSuggestionDoc(s);
         }
-        return this.renderSuggestionDoc(s);
       })}
     </div>;
   }

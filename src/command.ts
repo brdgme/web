@@ -260,13 +260,23 @@ export function pushResult(result: IParseResult, to: IParseResult): IParseResult
   });
 }
 
+export const SUGGESTION_DOC = "SUGGESTION_DOC";
+export const SUGGESTION_VALUE = "SUGGESTION_VALUE";
+
 export interface ISuggestionDoc {
-  name?: string;
+  kind: typeof SUGGESTION_DOC;
+  offset: number;
+  length?: number;
   desc?: string;
   values: Suggestion[];
 }
-export type SuggestionValue = string;
-export type Suggestion = ISuggestionDoc | SuggestionValue;
+export interface ISuggestionValue {
+  kind: typeof SUGGESTION_VALUE;
+  offset: number;
+  length?: number;
+  value: string;
+}
+export type Suggestion = ISuggestionDoc | ISuggestionValue;
 export function suggestions(result: IParseResult, at: number): Suggestion[] {
   let s: Suggestion[] = [];
   let nextValues: Suggestion[] = [];
@@ -279,16 +289,38 @@ export function suggestions(result: IParseResult, at: number): Suggestion[] {
     const offset = result.offset || 0;
     const length = result.length || 0;
     if (result.value !== undefined && offset <= at && offset + length >= at) {
-      s.push(result.value);
+      s.push({
+        kind: SUGGESTION_VALUE,
+        offset: result.offset,
+        length: result.length,
+        value: result.value,
+      });
     }
   }
   s = s.concat(nextValues);
-  if (s.length > 0 && (result.name !== undefined || result.desc !== undefined)) {
-    return [{
-      name: result.name,
-      desc: result.desc,
-      values: s,
-    }];
+  if (s.length > 0 && result.desc !== undefined) {
+    // We only document values which have a matching offset as the result, so
+    // split them here.
+    const docS: Suggestion[] = [];
+    const valueS: Suggestion[] = [];
+    for (const v of s) {
+      if (v.offset === result.offset) {
+        docS.push(v);
+      } else {
+        valueS.push(v);
+      }
+    }
+    const splitS: Suggestion[] = [];
+    if (docS.length > 0) {
+      splitS.push({
+        kind: SUGGESTION_DOC,
+        offset: result.offset,
+        length: result.length,
+        desc: result.desc,
+        values: docS,
+      });
+    }
+    return splitS.concat(valueS);
   }
   return s;
 }
