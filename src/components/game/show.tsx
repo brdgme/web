@@ -114,7 +114,7 @@ export class Component extends React.PureComponent<IProps, {}> {
     this.fetchGameIfRequired(nextProps);
   }
 
-  public componentDidUpdate(prevProps: IProps, prevState: undefined) {
+  public componentDidUpdate(prevProps: IProps, prevState: {}) {
     const prevLogLen = prevProps.game
       && prevProps.game.game_logs
       && prevProps.game.game_logs.size
