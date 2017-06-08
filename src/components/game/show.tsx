@@ -187,8 +187,9 @@ export class Component extends React.PureComponent<IProps, {}> {
       {suggestions.map((s) => {
         switch (s.kind) {
           case Command.SUGGESTION_VALUE:
-            return <div
-              onClick={() => {
+            return <div>
+              <a onClick={(e) => {
+                e.preventDefault();
                 this.onCommandChange(
                   this.props.command.substr(0, s.offset)
                   + s.value
@@ -197,8 +198,10 @@ export class Component extends React.PureComponent<IProps, {}> {
                   s.offset + s.value.length + 1,
                 );
                 this.focusCommandInput();
-              }}
-            >{s.value}</div>;
+              }}>
+                {s.value}
+              </a>
+            </div>;
           case Command.SUGGESTION_DOC:
             return this.renderSuggestionDoc(s);
         }
@@ -226,10 +229,7 @@ export class Component extends React.PureComponent<IProps, {}> {
   private scrollToLastLog() {
     if (this.refs.gameLogs !== undefined) {
       const gameLogs = this.refs.gameLogs as Element;
-      const lastLog = gameLogs.querySelector(".game-log-entry:last-child");
-      if (lastLog !== null) {
-        lastLog.scrollIntoView(false);
-      }
+      gameLogs.scrollTop = gameLogs.scrollHeight;
     }
   }
 
@@ -241,12 +241,12 @@ export class Component extends React.PureComponent<IProps, {}> {
           {this.props.game.game_players && this.props.game.game_players.map(this.renderMetaPlayer)}
           <h3>Actions</h3>
           <div>
-            <a href="#" onClick={(e) => {
+            <a onClick={(e) => {
               e.preventDefault();
             }}>Concede</a>
           </div>
           {this.props.game.game_player.can_undo && <div>
-            <a href="#" onClick={(e) => {
+            <a onClick={(e) => {
               e.preventDefault();
               this.props.onUndo(this.props.gameId);
             }}>Undo</a>
@@ -351,7 +351,7 @@ export class Component extends React.PureComponent<IProps, {}> {
 
   private onCommandSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
-    this.props.onCommand(this.props.gameId, this.props.command);
+    this.props.onCommand(this.props.gameId, this.props.command.trim());
   }
 
   private focusCommandInput() {

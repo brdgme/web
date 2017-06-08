@@ -35,10 +35,21 @@
       position: absolute;
       left: 0;
       bottom: 0;
-      background-color: salmon;
+      border-radius: 0.63em;
+      border: 1px solid @dark-background;
+      padding: 0.63em;
+      background-color: rgba(255, 255, 255, 0.7);
+      max-height: 6em;
+      overflow-y: auto;
+
+      .suggestion-doc-desc {
+        font-size: 0.9em;
+        font-style: italic;
+      }
 
       .suggestion-doc-values {
         margin-left: 0.6em;
+        margin-bottom: 0.3em;
       }
     }
   }

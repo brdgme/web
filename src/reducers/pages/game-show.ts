@@ -46,13 +46,20 @@ export function reducer(state = new State(), action: Action): State {
     case UPDATE_COMMAND: return state
       .set("command", action.payload.command)
       .set("commandPos", action.payload.commandPos) as State;
-    case Game.SUBMIT_COMMAND: return state.set("submittingCommand", true) as State;
-    case Game.SUBMIT_COMMAND_SUCCESS: return state
+    case Game.SUBMIT_COMMAND:
+    case Game.SUBMIT_UNDO:
+      return state.set("submittingCommand", true) as State;
+    case Game.SUBMIT_COMMAND_SUCCESS:
+    case Game.SUBMIT_UNDO_SUCCESS:
+      return state
       .set("submittingCommand", false)
       .set("command", "")
+      .set("commandPos", 0)
       .remove("commandError") as State;
     case Game.SUBMIT_COMMAND_FAIL: return state
       .set("commandError", action.payload)
+      .set("submittingCommand", false) as State;
+    case Game.SUBMIT_UNDO_FAIL: return state
       .set("submittingCommand", false) as State;
     default: return state;
   }

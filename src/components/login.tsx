@@ -55,14 +55,14 @@ export class Component extends React.PureComponent<IProps, {}> {
                 <input type="submit" value="Get code" />
               </div>
               <div className="hasCode">
-                <a href="#" onClick={this.handleClickHaveCode}>I already have a login code</a>
+                <a onClick={this.handleClickHaveCode}>I already have a login code</a>
               </div>
             </form>
           </div>
         ) || (
             <div>
               Logging in as
-              <a href="#" onClick={this.handleClickChangeEmail}>{this.props.email}</a>
+              <a onClick={this.handleClickChangeEmail}>{this.props.email}</a>
             </div>
           )}
         {this.props.mode === LoginReducer.Mode.EnteringCode && (

@@ -35,20 +35,20 @@ export class Component extends React.PureComponent<IProps, {}> {
       <div className="layout">
         <div className="menu">
           <h1>
-            <a href="#" onClick={(e) => {
+            <a onClick={(e) => {
               e.preventDefault();
               this.props.onRedirect("/");
             }}>brdg.me</a>
           </h1>
           <div className="subheading">
-            <a href="#" onClick={(e) => {
+            <a onClick={(e) => {
               e.preventDefault();
               this.props.onRedirect("/");
             }}>Lo-fi board games</a>
           </div>
           {this.renderAuth()}
           <div>
-            <a href="#" onClick={(e) => {
+            <a onClick={(e) => {
               e.preventDefault();
               this.props.onRedirect("/game/new");
             }}>New game</a>
@@ -63,7 +63,7 @@ export class Component extends React.PureComponent<IProps, {}> {
   private renderGame(game: Records.GameExtended): JSX.Element {
     const myPlayerId = game.game_player && game.game_player.id;
     return <div className="layout-game">
-      <a href="#" onClick={(e) => {
+      <a onClick={(e) => {
         e.preventDefault();
         this.props.onRedirect(`/game/${game.game.id}`);
       }}>
@@ -107,7 +107,7 @@ export class Component extends React.PureComponent<IProps, {}> {
     if (this.props.user !== undefined) {
       return <div>
         <div>
-          <a href="#" onClick={(e) => {
+          <a onClick={(e) => {
             e.preventDefault();
             this.props.onLogout();
           }}>Logout</a>
@@ -115,7 +115,7 @@ export class Component extends React.PureComponent<IProps, {}> {
       </div>;
     } else {
       return <div>
-        <a href="#" onClick={(e) => {
+        <a onClick={(e) => {
           e.preventDefault();
           this.props.onRedirect("/login");
         }}>Log in</a>

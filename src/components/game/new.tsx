@@ -65,10 +65,10 @@ export class Component extends React.PureComponent<IProps, {}> {
               value={uId}
               onChange={(e) => this.handleUserIdChange(e, key!)}
             />
-            <a href="#" onClick={(e) => this.handleRemoveUserId(e, key!)}>X</a>
+            <a onClick={(e) => this.handleRemoveUserId(e, key!)}>X</a>
           </div>)}
           <div>
-            <a href="#" onClick={this.handleAddUserIdClick}>Add</a>
+            <a onClick={this.handleAddUserIdClick}>Add</a>
           </div>
           <h2>Opponent emails</h2>
           {this.props.emails.map((email, key) => <div>
@@ -76,10 +76,10 @@ export class Component extends React.PureComponent<IProps, {}> {
               value={email}
               onChange={(e) => this.handleEmailChange(e, key!)}
             />
-            <a href="#" onClick={(e) => this.handleRemoveEmail(e, key!)}>X</a>
+            <a onClick={(e) => this.handleRemoveEmail(e, key!)}>X</a>
           </div>)}
           <div>
-            <a href="#" onClick={this.handleAddEmailClick}>Add</a>
+            <a onClick={this.handleAddEmailClick}>Add</a>
           </div>
           <div>
             <input type="submit" value="Create game" />
