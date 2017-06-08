@@ -459,7 +459,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<{}>, ownProps: IOwnProps): 
   };
 }
 
-export const Container = ReactRedux.connect(
+export const Container: React.ComponentClass<IOwnProps> = ReactRedux.connect(
   mapStateToProps,
   mapDispatchToProps,
 )(Component);

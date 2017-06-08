@@ -140,7 +140,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<{}>): IPropHandlers {
   };
 }
 
-export const Container = ReactRedux.connect(
+export const Container: React.ComponentClass<{}> = ReactRedux.connect(
   mapStateToProps,
   mapDispatchToProps,
 )(Component);

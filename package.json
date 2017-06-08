@@ -18,7 +18,7 @@
   "author": "Michael Alexander <beefsack@gmail.com>",
   "license": "GPL-3.0",
   "dependencies": {
-    "@types/classnames": "0.0.32",
+    "@types/classnames": "^2.2.0",
     "@types/react": "^15.0.16",
     "@types/react-dom": "^15.5.0",
     "@types/react-redux": "^4.4.40",
@@ -36,11 +36,11 @@
     "url": "^0.11.0"
   },
   "devDependencies": {
-    "@types/chai": "^3.5.1",
+    "@types/chai": "^4.0.0",
     "@types/mocha": "^2.2.41",
     "awesome-typescript-loader": "^3.1.2",
     "brdgme-websocket-server": "https://github.com/brdgme/websocket-server.git",
-    "chai": "^3.5.0",
+    "chai": "^4.0.0",
     "css-loader": "^0.28.0",
     "express": "^4.15.2",
     "extract-text-webpack-plugin": "^2.1.0",
@@ -51,7 +51,7 @@
     "moment": "^2.18.1",
     "morgan": "^1.8.1",
     "source-map-loader": "^0.2.0",
-    "style-loader": "^0.16.0",
+    "style-loader": "^0.18.2",
     "tslint": "^5.2.0",
     "typescript": "^2.3.1",
     "webpack": "^2.3.1"

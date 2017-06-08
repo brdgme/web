@@ -40,7 +40,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<{}>): {} {
   return {};
 }
 
-export const Container = ReactRedux.connect(
+export const Container: React.ComponentClass<{}> = ReactRedux.connect(
   mapStateToProps,
   mapDispatchToProps,
 )(Component);
