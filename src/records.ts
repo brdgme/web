@@ -79,6 +79,7 @@ export class Game extends Immutable.Record({
   updated_at: undefined,
   game_version_id: undefined,
   is_finished: undefined,
+  finished_at: undefined,
 }) {
   public static fromJS(js: any): Game {
     return new Game(js);
@@ -89,6 +90,7 @@ export class Game extends Immutable.Record({
   public updated_at: string;
   public game_version_id: string;
   public is_finished: boolean;
+  public finished_at: string;
 }
 
 export class GameTypeUser extends Immutable.Record({

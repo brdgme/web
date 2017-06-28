@@ -40,6 +40,7 @@ interface IPropHandlers {
   onFetch: (gameId: string) => void;
   onSubscribeUpdates: (gameId: string) => void;
   onUnsubscribeUpdates: (gameId: string) => void;
+  onMarkRead: (gameId: string) => void;
 }
 
 interface IProps extends IPropValues, IPropHandlers { }
@@ -102,6 +103,7 @@ export class Component extends React.PureComponent<IProps, {}> {
     this.fetchGameIfRequired(this.props);
     this.focusCommandInput();
     this.scrollToLastLog();
+    this.props.onMarkRead(this.props.gameId);
     document.addEventListener("keydown", this.focusCommandInput);
     this.props.onSubscribeUpdates(this.props.gameId);
   }
@@ -110,6 +112,7 @@ export class Component extends React.PureComponent<IProps, {}> {
     if (this.props.gameId !== nextProps.gameId) {
       this.props.onUnsubscribeUpdates(this.props.gameId);
       this.props.onSubscribeUpdates(nextProps.gameId);
+      this.props.onMarkRead(nextProps.gameId);
     }
     this.fetchGameIfRequired(nextProps);
   }
@@ -456,6 +459,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<{}>, ownProps: IOwnProps): 
     onFetch: (gameId) => dispatch(Game.fetchGame(gameId)),
     onSubscribeUpdates: (gameId) => dispatch(WS.subscribeGame(gameId)),
     onUnsubscribeUpdates: () => dispatch(WS.unsubscribeGame()),
+    onMarkRead: (gameId) => dispatch(Game.submitMarkRead(gameId)),
   };
 }
 

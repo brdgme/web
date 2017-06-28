@@ -43,6 +43,25 @@ export class State extends Immutable.Record({
       });
     })) as this;
   }
+
+  public updateGamePlayer(gamePlayer: Model.IGamePlayer): this {
+    return this.updateIn(
+      ["games", gamePlayer.game_id],
+      (game: Records.GameExtended) => game.withMutations((g: Records.GameExtended) => {
+      if (g.game_player && g.game_player.id === gamePlayer.id) {
+        g.game_player.update((gp) => gp.merge(gamePlayer));
+      }
+      g.game_players.update((gps) => gps.map((gpu) => {
+        if (gpu!.game_player.id === gamePlayer.id) {
+          return gpu!.update(
+            "game_player",
+            (gp) => gp.merge(gamePlayer),
+          ) as Records.GamePlayerTypeUser;
+        }
+        return gpu!;
+      }).toList());
+    })) as this;
+  }
 }
 
 export const FETCH_GAME = "brdgme/game/FETCH_GAME";
@@ -55,6 +74,9 @@ export const SUBMIT_COMMAND_FAIL = "brdgme/game/SUBMIT_COMMAND_FAIL";
 export const SUBMIT_UNDO = "brdgme/game/SUBMIT_UNDO";
 export const SUBMIT_UNDO_SUCCESS = "brdgme/game/SUBMIT_UNDO_SUCCESS";
 export const SUBMIT_UNDO_FAIL = "brdgme/game/SUBMIT_UNDO_FAIL";
+export const SUBMIT_MARK_READ = "brdgme/game/SUBMIT_MARK_READ";
+export const SUBMIT_MARK_READ_SUCCESS = "brdgme/game/SUBMIT_MARK_READ_SUCCESS";
+export const SUBMIT_MARK_READ_FAIL = "brdgme/game/SUBMIT_MARK_READ_FAIL";
 
 export interface IFetchGame {
   type: typeof FETCH_GAME;
@@ -151,6 +173,35 @@ export const submitUndoFail = (error: string): ISubmitUndoFail => ({
   payload: error,
 });
 
+export interface ISubmitMarkRead {
+  type: typeof SUBMIT_MARK_READ;
+  payload: string;
+}
+export const submitMarkRead =
+  (gameId: string): ISubmitMarkRead => ({
+    type: SUBMIT_MARK_READ,
+    payload: gameId,
+  });
+
+export interface ISubmitMarkReadSuccess {
+  type: typeof SUBMIT_MARK_READ_SUCCESS;
+  payload: Model.IGamePlayer;
+}
+export const submitMarkReadSuccess =
+  (gamePlayer: Model.IGamePlayer): ISubmitMarkReadSuccess => ({
+    type: SUBMIT_MARK_READ_SUCCESS,
+    payload: gamePlayer,
+  });
+
+export interface ISubmitMarkReadFail {
+  type: typeof SUBMIT_MARK_READ_FAIL;
+  payload: string;
+}
+export const submitMarkReadFail = (error: string): ISubmitMarkReadFail => ({
+  type: SUBMIT_MARK_READ_FAIL,
+  payload: error,
+});
+
 export type Action
   = IFetchGame
   | IFetchGameSuccess
@@ -162,6 +213,9 @@ export type Action
   | ISubmitUndo
   | ISubmitUndoSuccess
   | ISubmitUndoFail
+  | ISubmitMarkRead
+  | ISubmitMarkReadSuccess
+  | ISubmitMarkReadFail
   ;
 
 export function reducer(state = new State(), action: Action): State {
@@ -171,6 +225,7 @@ export function reducer(state = new State(), action: Action): State {
     case UPDATE_GAMES: return state.updateGames(action.payload);
     case SUBMIT_COMMAND_SUCCESS: return state.updateGames(
       Records.GameExtended.fromJSList([action.payload]));
+    case SUBMIT_MARK_READ_SUCCESS: return state.updateGamePlayer(action.payload);
     default: return state;
   }
 }

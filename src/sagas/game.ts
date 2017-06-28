@@ -12,6 +12,7 @@ export function* sagas(): IterableIterator<Effect> {
   yield takeEvery(Game.FETCH_GAME, fetchGame);
   yield takeEvery(Game.SUBMIT_COMMAND, submitCommand);
   yield takeEvery(Game.SUBMIT_UNDO, submitUndo);
+  yield takeEvery(Game.SUBMIT_MARK_READ, submitMarkRead);
   yield takeEvery(GameNew.SUBMIT, submitNewGame);
 }
 
@@ -57,6 +58,23 @@ function* submitUndo(action: Game.ISubmitUndo): IterableIterator<Effect> {
     yield put(Game.submitUndoSuccess(game));
   } catch (e) {
     yield put(Game.submitUndoFail(e.response && e.response.text || e.message));
+  }
+}
+
+function* submitMarkRead(action: Game.ISubmitMarkRead): IterableIterator<Effect> {
+  const token: string = yield select((state: AppState) => state.session.token);
+  if (token === undefined) {
+    return;
+  }
+  try {
+    const gamePlayer = yield call(
+      http.submitMarkGameRead,
+      action.payload,
+      token,
+    );
+    yield put(Game.submitMarkReadSuccess(gamePlayer));
+  } catch (e) {
+    yield put(Game.submitMarkReadFail(e.response && e.response.text || e.message));
   }
 }
 

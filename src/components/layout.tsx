@@ -54,6 +54,7 @@ export class Component extends React.PureComponent<IProps, {}> {
             }}>New game</a>
           </div>
           {this.renderMyTurnGames()}
+          {this.renderFinishedGames()}
         </div>
         <div className="content">{this.props.children}</div>
       </div>
@@ -103,6 +104,27 @@ export class Component extends React.PureComponent<IProps, {}> {
       .toList();
   }
 
+  private renderFinishedGames(): JSX.Element | undefined {
+    const finishedGames = this.finishedGames();
+    if (finishedGames.size === 0) {
+      return undefined;
+    }
+    return <div>
+      <h2>Finished</h2>
+      {finishedGames.map((g) => g && this.renderGame(g))}
+    </div>;
+  }
+
+  private finishedGames(): Immutable.List<Records.GameExtended> {
+    if (this.props.activeGames === undefined || this.props.user === undefined) {
+      return Immutable.List() as Immutable.List<Records.GameExtended>;
+    }
+    return this.props.activeGames
+      .filter((ag) => ag!.game.is_finished && (!ag!.game_player || !ag!.game_player!.is_read))
+      .sortBy((ag) => ag!.game.finished_at)
+      .toList();
+  }
+
   private renderAuth(): JSX.Element {
     if (this.props.user !== undefined) {
       return <div>
@@ -127,9 +149,7 @@ export class Component extends React.PureComponent<IProps, {}> {
 function mapStateToProps(state: AppState): IPropValues {
   return {
     user: state.session.user,
-    activeGames: state.game.games.size > 0 && state.game.games.filter(
-      (g: Records.GameExtended) => !g.game.is_finished,
-    ).toList() || undefined,
+    activeGames: state.game.games.size > 0 && state.game.games.toList() || undefined,
   };
 }
 
