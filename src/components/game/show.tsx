@@ -244,12 +244,12 @@ export class Component extends React.PureComponent<IProps, {}> {
           <h2>{this.props.game.game_type && this.props.game.game_type.name}</h2>
           {this.props.game.game_players && this.props.game.game_players.map(this.renderMetaPlayer)}
           <h3>Actions</h3>
-          <div>
+          {!this.props.game.game.is_finished && this.props.game.game_players.size <= 2 && <div>
             <a onClick={(e) => {
               e.preventDefault();
               this.props.onConcede(this.props.gameId);
             }}>Concede</a>
-          </div>
+          </div>}
           {this.props.game.game_player.can_undo && <div>
             <a onClick={(e) => {
               e.preventDefault();
