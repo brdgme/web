@@ -41,6 +41,7 @@ interface IPropHandlers {
   onSubscribeUpdates: (gameId: string) => void;
   onUnsubscribeUpdates: (gameId: string) => void;
   onMarkRead: (gameId: string) => void;
+  onConcede: (gameId: string) => void;
 }
 
 interface IProps extends IPropValues, IPropHandlers { }
@@ -246,6 +247,7 @@ export class Component extends React.PureComponent<IProps, {}> {
           <div>
             <a onClick={(e) => {
               e.preventDefault();
+              this.props.onConcede(this.props.gameId);
             }}>Concede</a>
           </div>
           {this.props.game.game_player.can_undo && <div>
@@ -460,6 +462,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<{}>, ownProps: IOwnProps): 
     onSubscribeUpdates: (gameId) => dispatch(WS.subscribeGame(gameId)),
     onUnsubscribeUpdates: () => dispatch(WS.unsubscribeGame()),
     onMarkRead: (gameId) => dispatch(Game.submitMarkRead(gameId)),
+    onConcede: (gameId) => dispatch(Game.submitConcede(gameId)),
   };
 }
 

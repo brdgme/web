@@ -77,6 +77,9 @@ export const SUBMIT_UNDO_FAIL = "brdgme/game/SUBMIT_UNDO_FAIL";
 export const SUBMIT_MARK_READ = "brdgme/game/SUBMIT_MARK_READ";
 export const SUBMIT_MARK_READ_SUCCESS = "brdgme/game/SUBMIT_MARK_READ_SUCCESS";
 export const SUBMIT_MARK_READ_FAIL = "brdgme/game/SUBMIT_MARK_READ_FAIL";
+export const SUBMIT_CONCEDE = "brdgme/game/SUBMIT_CONCEDE";
+export const SUBMIT_CONCEDE_SUCCESS = "brdgme/game/SUBMIT_CONCEDE_SUCCESS";
+export const SUBMIT_CONCEDE_FAIL = "brdgme/game/SUBMIT_CONCEDE_FAIL";
 
 export interface IFetchGame {
   type: typeof FETCH_GAME;
@@ -202,6 +205,35 @@ export const submitMarkReadFail = (error: string): ISubmitMarkReadFail => ({
   payload: error,
 });
 
+export interface ISubmitConcede {
+  type: typeof SUBMIT_CONCEDE;
+  payload: string;
+}
+export const submitConcede =
+  (gameId: string): ISubmitConcede => ({
+    type: SUBMIT_CONCEDE,
+    payload: gameId,
+  });
+
+export interface ISubmitConcedeSuccess {
+  type: typeof SUBMIT_CONCEDE_SUCCESS;
+  payload: Records.GameExtended;
+}
+export const submitConcedeSuccess =
+  (game: Records.GameExtended): ISubmitConcedeSuccess => ({
+    type: SUBMIT_CONCEDE_SUCCESS,
+    payload: game,
+  });
+
+export interface ISubmitConcedeFail {
+  type: typeof SUBMIT_CONCEDE_FAIL;
+  payload: string;
+}
+export const submitConcedeFail = (error: string): ISubmitConcedeFail => ({
+  type: SUBMIT_CONCEDE_FAIL,
+  payload: error,
+});
+
 export type Action
   = IFetchGame
   | IFetchGameSuccess
@@ -216,6 +248,9 @@ export type Action
   | ISubmitMarkRead
   | ISubmitMarkReadSuccess
   | ISubmitMarkReadFail
+  | ISubmitConcede
+  | ISubmitConcedeSuccess
+  | ISubmitConcedeFail
   ;
 
 export function reducer(state = new State(), action: Action): State {
@@ -226,6 +261,8 @@ export function reducer(state = new State(), action: Action): State {
     case SUBMIT_COMMAND_SUCCESS: return state.updateGames(
       Records.GameExtended.fromJSList([action.payload]));
     case SUBMIT_MARK_READ_SUCCESS: return state.updateGamePlayer(action.payload);
+    case SUBMIT_CONCEDE_SUCCESS: return state.updateGames(
+      Records.GameExtended.fromJSList([action.payload]));
     default: return state;
   }
 }

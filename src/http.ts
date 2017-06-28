@@ -58,6 +58,16 @@ export async function submitMarkGameRead(id: string, token: string): Promise<Mod
     .then((res) => res.body as Model.IGamePlayer);
 }
 
+export async function submitGameConcede(id: string, token: string): Promise<Model.IGameExtended> {
+  return superagent
+    .post(`${process.env.API_SERVER}/game/${id}/concede`)
+    .auth(token, "")
+    .set("Content-Type", "application/json")
+    .set("Accept", "application/json")
+    .send()
+    .then((res) => res.body as Model.IGameExtended);
+}
+
 export async function submitUndo(id: string, token: string): Promise<Model.IGameExtended> {
   return superagent
     .post(`${process.env.API_SERVER}/game/${id}/undo`)
