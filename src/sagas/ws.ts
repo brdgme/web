@@ -1,5 +1,17 @@
 import { END, eventChannel } from "redux-saga";
-import { actionChannel, call, Effect, fork, put, select, take, takeEvery, takeLatest } from "redux-saga/effects";
+import {
+  actionChannel,
+  call,
+  cancel,
+  Effect,
+  fork,
+  put,
+  race,
+  select,
+  take,
+  takeEvery,
+  takeLatest,
+} from "redux-saga/effects";
 
 import * as http from "../http";
 import * as Records from "../records";
@@ -39,16 +51,30 @@ export function* wsSaga(): IterableIterator<Effect> {
     try {
       // yield put(WS.connecting());
       const socket: WebSocket = yield call(connect, process.env.WS_SERVER);
+      const socketClose = call(socketClosePromise, socket);
       // yield put(WS.connected());
       const s = yield fork(socketSagas, socket);
       while (true) {
-        sendAction(socket, yield take(actions));
+        const { action } = yield race({
+          action: take(actions),
+          close: socketClose,
+        });
+        if (action) {
+          sendAction(socket, action);
+        } else {
+          break;
+        }
       }
     } finally {
       yield put(WS.waitingForReconnect(5));
       yield call(sleep, 5 * 1000);
     }
   }
+}
+
+function socketClosePromise(socket: WebSocket): Promise<{}> {
+  return new Promise((resolve, reject) =>
+    socket.addEventListener("close", () => resolve()));
 }
 
 export function* handleMessages(socket: WebSocket): IterableIterator<Effect> {

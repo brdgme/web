@@ -7,7 +7,7 @@ export enum ConnectionState {
 }
 
 export class State extends Immutable.Record({
-  connected: false,
+  connectionState: ConnectionState.Connecting,
   secondsBeforeReconnect: undefined,
   subUser: undefined,
   subGame: undefined,
