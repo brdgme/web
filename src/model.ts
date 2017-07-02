@@ -36,7 +36,7 @@ export interface IGamePlayer {
   has_accepted: boolean;
   is_turn: boolean;
   is_read: boolean;
-  is_winner: boolean;
+  place: number;
 }
 
 export interface IUser {
