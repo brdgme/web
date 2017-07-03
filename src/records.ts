@@ -132,6 +132,7 @@ export class GamePlayer extends Immutable.Record({
   points: undefined,
   can_undo: undefined,
   place: undefined,
+  rating_change: undefined,
 }) {
   public static fromJS(js: any): GamePlayer {
     return new GamePlayer(js);
@@ -153,6 +154,7 @@ export class GamePlayer extends Immutable.Record({
   public points: number;
   public can_undo: boolean;
   public place: number;
+  public rating_change: number;
 }
 
 export class GameLog extends Immutable.Record({

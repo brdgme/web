@@ -36,7 +36,8 @@ export interface IGamePlayer {
   has_accepted: boolean;
   is_turn: boolean;
   is_read: boolean;
-  place: number;
+  place?: number;
+  rating_change?: number;
 }
 
 export interface IUser {
