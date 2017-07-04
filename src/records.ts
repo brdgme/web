@@ -222,6 +222,7 @@ export class GameExtended extends Immutable.Record({
   pub_state: undefined,
   html: undefined,
   command_spec: undefined,
+  chat: undefined,
 }) {
   public static fromJS(js: any): GameExtended {
     return new GameExtended({
@@ -234,6 +235,7 @@ export class GameExtended extends Immutable.Record({
       pub_state: js.pub_state,
       html: js.html,
       command_spec: Immutable.fromJS(js.command_spec),
+      chat: js.chat && ChatExtended.fromJS(js.chat) || undefined,
     });
   }
 
@@ -250,4 +252,75 @@ export class GameExtended extends Immutable.Record({
   public pub_state: string;
   public html?: string;
   public command_spec?: Immutable.Map<any, any>;
+  public chat?: ChatExtended;
+}
+
+export class Chat extends Immutable.Record({
+  id: undefined,
+  created_at: undefined,
+  updated_at: undefined,
+}) {
+  public static fromJS(js: any): Chat {
+    return new Chat(js);
+  }
+
+  public id: string;
+  public created_at: string;
+  public updated_at: string;
+}
+
+export class ChatUser extends Immutable.Record({
+  id: undefined,
+  created_at: undefined,
+  updated_at: undefined,
+  chat_id: undefined,
+  user_id: undefined,
+  last_read_at: undefined,
+}) {
+  public static fromJS(js: any): ChatUser {
+    return new ChatUser(js);
+  }
+
+  public id: string;
+  public created_at: string;
+  public updated_at: string;
+  public chat_id: string;
+  public user_id: string;
+  public last_read_at?: string;
+}
+
+export class ChatMessage extends Immutable.Record({
+  id: undefined,
+  created_at: undefined,
+  updated_at: undefined,
+  chat_user_id: undefined,
+  message: undefined,
+}) {
+  public static fromJS(js: any): ChatMessage {
+    return new ChatMessage(js);
+  }
+
+  public id: string;
+  public created_at: string;
+  public updated_at: string;
+  public chat_user_id: string;
+  public message: string;
+}
+
+export class ChatExtended extends Immutable.Record({
+  chat: undefined,
+  chat_users: undefined,
+  chat_messages: undefined,
+}) {
+  public static fromJS(js: any): ChatExtended {
+    return new ChatExtended({
+      chat: Chat.fromJS(js.chat),
+      chat_users: Immutable.List(js.chat_users.map(ChatUser.fromJS)),
+      chat_messages: Immutable.List(js.chat_messages.map(ChatMessage.fromJS)),
+    });
+  }
+
+  public chat: Chat;
+  public chat_users: Immutable.List<ChatUser>;
+  public chat_messages: Immutable.List<ChatMessage>;
 }
