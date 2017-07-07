@@ -16,6 +16,7 @@ export interface IPropValues {
   user?: Records.User;
   activeGames?: Immutable.List<Records.GameExtended>;
   menuOpen: boolean;
+  onSubMenuButtonClick?: () => void;
 }
 
 interface IPropHandlers {
@@ -47,6 +48,15 @@ export class Component extends React.PureComponent<IProps, {}> {
         <div className="layout-header">
           <input type="button" onClick={this.handleToggleMenu} value="Menu" />
           <span className="header-title">brdg.me</span>
+          {this.props.onSubMenuButtonClick && <input
+            style={{
+              display: "inline-block",
+              float: "right",
+            }}
+            type="button"
+            onClick={this.props.onSubMenuButtonClick}
+            value="Sub menu"
+          />}
         </div>
         <div className="layout-body">
           <div className={classNames({
@@ -178,11 +188,16 @@ export class Component extends React.PureComponent<IProps, {}> {
   }
 }
 
-function mapStateToProps(state: AppState): IPropValues {
+interface IOwnProps {
+  onSubMenuButtonClick?: () => void;
+}
+
+function mapStateToProps(state: AppState, ownProps: IOwnProps): IPropValues {
   return {
     user: state.session.user,
     activeGames: state.game.games.size > 0 && state.game.games.toList() || undefined,
     menuOpen: state.layout.menuOpen,
+    onSubMenuButtonClick: ownProps.onSubMenuButtonClick,
   };
 }
 
@@ -195,7 +210,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<{}>): IPropHandlers {
   };
 }
 
-export const Container: React.ComponentClass<{}> = ReactRedux.connect(
+export const Container: React.ComponentClass<IOwnProps> = ReactRedux.connect(
   mapStateToProps,
   mapDispatchToProps,
 )(Component);

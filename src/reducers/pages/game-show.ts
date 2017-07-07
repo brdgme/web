@@ -10,9 +10,11 @@ export class State extends Immutable.Record({
   commandError: undefined as string | undefined,
   suggestions: Immutable.List(),
   allSuggestions: Immutable.List(),
+  subMenuOpen: false,
 }) { }
 
 export const UPDATE_COMMAND = "brdgme/pages/game-show/UPDATE_COMMAND";
+export const TOGGLE_SUB_MENU = "brdgme/pages/game-show/TOGGLE_SUB_MENU";
 
 export interface IUpdateCommand {
   type: typeof UPDATE_COMMAND;
@@ -31,13 +33,22 @@ export const updateCommand = (
   payload: { command, commandPos, commandSpec },
 });
 
-type Action = IUpdateCommand | Game.Action;
+export interface IToggleSubMenu {
+  type: typeof TOGGLE_SUB_MENU;
+}
+export const toggleSubMenu = (): IToggleSubMenu => ({ type: TOGGLE_SUB_MENU });
+
+type Action
+  = IUpdateCommand
+  | IToggleSubMenu
+  | Game.Action;
 
 export function reducer(state = new State(), action: Action): State {
   switch (action.type) {
     case UPDATE_COMMAND: return state
       .set("command", action.payload.command)
       .set("commandPos", action.payload.commandPos);
+    case TOGGLE_SUB_MENU: return state.update("subMenuOpen", (s) => !s);
     case Game.SUBMIT_COMMAND:
     case Game.SUBMIT_UNDO:
       return state.set("submittingCommand", true);

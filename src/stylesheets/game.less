@@ -167,9 +167,33 @@
   }
 }
 
+.game-meta-close-underlay {
+  display: none;
+}
+
 @media @query-small {
   .game-meta {
     display: none;
+  }
+
+  .game-meta.open {
+    display: block;
+    position: absolute;
+    z-index: 100;
+    top: 0;
+    right: 0;
+    height: 100%;
+    max-width: 85%;
+  }
+
+  .game-meta-close-underlay {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.63);
   }
 
   .game-main .suggestions-container {

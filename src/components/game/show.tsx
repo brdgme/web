@@ -27,6 +27,7 @@ export interface IPropValues extends IOwnProps {
   commandPos: number;
   submittingCommand?: boolean;
   commandError?: string;
+  subMenuOpen: boolean;
 }
 
 interface IPropHandlers {
@@ -42,6 +43,7 @@ interface IPropHandlers {
   onUnsubscribeUpdates: (gameId: string) => void;
   onMarkRead: (gameId: string) => void;
   onConcede: (gameId: string) => void;
+  onToggleSubMenu: () => void;
 }
 
 interface IProps extends IPropValues, IPropHandlers { }
@@ -54,11 +56,14 @@ export class Component extends React.PureComponent<IProps, {}> {
     this.onCommandPositionChange = this.onCommandPositionChange.bind(this);
     this.focusCommandInput = this.focusCommandInput.bind(this);
     this.onCommandSubmit = this.onCommandSubmit.bind(this);
+    this.handleSubMenuButtonClick = this.handleSubMenuButtonClick.bind(this);
   }
 
   public render(): JSX.Element {
     return (
-      <Layout>
+      <Layout
+        onSubMenuButtonClick={this.handleSubMenuButtonClick}
+      >
         <div className="game-container">
           <div className="game-main">
             <div className="game-render">
@@ -96,6 +101,10 @@ export class Component extends React.PureComponent<IProps, {}> {
           </div>
           {this.renderMeta()}
         </div>
+        {this.props.subMenuOpen && <div
+          className="game-meta-close-underlay"
+          onClick={this.handleSubMenuButtonClick}
+        />}
       </Layout>
     );
   }
@@ -238,7 +247,10 @@ export class Component extends React.PureComponent<IProps, {}> {
   }
 
   private renderMeta(): JSX.Element {
-    return <div className="game-meta">
+    return <div className={classNames({
+      "game-meta": true,
+      "open": this.props.subMenuOpen,
+    })}>
       <div className="game-meta-main">
         {this.props.game && this.props.game.game_player && <div>
           <h2>{this.props.game.game_type && this.props.game.game_type.name}</h2>
@@ -429,6 +441,10 @@ export class Component extends React.PureComponent<IProps, {}> {
       this.props.onCommandChange(command, commandPos, this.commandSpec());
     }
   }
+
+  private handleSubMenuButtonClick() {
+    this.props.onToggleSubMenu();
+  }
 }
 
 interface ICommandChange {
@@ -449,6 +465,7 @@ function mapStateToProps(state: AppState, ownProps: IOwnProps): IPropValues {
     commandPos: state.pages.gameShow.commandPos,
     submittingCommand: state.pages.gameShow.submittingCommand,
     commandError: state.pages.gameShow.commandError,
+    subMenuOpen: state.pages.gameShow.subMenuOpen,
   };
 }
 
@@ -457,6 +474,7 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<{}>, ownProps: IOwnProps): 
     onCommand: (gameId, command) => dispatch(Game.submitCommand(gameId, command)),
     onCommandChange: (command, commandPos, commandSpec) =>
       dispatch(GameShow.updateCommand(command, commandPos, commandSpec)),
+    onToggleSubMenu: () => dispatch(GameShow.toggleSubMenu()),
     onUndo: (gameId) => dispatch(Game.submitUndo(gameId)),
     onFetch: (gameId) => dispatch(Game.fetchGame(gameId)),
     onSubscribeUpdates: (gameId) => dispatch(WS.subscribeGame(gameId)),
