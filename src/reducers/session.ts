@@ -4,16 +4,11 @@ import * as Records from "../records";
 import * as Login from "./pages/login";
 
 export class State extends Immutable.Record({
-  token: undefined,
+  token: undefined as string | undefined,
   path: "",
-  user: undefined,
-  gameVersionTypes: undefined,
-}) {
-  public token?: string;
-  public path: string;
-  public user?: Records.User;
-  public gameVersionTypes?: Immutable.List<Records.GameVersionType>;
-}
+  user: undefined as Records.User | undefined,
+  gameVersionTypes: undefined as Immutable.List<Records.GameVersionType> | undefined,
+}) { }
 
 export const UPDATE_TOKEN = "brdgme/session/UPDATE_TOKEN";
 export const CLEAR_TOKEN = "brdgme/session/CLEAR_TOKEN";
@@ -71,12 +66,12 @@ type Action
 
 export function reducer(state = new State(), action: Action): State {
   switch (action.type) {
-    case UPDATE_TOKEN: return state.set("token", action.payload) as State;
-    case CLEAR_TOKEN: return state.remove("token") as State;
-    case UPDATE_PATH: return state.set("path", action.payload) as State;
-    case UPDATE_USER: return state.set("user", action.payload) as State;
+    case UPDATE_TOKEN: return state.set("token", action.payload);
+    case CLEAR_TOKEN: return state.remove("token");
+    case UPDATE_PATH: return state.set("path", action.payload);
+    case UPDATE_USER: return state.set("user", action.payload);
     case UPDATE_GAME_VERSION_TYPES:
-      return state.set("gameVersionTypes", action.payload) as State;
+      return state.set("gameVersionTypes", action.payload);
     default: return state;
   }
 }

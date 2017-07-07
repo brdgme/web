@@ -35,8 +35,8 @@ function* submitCommand(action: Game.ISubmitCommand): IterableIterator<Effect> {
   try {
     const game = yield call(
       http.submitGameCommand,
-      action.payload!.gameId,
-      action.payload!.command,
+      action.payload.gameId,
+      action.payload.command,
       token,
     );
     yield put(Game.submitCommandSuccess(game));

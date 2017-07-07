@@ -3,64 +3,47 @@ import * as Immutable from "immutable";
 import { ICommandSpec } from "./command";
 
 export class User extends Immutable.Record({
-  id: undefined,
-  created_at: undefined,
-  updated_at: undefined,
-  name: undefined,
-  pref_colors: Immutable.List(),
+  id: "",
+  created_at: "",
+  updated_at: "",
+  name: "",
+  pref_colors: Immutable.List<string>(),
 }) {
   public static fromJS(js: any): User {
     return new User(js);
   }
-
-  public id: string;
-  public created_at: string;
-  public updated_at: string;
-  public name: string;
-  public pref_colors: Immutable.List<string>;
 }
 
 export class GameType extends Immutable.Record({
-  id: undefined,
-  created_at: undefined,
-  updated_at: undefined,
-  name: undefined,
+  id: "",
+  created_at: "",
+  updated_at: "",
+  name: "",
+  player_counts: Immutable.List<number>(),
+  weight: 0,
 }) {
   public static fromJS(js: any): GameType {
     return new GameType(js);
   }
-
-  public id: string;
-  public created_at: string;
-  public updated_at: string;
-  public name: string;
 }
 
 export class GameVersion extends Immutable.Record({
-  id: undefined,
-  created_at: undefined,
-  updated_at: undefined,
-  game_type_id: undefined,
-  name: undefined,
-  is_public: undefined,
-  is_deprecated: undefined,
+  id: "",
+  created_at: "",
+  updated_at: "",
+  game_type_id: "",
+  name: "",
+  is_public: false,
+  is_deprecated: false,
 }) {
-  public static fromJS(js: any): GameType {
-    return new GameType(js);
+  public static fromJS(js: any): GameVersion {
+    return new GameVersion(js);
   }
-
-  public id: string;
-  public created_at: string;
-  public updated_at: string;
-  public game_type_id: string;
-  public name: string;
-  public is_public: boolean;
-  public is_deprecated: boolean;
 }
 
 export class GameVersionType extends Immutable.Record({
-  game_version: undefined,
-  game_type: undefined,
+  game_version: new GameVersion(),
+  game_type: new GameType(),
 }) {
   public static fromJS(js: any): GameVersionType {
     return new GameVersionType({
@@ -68,120 +51,77 @@ export class GameVersionType extends Immutable.Record({
       game_type: GameType.fromJS(js.game_type),
     });
   }
-
-  public game_version: GameVersion;
-  public game_type: GameType;
 }
 
 export class Game extends Immutable.Record({
-  id: undefined,
-  created_at: undefined,
-  updated_at: undefined,
-  game_version_id: undefined,
-  is_finished: undefined,
-  finished_at: undefined,
+  id: "",
+  created_at: "",
+  updated_at: "",
+  game_version_id: "",
+  is_finished: false,
+  finished_at: undefined as string | undefined,
+  chat_id: undefined as string | undefined,
 }) {
   public static fromJS(js: any): Game {
     return new Game(js);
   }
-
-  public id: string;
-  public created_at: string;
-  public updated_at: string;
-  public game_version_id: string;
-  public is_finished: boolean;
-  public finished_at: string;
 }
 
 export class GameTypeUser extends Immutable.Record({
-  id: undefined,
-  created_at: undefined,
-  updated_at: undefined,
-  game_type_id: undefined,
-  user_id: undefined,
-  rating: undefined,
-  peak_rating: undefined,
+  id: "",
+  created_at: "",
+  updated_at: "",
+  game_type_id: "",
+  user_id: "",
+  rating: 0,
+  peak_rating: 0,
 }) {
   public static fromJS(js: any): GameTypeUser {
     return new GameTypeUser(js);
   }
-
-  public id: string;
-  public created_at: string;
-  public updated_at: string;
-  public game_type_id: string;
-  public user_id: string;
-  public rating: number;
-  public peak_rating: number;
 }
 
 export class GamePlayer extends Immutable.Record({
-  id: undefined,
-  created_at: undefined,
-  updated_at: undefined,
-  game_id: undefined,
-  user_id: undefined,
-  position: undefined,
-  color: undefined,
-  has_accepted: undefined,
-  is_turn: undefined,
-  is_turn_at: undefined,
-  last_turn_at: undefined,
-  is_eliminated: undefined,
-  is_read: undefined,
-  points: undefined,
-  can_undo: undefined,
-  place: undefined,
-  rating_change: undefined,
+  id: "",
+  created_at: "",
+  updated_at: "",
+  game_id: "",
+  user_id: "",
+  position: 0,
+  color: "",
+  has_accepted: false,
+  is_turn: false,
+  is_turn_at: "",
+  last_turn_at: "",
+  is_eliminated: false,
+  is_read: false,
+  points: undefined as number | undefined,
+  can_undo: false,
+  place: undefined as number | undefined,
+  rating_change: undefined as number | undefined,
 }) {
   public static fromJS(js: any): GamePlayer {
     return new GamePlayer(js);
   }
-
-  public id: string;
-  public created_at: string;
-  public updated_at: string;
-  public game_id: string;
-  public user_id: string;
-  public position: number;
-  public color: string;
-  public has_accepted: boolean;
-  public is_turn: boolean;
-  public is_turn_at: string;
-  public last_turn_at: string;
-  public is_eliminated: boolean;
-  public is_read: boolean;
-  public points: number;
-  public can_undo: boolean;
-  public place: number;
-  public rating_change: number;
 }
 
 export class GameLog extends Immutable.Record({
-  id: undefined,
-  created_at: undefined,
-  updated_at: undefined,
-  game_id: undefined,
-  body: undefined,
-  is_public: undefined,
-  logged_at: undefined,
+  id: "",
+  created_at: "",
+  updated_at: "",
+  game_id: "",
+  body: "",
+  is_public: false,
+  logged_at: "",
 }) {
   public static fromJS(js: any): GameLog {
     return new GameLog(js);
   }
-
-  public id: string;
-  public created_at: string;
-  public updated_at: string;
-  public game_id: string;
-  public body: string;
-  public is_public: boolean;
-  public logged_at: string;
 }
 
 export class GameLogRendered extends Immutable.Record({
-  game_log: undefined,
-  html: undefined,
+  game_log: new GameLog(),
+  html: "",
 }) {
   public static fromJS(js: any): GameLogRendered {
     return new GameLogRendered({
@@ -189,15 +129,12 @@ export class GameLogRendered extends Immutable.Record({
       html: js.html,
     });
   }
-
-  public game_log: GameLog;
-  public html: string;
 }
 
 export class GamePlayerTypeUser extends Immutable.Record({
-  game_player: undefined,
-  user: undefined,
-  game_type_user: undefined,
+  game_player: new GamePlayer(),
+  user: new User(),
+  game_type_user: new GameTypeUser(),
 }) {
   public static fromJS(js: any): GamePlayerTypeUser {
     return new GamePlayerTypeUser({
@@ -206,23 +143,19 @@ export class GamePlayerTypeUser extends Immutable.Record({
       game_type_user: GameTypeUser.fromJS(js.game_type_user),
     });
   }
-
-  public game_player: GamePlayer;
-  public user: User;
-  public game_type_user: GameTypeUser;
 }
 
 export class GameExtended extends Immutable.Record({
-  game: undefined,
-  game_type: undefined,
-  game_version: undefined,
-  game_player: undefined,
-  game_players: undefined,
-  game_logs: undefined,
-  pub_state: undefined,
-  html: undefined,
-  command_spec: undefined,
-  chat: undefined,
+  game: new Game(),
+  game_type: new GameType(),
+  game_version: new GameVersion(),
+  game_player: undefined as GamePlayer | undefined,
+  game_players: Immutable.List<GamePlayerTypeUser>(),
+  chat: undefined as ChatExtended | undefined,
+  game_logs: undefined as Immutable.List<GameLogRendered> | undefined,
+  pub_state: undefined as string | undefined,
+  html: undefined as string | undefined,
+  command_spec: undefined as Immutable.Map<any, any> | undefined,
 }) {
   public static fromJS(js: any): GameExtended {
     return new GameExtended({
@@ -230,11 +163,11 @@ export class GameExtended extends Immutable.Record({
       game_type: GameType.fromJS(js.game_type),
       game_version: GameVersion.fromJS(js.game_version),
       game_player: js.game_player && GamePlayer.fromJS(js.game_player) || undefined,
-      game_players: Immutable.List(js.game_players.map(GamePlayerTypeUser.fromJS)),
-      game_logs: js.game_logs && Immutable.List(js.game_logs.map(GameLogRendered.fromJS)),
+      game_players: Immutable.List<GamePlayerTypeUser>(js.game_players.map(GamePlayerTypeUser.fromJS)),
+      game_logs: js.game_logs && Immutable.List<GameLogRendered>(js.game_logs.map(GameLogRendered.fromJS)) || undefined,
       pub_state: js.pub_state,
       html: js.html,
-      command_spec: Immutable.fromJS(js.command_spec),
+      command_spec: js.command_spec && Immutable.fromJS(js.command_spec) || undefined,
       chat: js.chat && ChatExtended.fromJS(js.chat) || undefined,
     });
   }
@@ -242,85 +175,53 @@ export class GameExtended extends Immutable.Record({
   public static fromJSList(js: any): Immutable.List<GameExtended> {
     return Immutable.List<GameExtended>(js.map(GameExtended.fromJS));
   }
-
-  public game: Game;
-  public game_type: GameType;
-  public game_version: GameVersion;
-  public game_player?: GamePlayer;
-  public game_players: Immutable.List<GamePlayerTypeUser>;
-  public game_logs?: Immutable.List<GameLogRendered>;
-  public pub_state: string;
-  public html?: string;
-  public command_spec?: Immutable.Map<any, any>;
-  public chat?: ChatExtended;
 }
 
 export class Chat extends Immutable.Record({
-  id: undefined,
-  created_at: undefined,
-  updated_at: undefined,
+  id: "",
+  created_at: "",
+  updated_at: "",
 }) {
   public static fromJS(js: any): Chat {
     return new Chat(js);
   }
-
-  public id: string;
-  public created_at: string;
-  public updated_at: string;
 }
 
 export class ChatUser extends Immutable.Record({
-  id: undefined,
-  created_at: undefined,
-  updated_at: undefined,
-  chat_id: undefined,
-  user_id: undefined,
-  last_read_at: undefined,
+  id: "",
+  created_at: "",
+  updated_at: "",
+  chat_id: "",
+  user_id: "",
+  last_read_at: "",
 }) {
   public static fromJS(js: any): ChatUser {
     return new ChatUser(js);
   }
-
-  public id: string;
-  public created_at: string;
-  public updated_at: string;
-  public chat_id: string;
-  public user_id: string;
-  public last_read_at?: string;
 }
 
 export class ChatMessage extends Immutable.Record({
-  id: undefined,
-  created_at: undefined,
-  updated_at: undefined,
-  chat_user_id: undefined,
-  message: undefined,
+  id: "",
+  created_at: "",
+  updated_at: "",
+  chat_user_id: "",
+  message: "",
 }) {
   public static fromJS(js: any): ChatMessage {
     return new ChatMessage(js);
   }
-
-  public id: string;
-  public created_at: string;
-  public updated_at: string;
-  public chat_user_id: string;
-  public message: string;
 }
 
 export class ChatExtended extends Immutable.Record({
-  chat: undefined,
-  chat_users: undefined,
-  chat_messages: undefined,
+  chat: new Chat(),
+  chat_users: Immutable.List<ChatUser>(),
+  chat_messages: Immutable.List<ChatMessage>(),
 }) {
   public static fromJS(js: any): ChatExtended {
     return new ChatExtended({
       chat: Chat.fromJS(js.chat),
-      chat_users: Immutable.List(js.chat_users.map(ChatUser.fromJS)),
-      chat_messages: Immutable.List(js.chat_messages.map(ChatMessage.fromJS)),
+      chat_users: Immutable.List<ChatUser>(js.chat_users.map(ChatUser.fromJS)),
+      chat_messages: Immutable.List<ChatMessage>(js.chat_messages.map(ChatMessage.fromJS)),
     });
   }
-
-  public chat: Chat;
-  public chat_users: Immutable.List<ChatUser>;
-  public chat_messages: Immutable.List<ChatMessage>;
 }

@@ -40,7 +40,7 @@ export type Action = IClearPageState;
 export function reducer(state: State = new State(), action: Action): State {
   state = childrenReducer(state, action);
   switch (action.type) {
-    case CLEAR_PAGE_STATE: return state.remove("pages") as State;
+    case CLEAR_PAGE_STATE: return state.remove("pages");
     default: return state;
   }
 }

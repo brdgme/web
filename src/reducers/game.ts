@@ -4,10 +4,8 @@ import * as Model from "../model";
 import * as Records from "../records";
 
 export class State extends Immutable.Record({
-  games: Immutable.Map(),
+  games: Immutable.Map<string, Records.GameExtended>(),
 }) {
-  public games: Immutable.Map<string, Records.GameExtended>;
-
   public updateGames(newGames: Immutable.List<Records.GameExtended>): this {
     return this.set("games", this.games.withMutations((games) => {
       newGames.forEach((g) => {
@@ -39,9 +37,9 @@ export class State extends Immutable.Record({
               });
             }
           }));
-        }) as Records.GameExtended);
+        }));
       });
-    })) as this;
+    }));
   }
 
   public updateGamePlayer(gamePlayer: Model.IGamePlayer): this {
@@ -51,19 +49,19 @@ export class State extends Immutable.Record({
     return this.updateIn(
       ["games", gamePlayer.game_id],
       (game: Records.GameExtended) => game.withMutations((g: Records.GameExtended) => {
-      if (g.game_player && g.game_player.id === gamePlayer.id) {
-        g.game_player.update((gp) => gp.merge(gamePlayer));
-      }
-      g.game_players.update((gps) => gps.map((gpu) => {
-        if (gpu!.game_player.id === gamePlayer.id) {
-          return gpu!.update(
-            "game_player",
-            (gp) => gp.merge(gamePlayer),
-          ) as Records.GamePlayerTypeUser;
+        if (g.game_player !== undefined && g.game_player.id === gamePlayer.id) {
+          g.game_player.merge(gamePlayer);
         }
-        return gpu!;
-      }).toList());
-    })) as this;
+        g.game_players.update((gps) => gps.map((gpu) => {
+          if (gpu.game_player.id === gamePlayer.id) {
+            return gpu.update(
+              "game_player",
+              (gp) => gp.merge(gamePlayer),
+            );
+          }
+          return gpu;
+        }).toList());
+      }));
   }
 }
 

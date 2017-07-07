@@ -6,7 +6,7 @@ import * as Session from "../reducers/session";
 
 export function* sagas(): IterableIterator<Effect> {
   yield takeEvery(Login.SUBMIT_EMAIL, submitLoginEmail),
-  yield takeEvery(Login.SUBMIT_CODE, submitLoginCode);
+    yield takeEvery(Login.SUBMIT_CODE, submitLoginCode);
 }
 
 function* submitLoginEmail(action: Login.ISubmitEmail): IterableIterator<Effect> {
@@ -22,8 +22,8 @@ function* submitLoginCode(action: Login.ISubmitCode): IterableIterator<Effect> {
   try {
     const token: string = yield call(
       http.submitLoginCode,
-      action.payload!.email,
-      action.payload!.code,
+      action.payload.email,
+      action.payload.code,
     );
     yield put(Login.submitCodeSuccess(token));
   } catch (e) {

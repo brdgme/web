@@ -53,9 +53,9 @@ export class Component extends React.PureComponent<IProps, {}> {
             >
               <option>Choose game</option>
               {this.props.gameVersionTypes.map((gv) => <option
-                value={gv!.game_version.id}
+                value={gv.game_version.id}
               >
-                {gv!.game_type.name}
+                {gv.game_type.name}
               </option>)}
             </select>
           </div>
@@ -63,9 +63,9 @@ export class Component extends React.PureComponent<IProps, {}> {
           {this.props.userIds.map((uId, key) => <div>
             <input
               value={uId}
-              onChange={(e) => this.handleUserIdChange(e, key!)}
+              onChange={(e) => this.handleUserIdChange(e, key)}
             />
-            <a onClick={(e) => this.handleRemoveUserId(e, key!)}>X</a>
+            <a onClick={(e) => this.handleRemoveUserId(e, key)}>X</a>
           </div>)}
           <div>
             <a onClick={this.handleAddUserIdClick}>Add</a>
@@ -74,9 +74,9 @@ export class Component extends React.PureComponent<IProps, {}> {
           {this.props.emails.map((email, key) => <div>
             <input
               value={email}
-              onChange={(e) => this.handleEmailChange(e, key!)}
+              onChange={(e) => this.handleEmailChange(e, key)}
             />
-            <a onClick={(e) => this.handleRemoveEmail(e, key!)}>X</a>
+            <a onClick={(e) => this.handleRemoveEmail(e, key)}>X</a>
           </div>)}
           <div>
             <a onClick={this.handleAddEmailClick}>Add</a>

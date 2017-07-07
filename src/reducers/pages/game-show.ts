@@ -7,18 +7,10 @@ export class State extends Immutable.Record({
   command: "",
   commandPos: 0,
   submittingCommand: false,
-  commandError: undefined,
-  hideLogsAt: undefined,
+  commandError: undefined as string | undefined,
   suggestions: Immutable.List(),
   allSuggestions: Immutable.List(),
-}) {
-  public command: string;
-  public commandPos: number;
-  public submittingCommand: boolean;
-  public commandError?: string;
-  public suggestions: Immutable.List<any>;
-  public allSuggestions: Immutable.List<any>;
-}
+}) { }
 
 export const UPDATE_COMMAND = "brdgme/pages/game-show/UPDATE_COMMAND";
 
@@ -45,22 +37,22 @@ export function reducer(state = new State(), action: Action): State {
   switch (action.type) {
     case UPDATE_COMMAND: return state
       .set("command", action.payload.command)
-      .set("commandPos", action.payload.commandPos) as State;
+      .set("commandPos", action.payload.commandPos);
     case Game.SUBMIT_COMMAND:
     case Game.SUBMIT_UNDO:
-      return state.set("submittingCommand", true) as State;
+      return state.set("submittingCommand", true);
     case Game.SUBMIT_COMMAND_SUCCESS:
     case Game.SUBMIT_UNDO_SUCCESS:
       return state
-      .set("submittingCommand", false)
-      .set("command", "")
-      .set("commandPos", 0)
-      .remove("commandError") as State;
+        .set("submittingCommand", false)
+        .set("command", "")
+        .set("commandPos", 0)
+        .remove("commandError");
     case Game.SUBMIT_COMMAND_FAIL: return state
       .set("commandError", action.payload)
-      .set("submittingCommand", false) as State;
+      .set("submittingCommand", false);
     case Game.SUBMIT_UNDO_FAIL: return state
-      .set("submittingCommand", false) as State;
+      .set("submittingCommand", false);
     default: return state;
   }
 }

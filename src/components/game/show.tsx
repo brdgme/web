@@ -313,8 +313,8 @@ export class Component extends React.PureComponent<IProps, {}> {
     }
     if (opponentWhoseTurn.size > 0) {
       const opponents = opponentWhoseTurn.map((o) => <span> <Player
-        name={o!.user.name}
-        color={o!.game_player.color}
+        name={o.user.name}
+        color={o.game_player.color}
       /></span>);
       if (isMyTurn) {
         content.push(<span> (also{opponents})</span>);
@@ -345,7 +345,7 @@ export class Component extends React.PureComponent<IProps, {}> {
         }
         return true;
       })
-      || Immutable.List()) as Immutable.List<Records.GamePlayerTypeUser>;
+      || Immutable.List());
   }
 
   private fetchGameIfRequired(props: IProps) {
@@ -386,7 +386,7 @@ export class Component extends React.PureComponent<IProps, {}> {
     let lastLog: moment.Moment;
     const renderedLogs: JSX.Element[] = logs.map((gl) => {
       let timeEl: JSX.Element = <div />;
-      const logTime = moment.utc(gl!.game_log.logged_at);
+      const logTime = moment.utc(gl.game_log.logged_at);
       if (lastLog === undefined || logTime.clone().subtract(10, "minutes").isAfter(lastLog)) {
         timeEl = (
           <div className="log-time">- {this.formatLogTime(logTime)} -</div>
@@ -396,7 +396,7 @@ export class Component extends React.PureComponent<IProps, {}> {
       return (
         <div className="game-log-entry">
           {timeEl}
-          <div dangerouslySetInnerHTML={{ __html: gl!.html }} />
+          <div dangerouslySetInnerHTML={{ __html: gl.html }} />
         </div>
       );
     }).toArray();

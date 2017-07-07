@@ -36,7 +36,7 @@ function* updateToken(action: Session.IUpdateToken): IterableIterator<Effect> {
   yield put(Session.updateGameVersionTypes(
     Immutable.List(
       init.game_version_types.map(Records.GameVersionType.fromJS),
-    ) as Immutable.List<Records.GameVersionType>,
+    ),
   ));
   yield put(Game.updateGames(Records.GameExtended.fromJSList(init.games)));
 }

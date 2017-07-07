@@ -7,10 +7,12 @@
         "target": "ES5",
         "jsx": "react",
         "strictNullChecks": true,
-        "noLib": true
+        "lib": [
+            "es2015",
+            "dom"
+        ]
     },
     "include": [
-        "./node_modules/typescript/lib/lib.es6.d.ts",
         "./src/**/*"
     ]
 }

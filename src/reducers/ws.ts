@@ -8,15 +8,10 @@ export enum ConnectionState {
 
 export class State extends Immutable.Record({
   connectionState: ConnectionState.Connecting,
-  secondsBeforeReconnect: undefined,
-  subUser: undefined,
-  subGame: undefined,
-}) {
-  public connectionState: ConnectionState;
-  public secondsBeforeReconnect?: number;
-  public subUser?: string;
-  public subGame?: string;
-}
+  secondsBeforeReconnect: undefined as number | undefined,
+  subUser: undefined as string | undefined,
+  subGame: undefined as string | undefined,
+}) { }
 
 export const CONNECTED = "brdgme/ws/CONNECTED";
 export const CONNECTING = "brdgme/ws/CONNECTING";
@@ -82,19 +77,19 @@ export type Action
 export function reducer(state = new State(), action: Action): State {
   switch (action.type) {
     case CONNECTING:
-      return state.set("connectionState", ConnectionState.Connecting) as State;
+      return state.set("connectionState", ConnectionState.Connecting);
     case CONNECTED:
       return state
         .set("connectionState", ConnectionState.Connected)
-        .remove("secondsBeforeReconnect") as State;
+        .remove("secondsBeforeReconnect");
     case WAITING_FOR_RECONNECT:
       return state
         .set("connectionState", ConnectionState.WaitingForReconnect)
-        .set("secondsBeforeReconnect", action.payload) as State;
-    case SUBSCRIBE_USER: return state.set("subUser", action.payload) as State;
-    case UNSUBSCRIBE_USER: return state.remove("subUser") as State;
-    case SUBSCRIBE_GAME: return state.set("subGame", action.payload) as State;
-    case UNSUBSCRIBE_GAME: return state.remove("subGame") as State;
+        .set("secondsBeforeReconnect", action.payload);
+    case SUBSCRIBE_USER: return state.set("subUser", action.payload);
+    case UNSUBSCRIBE_USER: return state.remove("subUser");
+    case SUBSCRIBE_GAME: return state.set("subGame", action.payload);
+    case UNSUBSCRIBE_GAME: return state.remove("subGame");
     default: return state;
   }
 }

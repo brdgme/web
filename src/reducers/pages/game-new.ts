@@ -11,17 +11,11 @@ export enum Mode {
 
 export class State extends Immutable.Record({
   mode: Mode.Editable,
-  game_version_types: undefined,
-  game_version_id: undefined,
-  emails: Immutable.List(),
-  user_ids: Immutable.List(),
-}) {
-  public mode: Mode;
-  public game_version_types: Immutable.List<Records.GameVersionType>;
-  public game_version_id: string;
-  public emails: Immutable.List<string>;
-  public user_ids: Immutable.List<string>;
-}
+  game_version_types: Immutable.List<Records.GameVersionType>(),
+  game_version_id: "",
+  emails: Immutable.List<string>(),
+  user_ids: Immutable.List<string>(),
+}) { }
 
 export const UPDATE_MODE = "brdgme/pages/game-new/UPDATE_MODE";
 export const FETCH_GAME_VERSION_TYPES = "brdgme/pages/game-new/FETCH_GAME_VERSION_TYPES";
@@ -159,35 +153,35 @@ export type Action
 
 export function reducer(state = new State(), action: Action): State {
   switch (action.type) {
-    case UPDATE_MODE: return state.set("mode", action.payload) as State;
+    case UPDATE_MODE: return state.set("mode", action.payload);
     case UPDATE_GAME_VERSION_ID: return state.set(
       "game_version_id",
       action.payload,
-    ) as State;
+    );
     case ADD_EMAIL: return state.update(
       "emails",
       (emails) => emails.push(""),
-    ) as State;
+    );
     case REMOVE_EMAIL: return state.update(
       "emails",
       (emails) => emails.delete(action.payload),
-    ) as State;
+    );
     case UPDATE_EMAIL: return state.update(
       "emails",
       (emails) => emails.set(action.payload.index, action.payload.email),
-    ) as State;
+    );
     case ADD_USER_ID: return state.update(
       "user_ids",
       (user_ids) => user_ids.push(""),
-    ) as State;
+    );
     case REMOVE_USER_ID: return state.update(
       "user_ids",
       (user_ids) => user_ids.delete(action.payload),
-    ) as State;
+    );
     case UPDATE_USER_ID: return state.update(
       "user_ids",
       (user_ids) => user_ids.set(action.payload.index, action.payload.user_id),
-    ) as State;
+    );
     case SUBMIT_FAIL:
       alert(`Failed to create game: ${action.payload}`);
       return state;

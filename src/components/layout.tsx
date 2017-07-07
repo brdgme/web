@@ -75,8 +75,8 @@ export class Component extends React.PureComponent<IProps, {}> {
           with {game.game_players
             .filter((gp) => gp && gp.game_player.id !== myPlayerId || false)
             .map((gp) => <span> <Player
-              name={gp!.user.name}
-              color={gp!.game_player.color}
+              name={gp.user.name}
+              color={gp.game_player.color}
             /></span>)}
         </div>
       </a>
@@ -96,11 +96,11 @@ export class Component extends React.PureComponent<IProps, {}> {
 
   private myTurnGames(): Immutable.List<Records.GameExtended> {
     if (this.props.activeGames === undefined || this.props.user === undefined) {
-      return Immutable.List() as Immutable.List<Records.GameExtended>;
+      return Immutable.List();
     }
     return this.props.activeGames
-      .filter((ag) => ag!.game_player && ag!.game_player!.is_turn || false)
-      .sortBy((ag) => ag!.game_player!.is_turn_at)
+      .filter((ag) => ag.game_player && ag.game_player.is_turn || false)
+      .sortBy((ag) => ag.game_player!.is_turn_at)
       .toList();
   }
 
@@ -117,11 +117,11 @@ export class Component extends React.PureComponent<IProps, {}> {
 
   private finishedGames(): Immutable.List<Records.GameExtended> {
     if (this.props.activeGames === undefined || this.props.user === undefined) {
-      return Immutable.List() as Immutable.List<Records.GameExtended>;
+      return Immutable.List();
     }
     return this.props.activeGames
-      .filter((ag) => ag!.game.is_finished && (!ag!.game_player || !ag!.game_player!.is_read))
-      .sortBy((ag) => ag!.game.finished_at)
+      .filter((ag) => ag.game.is_finished && (!ag.game_player || !ag.game_player.is_read))
+      .sortBy((ag) => ag.game.finished_at)
       .toList();
   }
 
