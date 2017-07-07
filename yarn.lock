@@ -404,7 +404,7 @@ braces@^2.2.2:
 
 "brdgme-websocket-server@https://github.com/brdgme/websocket-server.git":
   version "0.1.0"
-  resolved "https://github.com/brdgme/websocket-server.git#3689f024a5a36680e26ee2ea9aa213831f2d1911"
+  resolved "https://github.com/brdgme/websocket-server.git#1bf28dd29d449b4649576ca1b93db718e4eacac8"
   dependencies:
     "@types/loglevel" "^1.4.29"
     "@types/redis" "^0.12.36"
