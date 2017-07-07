@@ -1,3 +1,4 @@
+import * as classNames from "classnames";
 import * as Immutable from "immutable";
 import * as React from "react";
 import * as ReactRedux from "react-redux";
@@ -6,6 +7,7 @@ import * as Redux from "redux";
 import * as Records from "../records";
 import { State as AppState } from "../reducers";
 import * as Game from "../reducers/game";
+import * as Layout from "../reducers/layout";
 import * as Session from "../reducers/session";
 import Player from "./player";
 import { Spinner } from "./spinner";
@@ -13,16 +15,25 @@ import { Spinner } from "./spinner";
 export interface IPropValues {
   user?: Records.User;
   activeGames?: Immutable.List<Records.GameExtended>;
+  menuOpen: boolean;
 }
 
 interface IPropHandlers {
   onLogout: () => void;
   onRedirect: (path: string) => void;
+  onToggleMenu: () => void;
+  onCloseMenu: () => void;
 }
 
 interface IProps extends IPropValues, IPropHandlers { }
 
 export class Component extends React.PureComponent<IProps, {}> {
+  public constructor(props?: IProps, context?: any) {
+    super(props, context);
+
+    this.handleToggleMenu = this.handleToggleMenu.bind(this);
+  }
+
   public render() {
     let title = "brdg.me";
     const myTurnGames = this.myTurnGames().size;
@@ -33,30 +44,46 @@ export class Component extends React.PureComponent<IProps, {}> {
 
     return (
       <div className="layout">
-        <div className="menu">
-          <h1>
-            <a onClick={(e) => {
-              e.preventDefault();
-              this.props.onRedirect("/");
-            }}>brdg.me</a>
-          </h1>
-          <div className="subheading">
-            <a onClick={(e) => {
-              e.preventDefault();
-              this.props.onRedirect("/");
-            }}>Lo-fi board games</a>
-          </div>
-          {this.renderAuth()}
-          <div>
-            <a onClick={(e) => {
-              e.preventDefault();
-              this.props.onRedirect("/game/new");
-            }}>New game</a>
-          </div>
-          {this.renderMyTurnGames()}
-          {this.renderFinishedGames()}
+        <div className="layout-header">
+          <input type="button" onClick={this.handleToggleMenu} value="Menu" />
+          <span className="header-title">brdg.me</span>
         </div>
-        <div className="content">{this.props.children}</div>
+        <div className="layout-body">
+          <div className={classNames({
+            menu: true,
+            open: this.props.menuOpen,
+          })}>
+            <h1>
+              <a onClick={(e) => {
+                e.preventDefault();
+                this.props.onRedirect("/");
+                this.props.onCloseMenu();
+              }}>brdg.me</a>
+            </h1>
+            <div className="subheading">
+              <a onClick={(e) => {
+                e.preventDefault();
+                this.props.onRedirect("/");
+                this.props.onCloseMenu();
+              }}>Lo-fi board games</a>
+            </div>
+            {this.renderAuth()}
+            <div>
+              <a onClick={(e) => {
+                e.preventDefault();
+                this.props.onRedirect("/game/new");
+                this.props.onCloseMenu();
+              }}>New game</a>
+            </div>
+            {this.renderMyTurnGames()}
+            {this.renderFinishedGames()}
+          </div>
+          <div className="content">{this.props.children}</div>
+          {this.props.menuOpen && <div
+            className="menu-close-underlay"
+            onClick={this.handleToggleMenu}
+          />}
+        </div>
       </div>
     );
   }
@@ -67,6 +94,7 @@ export class Component extends React.PureComponent<IProps, {}> {
       <a onClick={(e) => {
         e.preventDefault();
         this.props.onRedirect(`/game/${game.game.id}`);
+        this.props.onCloseMenu();
       }}>
         <div className="layout-game-name">
           {game.game_type.name}
@@ -144,12 +172,17 @@ export class Component extends React.PureComponent<IProps, {}> {
       </div>;
     }
   }
+
+  private handleToggleMenu() {
+    this.props.onToggleMenu();
+  }
 }
 
 function mapStateToProps(state: AppState): IPropValues {
   return {
     user: state.session.user,
     activeGames: state.game.games.size > 0 && state.game.games.toList() || undefined,
+    menuOpen: state.layout.menuOpen,
   };
 }
 
@@ -157,6 +190,8 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<{}>): IPropHandlers {
   return {
     onLogout: () => dispatch(Session.clearToken()),
     onRedirect: (path) => dispatch(Session.updatePath(path)),
+    onToggleMenu: () => dispatch(Layout.toggleMenu()),
+    onCloseMenu: () => dispatch(Layout.closeMenu()),
   };
 }
 
