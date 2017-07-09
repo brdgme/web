@@ -136,7 +136,8 @@ export class Component extends React.PureComponent<IProps, {}> {
       && this.props.game.game_logs
       && this.props.game.game_logs.size
       || 0;
-    if (nextLogLen > prevLogLen) {
+    if (nextLogLen > prevLogLen ||
+      !prevProps.subMenuOpen && this.props.subMenuOpen) {
       // New logs, scroll to bottom.
       this.scrollToLastLog();
     }
