@@ -95,6 +95,7 @@ export class Component extends React.PureComponent<IProps, {}> {
               <form onSubmit={this.onCommandSubmit}>
                 <input
                   ref="command"
+                  type="text"
                   value={this.props.command}
                   onChange={this.onCommandInputChange}
                   onClick={this.onCommandPositionChange}
@@ -107,6 +108,11 @@ export class Component extends React.PureComponent<IProps, {}> {
                   autoCorrect="off"
                   autoCapitalize="off"
                   spellCheck={false}
+                />
+                <input
+                  type="submit"
+                  value="Send"
+                  disabled={this.commandInputDisabled()}
                 />
               </form>
             </div>}
@@ -232,9 +238,11 @@ export class Component extends React.PureComponent<IProps, {}> {
 
   private renderSuggestions(suggestions: Command.Suggestion[]): JSX.Element {
     // If the command input isn't focused, show a one-liner suggestion summary.
+    /*
     if (!this.props.commandFocused && this.props.command === "") {
       return this.renderSuggestionsSummary(suggestions);
     }
+    */
     // Render suggestions on one line if they're all values.
     if (suggestions.find((s) => s.kind === Command.SUGGESTION_DOC) === undefined) {
       const sLen = suggestions.length;
@@ -532,7 +540,7 @@ export class Component extends React.PureComponent<IProps, {}> {
   }
 
   private handleSuggestionsContainerClick() {
-    this.focusCommandInput();
+    // this.focusCommandInput();
   }
 
   private handleCommandBlur() {

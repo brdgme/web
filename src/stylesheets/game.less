@@ -80,14 +80,19 @@
   .game-command-input {
     width: 63%;
 
-    input {
-      border: 0;
-      width: 100%;
-      height: 100%;
-      font-size: 1.6em;
+    form {
+      display: flex;
 
-      &:disabled {
-        background-color: @dark-background;
+      input {
+        font-size: 1.6em;
+      }
+
+      input[type=text] {
+        flex: 10;
+
+        &:disabled {
+          background-color: @dark-background;
+        }
       }
     }
 
@@ -215,6 +220,10 @@
     .game-render {
       max-width: 99vw;
       overflow: auto;
+
+      > pre {
+        font-size: 0.8em;
+      }
     }
 
     .suggestions-container {
