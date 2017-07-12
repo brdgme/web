@@ -80,9 +80,10 @@ export class Component extends React.PureComponent<IProps, {}> {
                 || <Spinner />
               }
             </div>
-            {!this.isMyTurn() && this.renderWhoseTurn()}
+            {this.renderRecentLogs()}
             {this.renderSuggestionBox()}
-            {this.props.game && this.props.game.game_player && <div
+            {!this.isMyTurn() && this.renderWhoseTurn()}
+            {this.isMyTurn() && this.props.game && this.props.game.game_player && <div
               className={classNames({
                 "disabled": this.props.submittingCommand,
                 "game-command-input": true,
@@ -183,6 +184,19 @@ export class Component extends React.PureComponent<IProps, {}> {
     return suggestions;
   }
 
+  private renderRecentLogs(): JSX.Element | undefined {
+    const logs = this.recentLogs();
+    if (logs.size === 0) {
+      return undefined;
+    }
+    return <div className="recent-logs-container">
+      <div className="recent-logs-header">Recent logs</div>
+      <div ref="recentLogs" className="recent-logs">
+        {logs.map((l) => <div dangerouslySetInnerHTML={{ __html: l.html }} />)}
+      </div>
+    </div >;
+  }
+
   private renderSuggestionBox(): JSX.Element | undefined {
     const suggestions = this.commandSuggestions();
     if (suggestions.length === 0) {
@@ -203,7 +217,7 @@ export class Component extends React.PureComponent<IProps, {}> {
     if (s.values.length === 1 && s.values[0].kind === Command.SUGGESTION_VALUE) {
       return <div className="suggestion-doc-item">
         {this.renderSuggestionValueLink(s.values[0] as Command.ISuggestionValue)}
-        <span className="suggestion-doc-desc"> - {s.desc}</span>
+        {s.desc && <span className="suggestion-doc-desc"> - {s.desc}</span>}
       </div>;
     }
     return <div className="suggestion-doc">
@@ -244,6 +258,16 @@ export class Component extends React.PureComponent<IProps, {}> {
         }
       })}
     </div>;
+  }
+
+  private recentLogs(): Immutable.List<Records.GameLogRendered> {
+    if (!this.props.game || !this.props.game.game_logs || !this.props.game.game_player) {
+      return Immutable.List();
+    }
+    const gp = this.props.game.game_player;
+    return this.props.game.game_logs.filter(
+      (gl) => gl.game_log.created_at >= gp.last_turn_at,
+    );
   }
 
   private renderSuggestionsSummary(suggestions: Command.Suggestion[]): JSX.Element {
@@ -295,6 +319,10 @@ export class Component extends React.PureComponent<IProps, {}> {
     if (this.refs.gameLogs !== undefined) {
       const gameLogs = this.refs.gameLogs as Element;
       gameLogs.scrollTop = gameLogs.scrollHeight;
+    }
+    if (this.refs.recentLogs !== undefined) {
+      const recentLogs = this.refs.recentLogs as Element;
+      recentLogs.scrollTop = recentLogs.scrollHeight;
     }
   }
 
@@ -514,7 +542,7 @@ export class Component extends React.PureComponent<IProps, {}> {
       if (this.refs.command !== document.activeElement) {
         this.props.onCommandBlur();
       }
-    });
+    }, 100);
   }
 }
 

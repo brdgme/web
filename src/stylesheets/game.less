@@ -16,7 +16,7 @@
   flex-direction: column;
 
   .game-render {
-    flex: 1;
+    flex: 100;
     text-align: center;
     width: 100%;
     overflow-y: auto;
@@ -26,15 +26,38 @@
     }
   }
 
+  .recent-logs-container {
+    width: 63%;
+    flex: 1;
+
+    .recent-logs-header {
+      text-align: center;
+      font-weight: bold;
+      background-color: @dark-background;
+      border-top-left-radius: 0.63em;
+      border-top-right-radius: 0.63em;
+    }
+
+    .recent-logs {
+      font-size: 0.8em;
+      line-height: 1.4em;
+      max-height: 6em;
+      overflow-y: auto;
+      border-bottom-left-radius: 0.63em;
+      border-bottom-right-radius: 0.63em;
+      border: 1px solid @dark-background;
+      padding: 0.63em;
+    }
+  }
+
   .suggestions-container {
-    flex: 0;
+    flex: 1;
     width: 63%;
 
     .suggestions-content {
       border-radius: 0.63em;
       border: 1px solid @dark-background;
       padding: 0.63em;
-      background-color: rgba(255, 255, 255, 0.7);
       overflow-y: auto;
 
       .suggestion-doc-item {
@@ -193,20 +216,26 @@
     background-color: rgba(255, 255, 255, 0.63);
   }
 
-  .game-main .game-render {
-    max-width: 99vw;
-    overflow: auto;
-  }
+  .game-main {
+    .game-render {
+      max-width: 99vw;
+      overflow: auto;
+    }
 
-  .game-main .suggestions-container {
-    width: 100%;
+    .suggestions-container {
+      width: 100%;
+    }
+
+    .game-command-input {
+      width: 100%;
+    }
+
+    .recent-logs-container {
+      width: 100%;
+    }
   }
 
   .game-current-turn {
-    width: 100%;
-  }
-
-  .game-main .game-command-input {
     width: 100%;
   }
 }
