@@ -325,6 +325,21 @@ export function suggestions(result: IParseResult, at: number): Suggestion[] {
   return s;
 }
 
+export function suggestionValues(ss: Suggestion[]): string[] {
+  let values: string[] = [];
+  for (const s of ss) {
+    switch (s.kind) {
+      case SUGGESTION_VALUE:
+        values.push(s.value);
+        break;
+      case SUGGESTION_DOC:
+        values = values.concat(suggestionValues(s.values));
+        break;
+    }
+  }
+  return values;
+}
+
 export function startOfMatch(result: IParseResult, at: number): number | undefined {
   if (at === 0) {
     return 0;

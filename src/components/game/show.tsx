@@ -24,6 +24,7 @@ const oldDateFormat = "YYYY-M-D";
 export interface IPropValues extends IOwnProps {
   game?: Records.GameExtended;
   command: string;
+  commandFocused: boolean;
   commandPos: number;
   submittingCommand?: boolean;
   commandError?: string;
@@ -37,6 +38,8 @@ interface IPropHandlers {
     commandSpec?: Immutable.Map<any, any>,
   ) => void;
   onCommand: (gameId: string, command: string) => void;
+  onCommandFocus: () => void;
+  onCommandBlur: () => void;
   onUndo: (gameId: string) => void;
   onFetch: (gameId: string) => void;
   onSubscribeUpdates: (gameId: string) => void;
@@ -57,6 +60,9 @@ export class Component extends React.PureComponent<IProps, {}> {
     this.focusCommandInput = this.focusCommandInput.bind(this);
     this.onCommandSubmit = this.onCommandSubmit.bind(this);
     this.handleSubMenuButtonClick = this.handleSubMenuButtonClick.bind(this);
+    this.handleSuggestionsContainerClick = this.handleSuggestionsContainerClick.bind(this);
+    this.handleCommandFocus = this.handleCommandFocus.bind(this);
+    this.handleCommandBlur = this.handleCommandBlur.bind(this);
   }
 
   public render(): JSX.Element {
@@ -74,7 +80,7 @@ export class Component extends React.PureComponent<IProps, {}> {
                 || <Spinner />
               }
             </div>
-            {this.renderWhoseTurn()}
+            {!this.isMyTurn() && this.renderWhoseTurn()}
             {this.renderSuggestionBox()}
             {this.props.game && this.props.game.game_player && <div
               className={classNames({
@@ -87,14 +93,19 @@ export class Component extends React.PureComponent<IProps, {}> {
               </div>}
               <form onSubmit={this.onCommandSubmit}>
                 <input
+                  ref="command"
                   value={this.props.command}
                   onChange={this.onCommandInputChange}
                   onClick={this.onCommandPositionChange}
                   onKeyUp={this.onCommandPositionChange}
-                  onFocus={this.onCommandPositionChange}
+                  onFocus={this.handleCommandFocus}
+                  onBlur={this.handleCommandBlur}
                   placeholder={!this.commandInputDisabled() && "Enter command..." || undefined}
                   disabled={this.commandInputDisabled()}
-                  ref="editor"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
                 />
               </form>
             </div>}
@@ -111,7 +122,6 @@ export class Component extends React.PureComponent<IProps, {}> {
 
   public componentDidMount() {
     this.fetchGameIfRequired(this.props);
-    this.focusCommandInput();
     this.scrollToLastLog();
     this.props.onMarkRead(this.props.gameId);
     document.addEventListener("keydown", this.focusCommandInput);
@@ -178,7 +188,10 @@ export class Component extends React.PureComponent<IProps, {}> {
     if (suggestions.length === 0) {
       return undefined;
     }
-    return <div className="suggestions-container">
+    return <div
+      className="suggestions-container"
+      onClick={this.handleSuggestionsContainerClick}
+    >
       <div className="suggestions-content">
         {this.renderSuggestions(suggestions)}
       </div>
@@ -186,6 +199,13 @@ export class Component extends React.PureComponent<IProps, {}> {
   }
 
   private renderSuggestionDoc(s: Command.ISuggestionDoc): JSX.Element {
+    // Render doc for a single command on one line.
+    if (s.values.length === 1 && s.values[0].kind === Command.SUGGESTION_VALUE) {
+      return <div className="suggestion-doc-item">
+        {this.renderSuggestionValueLink(s.values[0] as Command.ISuggestionValue)}
+        <span className="suggestion-doc-desc"> - {s.desc}</span>
+      </div>;
+    }
     return <div className="suggestion-doc">
       {s.desc && <div className="suggestion-doc-header">
         {s.desc && <span className="suggestion-doc-desc">{s.desc}</span>}
@@ -197,30 +217,61 @@ export class Component extends React.PureComponent<IProps, {}> {
   }
 
   private renderSuggestions(suggestions: Command.Suggestion[]): JSX.Element {
+    // If the command input isn't focused, show a one-liner suggestion summary.
+    if (!this.props.commandFocused && this.props.command === "") {
+      return this.renderSuggestionsSummary(suggestions);
+    }
+    // Render suggestions on one line if they're all values.
+    if (suggestions.find((s) => s.kind === Command.SUGGESTION_DOC) === undefined) {
+      const sLen = suggestions.length;
+      return <div>
+        {suggestions.map((s, index) => <span>
+          {this.renderSuggestionValueLink(s as Command.ISuggestionValue)}
+          {index < sLen - 1 && " "}
+        </span>)}
+      </div>;
+    }
+    // Otherwise render suggestions on separate lines.
     return <div>
       {suggestions.map((s) => {
         switch (s.kind) {
           case Command.SUGGESTION_VALUE:
             return <div>
-              <a onClick={(e) => {
-                e.preventDefault();
-                this.onCommandChange(
-                  this.props.command.substr(0, s.offset)
-                  + s.value
-                  + " "
-                  + this.props.command.substr(s.offset + (s.length || 0)),
-                  s.offset + s.value.length + 1,
-                );
-                this.focusCommandInput();
-              }}>
-                {s.value}
-              </a>
+              {this.renderSuggestionValueLink(s)}
             </div>;
           case Command.SUGGESTION_DOC:
             return this.renderSuggestionDoc(s);
         }
       })}
     </div>;
+  }
+
+  private renderSuggestionsSummary(suggestions: Command.Suggestion[]): JSX.Element {
+    const values = Command.suggestionValues(suggestions);
+    const vLen = values.length;
+    if (vLen === 0) {
+      return <div />;
+    }
+    return <div>You can {values.map((v, index) => <span>
+      <strong>{v}</strong>
+      {index < vLen - 2 && ", "}
+      {index === vLen - 2 && " or "}
+    </span>)}</div>;
+  }
+
+  private renderSuggestionValueLink(s: Command.ISuggestionValue): JSX.Element {
+    return <a onClick={(e) => {
+      e.preventDefault();
+      this.onCommandChange(
+        this.props.command.substr(0, s.offset)
+        + s.value
+        + " "
+        + this.props.command.substr(s.offset + (s.length || 0)),
+        s.offset + s.value.length + 1,
+      );
+    }}>
+      {s.value}
+    </a>;
   }
 
   private commandInputDisabled(): boolean {
@@ -373,10 +424,10 @@ export class Component extends React.PureComponent<IProps, {}> {
   }
 
   private focusCommandInput() {
-    if (this.refs.editor === undefined) {
+    if (this.refs.command === undefined) {
       return;
     }
-    (this.refs.editor as HTMLInputElement).focus();
+    (this.refs.command as HTMLInputElement).focus();
   }
 
   private formatLogTime(t: moment.Moment): string {
@@ -429,6 +480,11 @@ export class Component extends React.PureComponent<IProps, {}> {
     );
   }
 
+  private handleCommandFocus(e: React.FormEvent<HTMLInputElement>) {
+    this.props.onCommandFocus();
+    this.onCommandPositionChange(e);
+  }
+
   private onCommandPositionChange(e: React.FormEvent<HTMLInputElement>) {
     this.onCommandChange(
       this.props.command,
@@ -445,6 +501,20 @@ export class Component extends React.PureComponent<IProps, {}> {
 
   private handleSubMenuButtonClick() {
     this.props.onToggleSubMenu();
+  }
+
+  private handleSuggestionsContainerClick() {
+    this.focusCommandInput();
+  }
+
+  private handleCommandBlur() {
+    // We want this to happen after click.
+    setTimeout(() => {
+      // Sometimes it is refocused though, so check to be sure.
+      if (this.refs.command !== document.activeElement) {
+        this.props.onCommandBlur();
+      }
+    });
   }
 }
 
@@ -463,6 +533,7 @@ function mapStateToProps(state: AppState, ownProps: IOwnProps): IPropValues {
     gameId: ownProps.gameId,
     game: state.game.games.get(ownProps.gameId),
     command: state.pages.gameShow.command,
+    commandFocused: state.pages.gameShow.commandFocused,
     commandPos: state.pages.gameShow.commandPos,
     submittingCommand: state.pages.gameShow.submittingCommand,
     commandError: state.pages.gameShow.commandError,
@@ -473,6 +544,8 @@ function mapStateToProps(state: AppState, ownProps: IOwnProps): IPropValues {
 function mapDispatchToProps(dispatch: Redux.Dispatch<{}>, ownProps: IOwnProps): IPropHandlers {
   return {
     onCommand: (gameId, command) => dispatch(Game.submitCommand(gameId, command)),
+    onCommandFocus: () => dispatch(GameShow.commandFocus()),
+    onCommandBlur: () => dispatch(GameShow.commandBlur()),
     onCommandChange: (command, commandPos, commandSpec) =>
       dispatch(GameShow.updateCommand(command, commandPos, commandSpec)),
     onToggleSubMenu: () => dispatch(GameShow.toggleSubMenu()),
