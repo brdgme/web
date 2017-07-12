@@ -35,27 +35,38 @@ export class Component extends React.PureComponent<IProps, {}> {
     this.handleToggleMenu = this.handleToggleMenu.bind(this);
   }
 
+  public myNextGame(): Records.GameExtended | undefined {
+    return this.props.activeGames && this.props.activeGames.find((g) => {
+      return g.game_player && g.game_player.is_turn || false;
+    }) || undefined;
+  }
+
   public render() {
     let title = "brdg.me";
     const myTurnGames = this.myTurnGames().size;
     if (myTurnGames > 0) {
       title += ` (${myTurnGames})`;
     }
+    const myNextGame = this.myNextGame();
     document.title = title;
 
     return (
       <div className="layout">
-        <div className="layout-header">
+        <div className={classNames({
+          "layout-header": true,
+          "my-turn": myNextGame !== undefined,
+        })}>
           <input type="button" onClick={this.handleToggleMenu} value="Menu" />
           <span className="header-title">brdg.me</span>
           {this.props.onSubMenuButtonClick && <input
-            style={{
-              display: "inline-block",
-              float: "right",
-            }}
             type="button"
             onClick={this.props.onSubMenuButtonClick}
             value="Sub menu"
+          />}
+          {myNextGame && <input
+            type="button"
+            onClick={() => this.props.onRedirect(`/game/${myNextGame.game.id}`)}
+            value="Next game"
           />}
         </div>
         <div className="layout-body">
