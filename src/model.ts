@@ -62,6 +62,7 @@ export interface IGameExtended {
   pub_state?: string;
   html?: string;
   command_spec?: string;
+  chat: IChatExtended[];
 }
 
 export interface IGameVersionType {
@@ -89,4 +90,33 @@ export interface IGameLog {
 export interface IGameLogHTML {
   game_log: IGameLog;
   html: string;
+}
+
+export interface IChat {
+  id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface IChatUser {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  chat_id: string;
+  user_id: string;
+  last_read_at: string;
+}
+
+export interface IChatMessage {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  chat_user_id: string;
+  message: string;
+}
+
+export interface IChatExtended {
+  chat: IChat;
+  chat_users: IChatUser[];
+  chat_messages: IChatMessage[];
 }

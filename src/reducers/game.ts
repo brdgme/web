@@ -81,6 +81,10 @@ export const SUBMIT_MARK_READ_FAIL = "brdgme/game/SUBMIT_MARK_READ_FAIL";
 export const SUBMIT_CONCEDE = "brdgme/game/SUBMIT_CONCEDE";
 export const SUBMIT_CONCEDE_SUCCESS = "brdgme/game/SUBMIT_CONCEDE_SUCCESS";
 export const SUBMIT_CONCEDE_FAIL = "brdgme/game/SUBMIT_CONCEDE_FAIL";
+export const SUBMIT_RESTART = "brdgme/game/SUBMIT_RESTART";
+export const SUBMIT_RESTART_SUCCESS = "brdgme/game/SUBMIT_RESTART_SUCCESS";
+export const SUBMIT_RESTART_FAIL = "brdgme/game/SUBMIT_RESTART_FAIL";
+export const GAME_RESTARTED = "brdgme/game/GAME_RESTARTED";
 
 export interface IFetchGame {
   type: typeof FETCH_GAME;
@@ -218,10 +222,10 @@ export const submitConcede =
 
 export interface ISubmitConcedeSuccess {
   type: typeof SUBMIT_CONCEDE_SUCCESS;
-  payload: Records.GameExtended;
+  payload: Model.IGameExtended;
 }
 export const submitConcedeSuccess =
-  (game: Records.GameExtended): ISubmitConcedeSuccess => ({
+  (game: Model.IGameExtended): ISubmitConcedeSuccess => ({
     type: SUBMIT_CONCEDE_SUCCESS,
     payload: game,
   });
@@ -233,6 +237,55 @@ export interface ISubmitConcedeFail {
 export const submitConcedeFail = (error: string): ISubmitConcedeFail => ({
   type: SUBMIT_CONCEDE_FAIL,
   payload: error,
+});
+
+export interface ISubmitRestart {
+  type: typeof SUBMIT_RESTART;
+  payload: string;
+}
+export const submitRestart =
+  (gameId: string): ISubmitRestart => ({
+    type: SUBMIT_RESTART,
+    payload: gameId,
+  });
+
+export interface ISubmitRestartSuccess {
+  type: typeof SUBMIT_RESTART_SUCCESS;
+  payload: {
+    oldGameId: string;
+    newGame: Model.IGameExtended;
+  };
+}
+export const submitRestartSuccess = (
+  oldGameId: string,
+  newGame: Model.IGameExtended,
+): ISubmitRestartSuccess => ({
+  type: SUBMIT_RESTART_SUCCESS,
+  payload: { oldGameId, newGame },
+});
+
+export interface ISubmitRestartFail {
+  type: typeof SUBMIT_RESTART_FAIL;
+  payload: string;
+}
+export const submitRestartFail = (error: string): ISubmitRestartFail => ({
+  type: SUBMIT_RESTART_FAIL,
+  payload: error,
+});
+
+export interface IGameRestarted {
+  type: typeof GAME_RESTARTED;
+  payload: {
+    gameId: string;
+    restartedGameId: string;
+  };
+}
+export const gameRestarted = (
+  gameId: string,
+  restartedGameId: string,
+): IGameRestarted => ({
+  type: GAME_RESTARTED,
+  payload: { gameId, restartedGameId },
 });
 
 export type Action
@@ -252,6 +305,10 @@ export type Action
   | ISubmitConcede
   | ISubmitConcedeSuccess
   | ISubmitConcedeFail
+  | ISubmitRestart
+  | ISubmitRestartSuccess
+  | ISubmitRestartFail
+  | IGameRestarted
   ;
 
 export function reducer(state = new State(), action: Action): State {
@@ -264,6 +321,19 @@ export function reducer(state = new State(), action: Action): State {
     case SUBMIT_MARK_READ_SUCCESS: return state.updateGamePlayer(action.payload);
     case SUBMIT_CONCEDE_SUCCESS: return state.updateGames(
       Records.GameExtended.fromJSList([action.payload]));
+    case SUBMIT_RESTART_SUCCESS: return state
+      .updateGames(Records.GameExtended.fromJSList([action.payload.newGame]))
+      .updateIn(
+        ["games", action.payload.oldGameId, "game"],
+        (game: Records.Game) => game.set(
+          "restarted_game_id",
+          action.payload.newGame.game.id,
+        ),
+      );
+    case GAME_RESTARTED: return state.updateIn(
+      ["games", action.payload.gameId, "game"],
+      (game: Records.Game) => game.set("restarted_game_id", action.payload.restartedGameId),
+    );
     default: return state;
   }
 }

@@ -78,6 +78,16 @@ export async function submitUndo(id: string, token: string): Promise<Model.IGame
     .then((res) => res.body as Model.IGameExtended);
 }
 
+export async function submitRestart(id: string, token: string): Promise<Model.IGameExtended> {
+  return superagent
+    .post(`${process.env.API_SERVER}/game/${id}/restart`)
+    .auth(token, "")
+    .set("Content-Type", "application/json")
+    .set("Accept", "application/json")
+    .send()
+    .then((res) => res.body as Model.IGameExtended);
+}
+
 export interface IInitResponse {
   game_version_types: Model.IGameVersionType[];
   games: Model.IGameExtended[];

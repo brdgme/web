@@ -2,6 +2,7 @@ import * as Immutable from "immutable";
 import { call, Effect, put, select, takeEvery, takeLatest } from "redux-saga/effects";
 
 import * as http from "../http";
+import * as Model from "../model";
 import * as Records from "../records";
 import { State as AppState } from "../reducers";
 import * as Game from "../reducers/game";
@@ -12,6 +13,7 @@ export function* sagas(): IterableIterator<Effect> {
   yield takeEvery(Game.FETCH_GAME, fetchGame);
   yield takeEvery(Game.SUBMIT_COMMAND, submitCommand);
   yield takeEvery(Game.SUBMIT_UNDO, submitUndo);
+  yield takeEvery(Game.SUBMIT_RESTART, submitRestart);
   yield takeEvery(Game.SUBMIT_MARK_READ, submitMarkRead);
   yield takeEvery(Game.SUBMIT_CONCEDE, submitConcede);
   yield takeEvery(GameNew.SUBMIT, submitNewGame);
@@ -59,6 +61,24 @@ function* submitUndo(action: Game.ISubmitUndo): IterableIterator<Effect> {
     yield put(Game.submitUndoSuccess(game));
   } catch (e) {
     yield put(Game.submitUndoFail(e.response && e.response.text || e.message));
+  }
+}
+
+function* submitRestart(action: Game.ISubmitRestart): IterableIterator<Effect> {
+  const token: string = yield select((state: AppState) => state.session.token);
+  if (token === undefined) {
+    return;
+  }
+  try {
+    const game: Model.IGameExtended = yield call(
+      http.submitRestart,
+      action.payload,
+      token,
+    );
+    yield put(Game.submitRestartSuccess(action.payload, game));
+    yield put(Session.updatePath(`/game/${game.game.id}`));
+  } catch (e) {
+    yield put(Game.submitRestartFail(e.response && e.response.text || e.message));
   }
 }
 
@@ -110,8 +130,7 @@ function* submitNewGame(action: GameNew.ISubmit): IterableIterator<Effect> {
       token,
     ));
     yield put(Game.updateGames(Immutable.List([game])));
-    const gameRecord =
-      yield put(Session.updatePath(`/game/${game.game.id}`));
+    yield put(Session.updatePath(`/game/${game.game.id}`));
     yield put(GameNew.submitSuccess(game));
   } catch (e) {
     yield put(GameNew.submitFail(e.response && e.response.text || e.message));

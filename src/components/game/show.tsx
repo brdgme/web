@@ -11,6 +11,7 @@ import * as Records from "../../records";
 import { State as AppState } from "../../reducers";
 import * as Game from "../../reducers/game";
 import * as GameShow from "../../reducers/pages/game-show";
+import * as Session from "../../reducers/session";
 import * as WS from "../../reducers/ws";
 import { Container as Layout } from "../layout";
 import Player from "../player";
@@ -42,11 +43,13 @@ interface IPropHandlers {
   onCommandBlur: () => void;
   onUndo: (gameId: string) => void;
   onFetch: (gameId: string) => void;
+  onRestart: (gameId: string) => void;
   onSubscribeUpdates: (gameId: string) => void;
   onUnsubscribeUpdates: (gameId: string) => void;
   onMarkRead: (gameId: string) => void;
   onConcede: (gameId: string) => void;
   onToggleSubMenu: () => void;
+  onRedirect: (path: string) => void;
 }
 
 interface IProps extends IPropValues, IPropHandlers { }
@@ -356,6 +359,21 @@ export class Component extends React.PureComponent<IProps, {}> {
               this.props.onUndo(this.props.gameId);
             }}>Undo</a>
           </div>}
+          {this.props.game.game.restarted_game_id && <div>
+            <a onClick={(e) => {
+              e.preventDefault();
+              this.props.onRedirect(`/game/${this.props.game!.game.restarted_game_id}`);
+            }}>Go to restarted game</a>
+          </div>}
+          {this.props.game.game_player
+            && this.props.game.game.is_finished
+            && !this.props.game.game.restarted_game_id
+            && <div>
+              <a onClick={(e) => {
+                e.preventDefault();
+                this.props.onRestart(this.props.gameId);
+              }}>Restart</a>
+            </div>}
         </div>}
       </div>
       <div className="game-meta-logs">
@@ -586,11 +604,13 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<{}>, ownProps: IOwnProps): 
       dispatch(GameShow.updateCommand(command, commandPos, commandSpec)),
     onToggleSubMenu: () => dispatch(GameShow.toggleSubMenu()),
     onUndo: (gameId) => dispatch(Game.submitUndo(gameId)),
+    onRestart: (gameId) => dispatch(Game.submitRestart(gameId)),
     onFetch: (gameId) => dispatch(Game.fetchGame(gameId)),
     onSubscribeUpdates: (gameId) => dispatch(WS.subscribeGame(gameId)),
     onUnsubscribeUpdates: () => dispatch(WS.unsubscribeGame()),
     onMarkRead: (gameId) => dispatch(Game.submitMarkRead(gameId)),
     onConcede: (gameId) => dispatch(Game.submitConcede(gameId)),
+    onRedirect: (path) => dispatch(Session.updatePath(path)),
   };
 }
 

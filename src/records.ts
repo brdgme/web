@@ -61,6 +61,7 @@ export class Game extends Immutable.Record({
   is_finished: false,
   finished_at: undefined as string | undefined,
   chat_id: undefined as string | undefined,
+  restarted_game_id: undefined as string | undefined,
 }) {
   public static fromJS(js: any): Game {
     return new Game(js);
