@@ -69,7 +69,13 @@
     text-decoration: none;
   }
 
-  .layout-game-name {
+  &.my-turn {
+    background-color: @my-turn-color;
+    font-weight: bold;
+  }
+
+  &.finished {
+    background-color: @finished-color;
     font-weight: bold;
   }
 
@@ -79,7 +85,7 @@
   }
 
   &:hover {
-    background-color: lighten(@dark-background, 5%);
+    background-color: lighten(@dark-background, 10%);
   }
 }
 

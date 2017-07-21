@@ -96,8 +96,7 @@ export class Component extends React.PureComponent<IProps, {}> {
                 this.props.onCloseMenu();
               }}>New game</a>
             </div>
-            {this.renderMyTurnGames()}
-            {this.renderFinishedGames()}
+            {this.renderActiveGames()}
           </div>
           <div className="content">{this.props.children}</div>
           {this.props.menuOpen && <div
@@ -111,7 +110,11 @@ export class Component extends React.PureComponent<IProps, {}> {
 
   private renderGame(game: Records.GameExtended): JSX.Element {
     const myPlayerId = game.game_player && game.game_player.id;
-    return <div className="layout-game">
+    return <div className={classNames({
+      "layout-game": true,
+      "my-turn": game.game_player && game.game_player.is_turn,
+      "finished": game.game_player && game.game.is_finished && !game.game_player.is_read,
+    })}>
       <a onClick={(e) => {
         e.preventDefault();
         this.props.onRedirect(`/game/${game.game.id}`);
@@ -129,18 +132,58 @@ export class Component extends React.PureComponent<IProps, {}> {
             /></span>)}
         </div>
       </a>
-    </div>;
+    </div >;
   }
 
-  private renderMyTurnGames(): JSX.Element | undefined {
-    const myTurnGames = this.myTurnGames();
-    if (myTurnGames.size === 0) {
+  private renderActiveGames(): JSX.Element | undefined {
+    const activeGames = this.activeGames();
+    if (activeGames.size === 0) {
       return undefined;
     }
     return <div>
-      <h2>Your turn</h2>
-      {myTurnGames.map((g) => g && this.renderGame(g))}
+      <h2>Active games</h2>
+      {activeGames.map((g) => g && this.renderGame(g))}
     </div>;
+  }
+
+  private activeGames(): Immutable.List<Records.GameExtended> {
+    if (this.props.activeGames === undefined || this.props.user === undefined) {
+      return Immutable.List();
+    }
+    return this.props.activeGames
+      .filter((ag) => ag.game_player && (
+        !ag.game.is_finished || !ag.game_player.is_read
+      ))
+      .sort((ag1, ag2) => {
+        // Finished games at the top.
+        if (ag1.game.is_finished && !ag2.game.is_finished) {
+          return -1;
+        }
+        if (ag2.game.is_finished && !ag1.game.is_finished) {
+          return 1;
+        }
+        // Followed by current turn games, ordered by turn time.
+        if (ag1.game_player!.is_turn && ag2.game_player!.is_turn) {
+          if (ag1.game_player!.is_turn_at < ag2.game_player!.is_turn_at) {
+            return -1;
+          }
+          if (ag2.game_player!.is_turn_at < ag1.game_player!.is_turn_at) {
+            return 1;
+          }
+        }
+        if (ag1.game_player!.is_turn) {
+          return -1;
+        }
+        if (ag2.game_player!.is_turn) {
+          return 1;
+        }
+        // Otherwise ordered by newest first.
+        if (ag1.game.updated_at > ag2.game.updated_at) {
+          return -1;
+        }
+        return 1;
+      })
+      .toList();
   }
 
   private myTurnGames(): Immutable.List<Records.GameExtended> {
@@ -150,27 +193,6 @@ export class Component extends React.PureComponent<IProps, {}> {
     return this.props.activeGames
       .filter((ag) => ag.game_player && ag.game_player.is_turn || false)
       .sortBy((ag) => ag.game_player!.is_turn_at)
-      .toList();
-  }
-
-  private renderFinishedGames(): JSX.Element | undefined {
-    const finishedGames = this.finishedGames();
-    if (finishedGames.size === 0) {
-      return undefined;
-    }
-    return <div>
-      <h2>Finished</h2>
-      {finishedGames.map((g) => g && this.renderGame(g))}
-    </div>;
-  }
-
-  private finishedGames(): Immutable.List<Records.GameExtended> {
-    if (this.props.activeGames === undefined || this.props.user === undefined) {
-      return Immutable.List();
-    }
-    return this.props.activeGames
-      .filter((ag) => ag.game.is_finished && (!ag.game_player || !ag.game_player.is_read))
-      .sortBy((ag) => ag.game.finished_at)
       .toList();
   }
 
