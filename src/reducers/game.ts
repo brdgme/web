@@ -50,9 +50,11 @@ export class State extends Immutable.Record({
       ["games", gamePlayer.game_id],
       (game: Records.GameExtended) => game.withMutations((g: Records.GameExtended) => {
         if (g.game_player !== undefined && g.game_player.id === gamePlayer.id) {
-          g.game_player.merge(gamePlayer);
+          g.update(
+            "game_player",
+            (gp) => gp && gp.merge(gamePlayer) || Records.GamePlayer.fromJS(gamePlayer));
         }
-        g.game_players.update((gps) => gps.map((gpu) => {
+        g.update("game_players", (gps) => gps.map((gpu) => {
           if (gpu.game_player.id === gamePlayer.id) {
             return gpu.update(
               "game_player",
