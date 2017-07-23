@@ -30,42 +30,61 @@ export const MATCH_FULL = "2_MATCH_FULL";
 export const MATCH_PARTIAL = "1_MATCH_PARTIAL";
 export const MATCH_ERROR = "0_MATCH_ERROR";
 
+/**
+ * Generates some potential values for the int parser to use for suggestions.
+ * @param min minimum value
+ * @param max maximum value
+ */
+function potentialIntValues(min?: number, max?: number): number[] {
+  const start = min || 1;
+  const end = max || (start + 4);
+  const values: number[] = [];
+  for (let i = start; i <= end; i++) {
+    values.push(i);
+  }
+  return values;
+}
+
 const intRegex = /\-?\d+/;
 export function parseIntSpec(input: string, offset: number, min?: number, max?: number): IParseResult {
-  if (offset >= input.length) {
-    return {
-      kind: MATCH_PARTIAL,
-      offset,
-    };
-  }
-  const matches = intRegex.exec(input.substr(offset));
-  if (matches) {
-    const value = parseInt(matches[0], 10);
+  // First we see if we have an actual integer match.
+  const intMatches = intRegex.exec(input.substr(offset));
+  // We also do an enum match so we can provide suggestions.
+  const enumValues = potentialIntValues(min, max)
+    .map((i) => i.toString())
+    .filter((i) => !intMatches || intMatches[0] !== i);
+  const enumResult = parseEnum(input, offset, enumValues, true);
+  let intResult: IParseResult = {
+    kind: MATCH_PARTIAL,
+    offset,
+  };
+  if (intMatches) {
+    const value = parseInt(intMatches[0], 10);
     if (min !== undefined && value < min) {
-      return {
+      intResult = {
         kind: MATCH_ERROR,
         offset,
         message: `${value} is less than the minimum ${min}`,
       };
-    }
-    if (max !== undefined && value > max) {
-      return {
+    } else if (max !== undefined && value > max) {
+      intResult = {
         kind: MATCH_ERROR,
         offset,
         message: `${value} is greater than the maximum ${max}`,
       };
+    } else {
+      intResult = {
+        kind: MATCH_FULL,
+        offset,
+        length: intMatches[0].length,
+        value: intMatches[0],
+      };
     }
-    return {
-      kind: MATCH_FULL,
-      offset,
-      length: matches[0].length,
-      value: matches[0],
-    };
   }
   return {
-    kind: MATCH_ERROR,
+    kind: intResult.kind,
     offset,
-    message: "expected a number",
+    next: [intResult].concat(enumResult.next || []),
   };
 }
 
