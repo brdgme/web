@@ -351,7 +351,9 @@ export class Component extends React.PureComponent<IProps, {}> {
           {!this.props.game.game.is_finished && this.props.game.game_players.size <= 2 && <div>
             <a onClick={(e) => {
               e.preventDefault();
-              this.props.onConcede(this.props.gameId);
+              if (confirm("Are you sure you want to concede?")) {
+                this.props.onConcede(this.props.gameId);
+              }
             }}>Concede</a>
           </div>}
           {this.props.game.game_player.can_undo && <div>
