@@ -66,6 +66,7 @@ export class Component extends React.PureComponent<IProps, {}> {
     this.handleSuggestionsContainerClick = this.handleSuggestionsContainerClick.bind(this);
     this.handleCommandFocus = this.handleCommandFocus.bind(this);
     this.handleCommandBlur = this.handleCommandBlur.bind(this);
+    this.renderMetaPlayer = this.renderMetaPlayer.bind(this);
   }
 
   public render(): JSX.Element {
@@ -107,7 +108,7 @@ export class Component extends React.PureComponent<IProps, {}> {
                   onBlur={this.handleCommandBlur}
                   placeholder={!this.commandInputDisabled() && "Enter command..." || undefined}
                   disabled={this.commandInputDisabled()}
-                  autoComplete="off"
+                  autocomplete="off"
                   autoCorrect="off"
                   autoCapitalize="off"
                   spellCheck={false}
@@ -392,24 +393,44 @@ export class Component extends React.PureComponent<IProps, {}> {
           name={gp.user.name}
           color={gp.game_player.color}
         />
-        &nbsp;
-        <abbr
-          title="ELO rating, new players start at 1200"
-          style={{
-            cursor: "help",
-          }}
-        >
-          ({gp.game_type_user.rating})
-        </abbr>
       </div>
       <div style={{
         marginLeft: "1em",
       }}>
+        <div>
+          <abbr
+            title="ELO rating, new players start at 1200"
+            style={{
+              cursor: "help",
+            }}
+          >Rating</abbr>
+          :&nbsp;
+          {gp.game_type_user.rating}
+          {typeof gp.game_player.rating_change === "number" &&
+            <span> ({this.renderRatingChange(gp.game_player.rating_change)})</span>}
+        </div>
         {gp.game_player.points !== undefined && <div>
           Points: {gp.game_player.points}
         </div>}
       </div>
     </div>;
+  }
+
+  private renderRatingChange(amount: number): JSX.Element {
+    return <span className="rating-change">
+      {this.renderRatingChangeIcon(amount)}
+      {Math.abs(amount)}
+    </span>;
+  }
+
+  private renderRatingChangeIcon(amount: number): JSX.Element {
+    if (amount > 0) {
+      return <span className="rating-change-up">↗</span>;
+    } else if (amount < 0) {
+      return <span className="rating-change-down">↘</span>;
+    } else {
+      return <span className="rating-change-none">-</span>;
+    }
   }
 
   private isMyTurn(): boolean {
