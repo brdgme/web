@@ -344,39 +344,41 @@ export class Component extends React.PureComponent<IProps, {}> {
       "open": this.props.subMenuOpen,
     })}>
       <div className="game-meta-main">
-        {this.props.game && this.props.game.game_player && <div>
+        {this.props.game && <div>
           <h2>{this.props.game.game_type && this.props.game.game_type.name}</h2>
           {this.props.game.game_players && this.props.game.game_players.map(this.renderMetaPlayer)}
-          <h3>Actions</h3>
-          {!this.props.game.game.is_finished && this.props.game.game_players.size <= 2 && <div>
-            <a onClick={(e) => {
-              e.preventDefault();
-              if (confirm("Are you sure you want to concede?")) {
-                this.props.onConcede(this.props.gameId);
-              }
-            }}>Concede</a>
-          </div>}
-          {this.props.game.game_player.can_undo && <div>
-            <a onClick={(e) => {
-              e.preventDefault();
-              this.props.onUndo(this.props.gameId);
-            }}>Undo</a>
-          </div>}
-          {this.props.game.game.restarted_game_id && <div>
-            <a onClick={(e) => {
-              e.preventDefault();
-              this.props.onRedirect(`/game/${this.props.game!.game.restarted_game_id}`);
-            }}>Go to restarted game</a>
-          </div>}
-          {this.props.game.game_player
-            && this.props.game.game.is_finished
-            && !this.props.game.game.restarted_game_id
-            && <div>
+          {this.props.game.game_player && <div>
+            <h3>Actions</h3>
+            {!this.props.game.game.is_finished && this.props.game.game_players.size <= 2 && <div>
               <a onClick={(e) => {
                 e.preventDefault();
-                this.props.onRestart(this.props.gameId);
-              }}>Restart</a>
+                if (confirm("Are you sure you want to concede?")) {
+                  this.props.onConcede(this.props.gameId);
+                }
+              }}>Concede</a>
             </div>}
+            {this.props.game.game_player.can_undo && <div>
+              <a onClick={(e) => {
+                e.preventDefault();
+                this.props.onUndo(this.props.gameId);
+              }}>Undo</a>
+            </div>}
+            {this.props.game.game.restarted_game_id && <div>
+              <a onClick={(e) => {
+                e.preventDefault();
+                this.props.onRedirect(`/game/${this.props.game!.game.restarted_game_id}`);
+              }}>Go to restarted game</a>
+            </div>}
+            {this.props.game.game_player
+              && this.props.game.game.is_finished
+              && !this.props.game.game.restarted_game_id
+              && <div>
+                <a onClick={(e) => {
+                  e.preventDefault();
+                  this.props.onRestart(this.props.gameId);
+                }}>Restart</a>
+              </div>}
+          </div>}
         </div>}
       </div>
       <div className="game-meta-logs">
