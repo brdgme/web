@@ -115,31 +115,30 @@ export function parseEnum(input: string, offset: number, values: string[], exact
     }
   }
 
-  switch (matches.length) {
-    case 0:
-      return {
-        kind: MATCH_ERROR,
-        offset,
-        message: `input doesn't match any value in: ${values.join(", ")}`,
-      };
-    case 1:
-      return Object.assign({}, matches[0], {
-        kind: (matches[0].kind === MATCH_FULL || !exact) && MATCH_FULL || MATCH_PARTIAL,
-      });
-    default:
-      for (const m of matches) {
-        if (m.kind === MATCH_FULL) {
-          return m;
-        }
-      }
-      // Because we have multiple partial matches, we return this as a zero
-      // length full match with all the partial matches as children.
-      return {
-        kind: MATCH_FULL,
-        offset,
-        next: matches,
-      };
+  if (matches.length === 0) {
+    return {
+      kind: MATCH_ERROR,
+      offset,
+      message: `input doesn't match any value in: ${values.join(", ")}`,
+    };
   }
+  if (matches.length === 1 && (matches[0].length || 0) > 0) {
+    return Object.assign({}, matches[0], {
+      kind: (matches[0].kind === MATCH_FULL || !exact) && MATCH_FULL || MATCH_PARTIAL,
+    });
+  }
+  for (const m of matches) {
+    if (m.kind === MATCH_FULL) {
+      return m;
+    }
+  }
+  // Because we have multiple partial matches, we return this as a zero
+  // length full match with all the partial matches as children.
+  return {
+    kind: MATCH_FULL,
+    offset,
+    next: matches,
+  };
 }
 
 export function parseToken(input: string, offset: number, token: string): IParseResult {
