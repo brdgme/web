@@ -74,6 +74,9 @@ export const UPDATE_GAMES = "brdgme/game/UPDATE_GAMES";
 export const SUBMIT_COMMAND = "brdgme/game/SUBMIT_COMMAND";
 export const SUBMIT_COMMAND_SUCCESS = "brdgme/game/SUBMIT_COMMAND_SUCCESS";
 export const SUBMIT_COMMAND_FAIL = "brdgme/game/SUBMIT_COMMAND_FAIL";
+export const SUBMIT_CHAT = "brdgme/game/SUBMIT_CHAT";
+export const SUBMIT_CHAT_SUCCESS = "brdgme/game/SUBMIT_CHAT_SUCCESS";
+export const SUBMIT_CHAT_FAIL = "brdgme/game/SUBMIT_CHAT_FAIL";
 export const SUBMIT_UNDO = "brdgme/game/SUBMIT_UNDO";
 export const SUBMIT_UNDO_SUCCESS = "brdgme/game/SUBMIT_UNDO_SUCCESS";
 export const SUBMIT_UNDO_FAIL = "brdgme/game/SUBMIT_UNDO_FAIL";
@@ -151,6 +154,38 @@ export interface ISubmitCommandFail {
 }
 export const submitCommandFail = (error: string): ISubmitCommandFail => ({
   type: SUBMIT_COMMAND_FAIL,
+  payload: error,
+});
+
+export interface ISubmitChat {
+  type: typeof SUBMIT_CHAT;
+  payload: {
+    gameId: string;
+    message: string;
+  };
+}
+export const submitChat =
+  (gameId: string, message: string): ISubmitChat => ({
+    type: SUBMIT_CHAT,
+    payload: { gameId, message },
+  });
+
+export interface ISubmitChatSuccess {
+  type: typeof SUBMIT_CHAT_SUCCESS;
+  payload: Model.IChatMessage;
+}
+export const submitChatSuccess =
+  (message: Model.IChatMessage): ISubmitChatSuccess => ({
+    type: SUBMIT_CHAT_SUCCESS,
+    payload: message,
+  });
+
+export interface ISubmitChatFail {
+  type: typeof SUBMIT_CHAT_FAIL;
+  payload: string;
+}
+export const submitChatFail = (error: string): ISubmitChatFail => ({
+  type: SUBMIT_CHAT_FAIL,
   payload: error,
 });
 
@@ -298,6 +333,9 @@ export type Action
   | ISubmitCommand
   | ISubmitCommandSuccess
   | ISubmitCommandFail
+  | ISubmitChat
+  | ISubmitChatSuccess
+  | ISubmitChatFail
   | ISubmitUndo
   | ISubmitUndoSuccess
   | ISubmitUndoFail

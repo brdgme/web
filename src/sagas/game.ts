@@ -12,6 +12,7 @@ import * as Session from "../reducers/session";
 export function* sagas(): IterableIterator<Effect> {
   yield takeEvery(Game.FETCH_GAME, fetchGame);
   yield takeEvery(Game.SUBMIT_COMMAND, submitCommand);
+  yield takeEvery(Game.SUBMIT_CHAT, submitChat);
   yield takeEvery(Game.SUBMIT_UNDO, submitUndo);
   yield takeEvery(Game.SUBMIT_RESTART, submitRestart);
   yield takeEvery(Game.SUBMIT_MARK_READ, submitMarkRead);
@@ -44,6 +45,24 @@ function* submitCommand(action: Game.ISubmitCommand): IterableIterator<Effect> {
     yield put(Game.submitCommandSuccess(game));
   } catch (e) {
     yield put(Game.submitCommandFail(e.response && e.response.text || e.message));
+  }
+}
+
+function* submitChat(action: Game.ISubmitChat): IterableIterator<Effect> {
+  const token: string = yield select((state: AppState) => state.session.token);
+  if (token === undefined) {
+    return;
+  }
+  try {
+    const message = yield call(
+      http.submitGameChat,
+      action.payload.gameId,
+      action.payload.message,
+      token,
+    );
+    yield put(Game.submitChatSuccess(message));
+  } catch (e) {
+    yield put(Game.submitChatFail(e.response && e.response.text || e.message));
   }
 }
 

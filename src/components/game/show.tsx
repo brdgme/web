@@ -29,6 +29,7 @@ export interface IPropValues extends IOwnProps {
   commandPos: number;
   submittingCommand?: boolean;
   commandError?: string;
+  chat: string;
   subMenuOpen: boolean;
 }
 
@@ -41,6 +42,8 @@ interface IPropHandlers {
   onCommand: (gameId: string, command: string) => void;
   onCommandFocus: () => void;
   onCommandBlur: () => void;
+  onChat: (gameId: string, message: string) => void;
+  onChatChange: (message: string) => void;
   onUndo: (gameId: string) => void;
   onFetch: (gameId: string) => void;
   onRestart: (gameId: string) => void;
@@ -67,6 +70,7 @@ export class Component extends React.PureComponent<IProps, {}> {
     this.handleCommandFocus = this.handleCommandFocus.bind(this);
     this.handleCommandBlur = this.handleCommandBlur.bind(this);
     this.renderMetaPlayer = this.renderMetaPlayer.bind(this);
+    this.renderChatMessage = this.renderChatMessage.bind(this);
   }
 
   public render(): JSX.Element {
@@ -134,9 +138,14 @@ export class Component extends React.PureComponent<IProps, {}> {
   public componentDidMount() {
     this.fetchGameIfRequired(this.props);
     this.scrollToLastLog();
+    this.scrollToLastChat();
     this.props.onMarkRead(this.props.gameId);
-    document.addEventListener("keydown", this.focusCommandInput);
     this.props.onSubscribeUpdates(this.props.gameId);
+    // Hack to catch all keypresses on the body, except in the chat input.
+    (this.refs.chatInput as HTMLInputElement).addEventListener("keydown", (e) => {
+      e.stopPropagation();
+    });
+    document.addEventListener("keydown", this.focusCommandInput);
   }
 
   public componentWillReceiveProps(nextProps: IProps) {
@@ -381,12 +390,52 @@ export class Component extends React.PureComponent<IProps, {}> {
           </div>}
         </div>}
       </div>
-      <div className="game-meta-logs">
-        <h2>Logs</h2>
-        <div className="game-meta-logs-content" ref="gameLogs">
-          {this.renderLogs()}
+      <div className="game-meta-chat">
+        <h2>Chat</h2>
+        <div className="game-meta-chat-messages">
+          {this.props.game
+            && this.props.game.chat
+            && this.props.game.chat.chat_messages
+              .sortBy((m) => m.created_at)
+              .map(this.renderChatMessage)}
         </div>
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          this.props.onChat(this.props.gameId, this.props.chat);
+        }}>
+          <input
+            ref="chatInput"
+            value={this.props.chat}
+            onChange={(e) => this.props.onChatChange(e.currentTarget.value)}
+          />
+          <input type="submit" value="Send" />
+        </form>
       </div>
+    </div>;
+  }
+
+  private renderChatMessage(m: Records.ChatMessage): JSX.Element | undefined {
+    const chatUser = this.props.game
+      && this.props.game.chat
+      && this.props.game.chat.chat_users.find((cu) => cu.id === m.chat_user_id);
+    if (!chatUser) {
+      return undefined;
+    }
+    const gptu = this.props.game && this.props.game.game_players.find(
+      (p) => p.user.id === chatUser.user_id,
+    );
+    if (!gptu) {
+      return undefined;
+    }
+    return <div
+      className="game-meta-chat-message"
+      key={m.id}
+    >
+      <Player
+        name={gptu.user.name}
+        color={gptu.game_player.color}
+      />:&nbsp;
+      {m.message}
     </div>;
   }
 
@@ -617,6 +666,7 @@ function mapStateToProps(state: AppState, ownProps: IOwnProps): IPropValues {
     submittingCommand: state.pages.gameShow.submittingCommand,
     commandError: state.pages.gameShow.commandError,
     subMenuOpen: state.pages.gameShow.subMenuOpen,
+    chat: state.pages.gameShow.chat,
   };
 }
 
@@ -627,6 +677,8 @@ function mapDispatchToProps(dispatch: Redux.Dispatch<{}>, ownProps: IOwnProps): 
     onCommandBlur: () => dispatch(GameShow.commandBlur()),
     onCommandChange: (command, commandPos, commandSpec) =>
       dispatch(GameShow.updateCommand(command, commandPos, commandSpec)),
+    onChat: (gameId, message) => dispatch(Game.submitChat(gameId, message)),
+    onChatChange: (message) => dispatch(GameShow.updateChat(message)),
     onToggleSubMenu: () => dispatch(GameShow.toggleSubMenu()),
     onUndo: (gameId) => dispatch(Game.submitUndo(gameId)),
     onRestart: (gameId) => dispatch(Game.submitRestart(gameId)),

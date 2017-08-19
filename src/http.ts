@@ -48,6 +48,16 @@ export async function submitGameCommand(id: string, command: string, token: stri
     .then((res) => res.body as Model.IGameExtended);
 }
 
+export async function submitGameChat(id: string, message: string, token: string): Promise<Model.IChatMessage> {
+  return superagent
+    .post(`${process.env.API_SERVER}/game/${id}/chat`)
+    .auth(token, "")
+    .set("Content-Type", "application/json")
+    .set("Accept", "application/json")
+    .send({ message })
+    .then((res) => res.body as Model.IChatMessage);
+}
+
 export async function submitMarkGameRead(id: string, token: string): Promise<Model.IGamePlayer> {
   return superagent
     .post(`${process.env.API_SERVER}/game/${id}/mark_read`)

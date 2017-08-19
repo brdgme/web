@@ -9,8 +9,7 @@ export class State extends Immutable.Record({
   commandFocused: false,
   submittingCommand: false,
   commandError: undefined as string | undefined,
-  suggestions: Immutable.List(),
-  allSuggestions: Immutable.List(),
+  chat: "",
   subMenuOpen: false,
 }) { }
 
@@ -18,6 +17,7 @@ export const UPDATE_COMMAND = "brdgme/pages/game-show/UPDATE_COMMAND";
 export const TOGGLE_SUB_MENU = "brdgme/pages/game-show/TOGGLE_SUB_MENU";
 export const COMMAND_FOCUS = "brdgme/pages/game-show/COMMAND_FOCUS";
 export const COMMAND_BLUR = "brdgme/pages/game-show/COMMAND_BLUR";
+export const UPDATE_CHAT = "brdgme/pages/game-show/UPDATE_CHAT";
 
 export interface IUpdateCommand {
   type: typeof UPDATE_COMMAND;
@@ -51,11 +51,22 @@ export interface ICommandBlur {
 }
 export const commandBlur = (): ICommandBlur => ({ type: COMMAND_BLUR });
 
+export interface IUpdateChat {
+  type: typeof UPDATE_CHAT;
+  payload: string;
+}
+
+export const updateChat = (chat: string): IUpdateChat => ({
+  type: UPDATE_CHAT,
+  payload: chat,
+});
+
 type Action
   = IUpdateCommand
   | IToggleSubMenu
   | ICommandFocus
   | ICommandBlur
+  | IUpdateChat
   | Game.Action;
 
 export function reducer(state = new State(), action: Action): State {
@@ -81,6 +92,8 @@ export function reducer(state = new State(), action: Action): State {
       .set("submittingCommand", false);
     case Game.SUBMIT_UNDO_FAIL: return state
       .set("submittingCommand", false);
+    case UPDATE_CHAT: return state.set("chat", action.payload);
+    case Game.SUBMIT_CHAT: return state.set("chat", "");
     default: return state;
   }
 }
