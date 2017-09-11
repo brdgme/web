@@ -108,7 +108,7 @@ export class Component extends React.PureComponent<IProps, {}> {
                   onBlur={this.handleCommandBlur}
                   placeholder={!this.commandInputDisabled() && "Enter command..." || undefined}
                   disabled={this.commandInputDisabled()}
-                  autocomplete="off"
+                  autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="off"
                   spellCheck={false}
