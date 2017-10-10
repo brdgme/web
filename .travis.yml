@@ -2,7 +2,7 @@ language: node_js
 node_js:
 - "7"
 env:
-- API_SERVER=https://api2.brdg.me WS_SERVER=wss://ws.brdg.me
+- API_SERVER=http://brdgme-api-prod.us-west-2.elasticbeanstalk.com WS_SERVER=ws://brdgme-websocket-server-prod.us-west-2.elasticbeanstalk.com
 before_install:
 - pip install --user awscli
 - export PATH=$PATH:$HOME/.local/bin
