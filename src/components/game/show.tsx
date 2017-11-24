@@ -55,7 +55,7 @@ interface IPropHandlers {
 interface IProps extends IPropValues, IPropHandlers { }
 
 export class Component extends React.PureComponent<IProps, {}> {
-  constructor(props?: IProps, context?: any) {
+  constructor(props: IProps, context?: any) {
     super(props, context);
 
     this.onCommandInputChange = this.onCommandInputChange.bind(this);

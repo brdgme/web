@@ -21,7 +21,7 @@ export interface IPropHandlers {
 export interface IProps extends IPropValues, IPropHandlers { }
 
 export class Component extends React.PureComponent<IProps, {}> {
-  constructor(props?: IProps, context?: any) {
+  constructor(props: IProps, context?: any) {
     super(props, context);
 
     this.handleChangeCode = this.handleChangeCode.bind(this);

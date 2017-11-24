@@ -43,7 +43,7 @@ export class State extends Immutable.Record({
   }
 
   public updateGamePlayer(gamePlayer: Model.IGamePlayer): this {
-    if (!this.get("games").has(gamePlayer.game_id)) {
+    if (!this.games.has(gamePlayer.game_id)) {
       return this;
     }
     return this.updateIn(

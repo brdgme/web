@@ -29,7 +29,7 @@ interface IPropHandlers {
 interface IProps extends IPropValues, IPropHandlers { }
 
 export class Component extends React.PureComponent<IProps, {}> {
-  public constructor(props?: IProps, context?: any) {
+  public constructor(props: IProps, context?: any) {
     super(props, context);
 
     this.handleToggleMenu = this.handleToggleMenu.bind(this);
