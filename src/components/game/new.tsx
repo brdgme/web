@@ -59,14 +59,18 @@ export class Component extends React.PureComponent<IProps, {}> {
               </option>)}
             </select>
           </div>
-          <h2>Opponent IDs</h2>
-          {this.props.userIds.map((uId, key) => <div>
-            <input
-              value={uId}
-              onChange={(e) => this.handleUserIdChange(e, key)}
-            />
-            <a onClick={(e) => this.handleRemoveUserId(e, key)}>X</a>
-          </div>)}
+          <div style={{
+            display: "none",
+          }}>
+            <h2>Opponent IDs</h2>
+            {this.props.userIds.map((uId, key) => <div>
+              <input
+                value={uId}
+                onChange={(e) => this.handleUserIdChange(e, key)}
+              />
+              <a onClick={(e) => this.handleRemoveUserId(e, key)}>X</a>
+            </div>)}
+          </div>
           <div>
             <a onClick={this.handleAddUserIdClick}>Add</a>
           </div>
