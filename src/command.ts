@@ -60,13 +60,13 @@ export function parseIntSpec(input: string, offset: number, min?: number, max?: 
   };
   if (intMatches) {
     const value = parseInt(intMatches[0], 10);
-    if (min !== undefined && value < min) {
+    if (min !== undefined && min !== null && value < min) {
       intResult = {
         kind: MATCH_ERROR,
         offset,
         message: `${value} is less than the minimum ${min}`,
       };
-    } else if (max !== undefined && value > max) {
+    } else if (max !== undefined && max !== null && value > max) {
       intResult = {
         kind: MATCH_ERROR,
         offset,
